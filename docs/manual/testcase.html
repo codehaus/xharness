@@ -1,0 +1,51 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>TestCase Task</title>
+</head>
+
+<body>
+
+<h2>TestCase</h2>
+<h3>Description</h3>
+<p>TestCase is a container task that may contain any other Ant Task. It forms the 
+logical unit of a "test". It works similar to the <a href="testgroup.html">TestGroup</a>
+Task ith the difference that it will stop executing it's containing Tasks and fail 
+as soon as one contained Task fails. It also has an "owner" attribute that can be
+used to identify an owner (person) responsible for the TestCase.
+</p>
+
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">name</td>
+    <td valign="top">The name of the TestCase. Used for Result logging.</td>
+    <td align="center" valign="middle">No (*)</td>
+  </tr>
+  <tr>
+    <td valign="top">owner</td>
+    <td valign="top">The owner of this TestCase. Defaults to "unknown".</td>
+    <td align="center" valign="middle">No</td>
+  </tr>
+</table>
+<p>
+(*) If no name is specified, the default name is "testcase" for the 
+first Task and "testcase_<i>n</i>" (n >= 2) for subsequent Tasks.<br/>
+
+<h3>Example</h3>
+<pre>  
+      &lt;testcase name=&quot;foo_test&quot; owner=&quot;eng-orbix&quot; skip=&quot;win&quot;&gt;
+          &lt;echo message=&quot;hello World&quot;/&gt;
+          &lt;xh-javabg classname=&quot;test.Server&quot;/&gt;
+          &lt;xh-exec executable=&quot;client&quot;/&gt;
+      &lt;/testcase&gt;
+</pre>
+</body>
+</html>

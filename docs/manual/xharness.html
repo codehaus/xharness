@@ -1,0 +1,105 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>XHarness Task</title>
+</head>
+
+<body>
+
+<h2>XHarness</h2>
+<h3>Description</h3>
+<p>XHarness is the top-level a container task of a XHarness test suite.
+It may contain any other Ant Task. 
+</p>
+
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">name</td>
+    <td valign="top">The name of the suite. Used for Result logging.</td>
+    <td align="center" valign="middle">Yes</td>
+  </tr>
+  <tr>
+    <td valign="top">resultsdir</td>
+    <td valign="top">Directory to write the XML reports of TestCases and Test 
+                     processes to.</td>
+    <td align="center" valign="middle">Yes</td>
+  </tr>
+  <tr>
+    <td valign="top">basedir</td>
+    <td valign="top">Base directory used to retrieve the full path to a process 
+                     executable. <a href="#basedir">See below</a></td>
+    <td align="center" valign="middle">No</td>
+  </tr>
+  <tr>
+    <td valign="top">pattern</td>
+    <td valign="top">Pattern string to selectively run only a subset of tests.</td>
+    <td align="center" valign="middle">No</td>
+  </tr>
+  <tr>
+    <td valign="top">errorproperty</td>
+    <td valign="top">The name of a property to set if at least one task within the XHarness suite fails.</td>
+    <td align="center" valign="middle">No</td>
+  </tr>
+</table>
+
+<h3>Example</h3>
+<pre>  
+      &lt;property name=&quot;test.pattern&quot; value=&quot;&quot;/&gt;
+
+      &lt;xharness name=&quot;craggy_island&quot; 
+                resultsdir=&quot;../build/results/xml&quot; 
+                pattern=&quot;${test.pattern}&quot;&gt;
+
+          &lt;testgroup name=&quot;foo&quot;&gt;
+              &lt;testgroup name=&quot;bar&quot;&gt;
+                  &lt;!-- ... --&gt;
+              &lt;/testgroup&gt;
+  
+              &lt;testgroup name=&quot;drink&quot;&gt;
+                  &lt;!-- ... --&gt;
+              &lt;/testgroup&gt;
+          &lt;/testgroup&gt;
+
+          &lt;testgroup name=&quot;spam&quot;&gt;
+              &lt;!-- ... --&gt;
+          &lt;/testgroup&gt;
+
+          &lt;testgroup name=&quot;eggs&quot;&gt;
+              &lt;!-- ... --&gt;
+          &lt;/testgroup&gt;
+      &lt;/xharness&gt;
+</pre>
+
+<h3><a name="basedir">Basedir logic</a></h3>
+<p>
+If the <code>basedir</code> attribute is set, XHarness will try to calculate the 
+location of test processes by prepending the processes <code>executable</code>
+attribute with the base directory (given in <code>basedir</code>) and the 
+realtive path within the XHarness Task hierarchy.</p>
+<p>It will also set the property current.test.dir to the relative path of
+the current test.</p>
+<p>For more information see <a href="xhexec.html">Xh-Exec Task</a>.
+</p>
+<pre>  
+      &lt;xharness name=&quot;foo&quot; basedir=&quot;/my/tests&quot;&gt;
+          &lt;testgroup name=&quot;bar&quot;&gt;
+              &lt;testgroup name=&quot;spam&quot;&gt;
+                  &lt;testcase name=&quot;eggs&quot;&gt;
+                      &lt;xh-exec executable=&quot;myprog&quot;/&gt;
+                  &lt;/testcase&gt;
+              &lt;/testgroup&gt;
+          &lt;/testgroup&gt;
+      &lt;/xharness&gt;
+</pre>
+<p>In this case, the <a href="xhexec.html">Xh-Exec</a> Task will actually be 
+executed as <code>/my/tests/foo/bar/spam/eggs/myprog</code>
+</body>
+</html>

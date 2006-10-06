@@ -1,0 +1,55 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>XHarness File Conditions</title>
+</head>
+
+<body>
+
+<h2>XHarness File Conditions</h2>
+<h3>Description</h3>
+<p>XHarness adds additional Condition types to the 
+<a href="http://ant.apache.org/manual/CoreTasks/conditions.html">Ant Condition framework</a>
+that operate on the contents of text files.</p>
+<p>
+<h3>FileContains</h3>
+<p>Parses a text file line-by-line for a string. If the file does not exist, can not be read or does not contain 
+the specified string, the condition evaluates to false, otherwise to true.</p>
+<h4>Parameters</h4>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">file</td>
+    <td valign="top">The file to parse.</td>
+    <td align="center" valign="top">Yes</td>
+  </tr>
+  <tr>
+    <td valign="top">string</td>
+    <td valign="top">The string to search for in the output.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">encoding</td>
+    <td valign="top">Encoding to use when loading the file.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<p>The string that the output is searched for can be specified either in the <code>string</code> attribute 
+or as a text element in the CDATA section of the condition.</p>
+<h4>Example</h4>
+<pre>       &lt;assert&gt;
+           &lt;and&gt;
+               &lt;filecontains file=&quot;foo.txt&quot; string=&quot;Hello&quot;/&gt;
+               &lt;filecontains file=&quot;../../bar.txt&quot; encoding=&quot;UTF-16&quot;&gt;World&lt;/filecontains&gt;
+           &lt;/and&gt;
+       &lt;/assert&gt;
+       
+</pre>
+</body>
+</html>
+

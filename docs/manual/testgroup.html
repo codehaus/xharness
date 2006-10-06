@@ -1,0 +1,96 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>TestGroup Task</title>
+</head>
+
+<body>
+
+<h2>TestGroup</h2>
+<h3>Description</h3>
+<p>TestGroup is a container task that may contain any other Ant Task. If forms the logical unit of
+a set of related TestCases or TestGroups. It executs all it's
+contained taks, regardless if they fail or not. After all Tasks have been executed, the TestGroup
+fails itself, if at least on of the containg Taks has failed.
+</p>
+<p>After the TestGroup has executed all it's containing Tasks it will stop all Background Processes 
+(<a href="xhexecbg.html">Xh-ExecBg</a> and <a href="xhjavabg.html">Xh-JavaBg</a>) that have were started 
+within the scope of the TestGroup.
+</p>
+<p>Optionally TestGroups can be structure similar to the
+directory structure of the tests in the file system. In that case, XHarness will automatically set 
+the property <pre>current.test.directory</pre> to the current working directory in the filesystem
+and adjust the dir attribute (if not set explicitly) of XHarness processes to that directory.
+</p>
+
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">name</td>
+    <td valign="top">The name of the TestGroup. Used for Result logging.</td>
+    <td align="center" valign="middle">No (*)</td>
+  </tr>
+</table>
+<p>(*) If no name is specified, the default name is "testgroup" for the 
+first Task and "testgroup_<i>n</i>" (n >= 2) for subsequent Tasks.</p>
+
+<h3>Example</h3>
+<pre>  
+      &lt;testgroup name=&quot;foo&quot;&gt;
+          &lt;servicedef name=&quot;foo_svcs&quot;&gt;
+              &lt;!-- ... --&gt;
+          &lt;/servicedef&gt;
+          
+          &lt;testgroup name=&quot;bar&quot;&gt;
+              &lt;servicedef name=&quot;bar_svcs&quot;&gt;
+                  &lt;!-- ... --&gt;
+              &lt;/servicedef&gt;
+              &lt;testcase name=&quot;bar_test&quot; owner=&quot;dmaguire&quot;&gt;
+                  &lt;!-- ... --&gt;
+              &lt;/testcase&gt;
+          &lt;/testgroup&gt;
+  
+          &lt;testgroup name=&quot;drink&quot;&gt;
+              &lt;testcase name=&quot;drink_test&quot; owner=&quot;tcrilly&quot;&gt;
+                  &lt;!-- ... --&gt;
+              &lt;/testcase&gt;
+              &lt;testcase name=&quot;more_drink&quot; owner=&quot;jhackett&quot;&gt;
+                  &lt;!-- ... --&gt;
+              &lt;/testcase&gt;
+          &lt;/testgroup&gt;
+      &lt;/testgroup&gt;
+</pre>
+<p>This test descriptor would report results of the following TestGroups, TestCases and Services:</p>
+<p>
+<table border="1" cellpadding="3" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Group</b></td>
+    <td valign="top"><b>Services</b></td>
+    <td valign="top"><b>Tests</b></td>
+  </tr>
+  <tr>
+    <td valign="top">foo</td>
+    <td valign="top">foo/foo_svcs</td>
+    <td valign="top">&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top">foo/bar</td>
+    <td valign="top">foo/bar/bar_svcs</td>
+    <td valign="top">foo/bar/bar_test</td>
+  </tr>
+  <tr>
+    <td valign="top">foo/drink</td>
+    <td valign="top">&nbsp;</td>
+    <td valign="top">foo/drink/drink_test<br>foo/drink/more_drink</td>
+  </tr>
+</table>
+</p>
+</body>
+</html>

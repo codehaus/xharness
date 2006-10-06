@@ -1,0 +1,172 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>EnvSet Type</title>
+</head>
+
+<body>
+
+<h2>EnvSet</h2>
+<h3>Description</h3>
+<p><a href="http://ant.apache.org/manual/CoreTasks/exec.html#env">Enviroment
+Variables</a> can be grouped to sets and later be referenced by their 
+<code>id</code> attribute. They are defined via an EnvSet element, which can 
+appear nested into another EnvSet element. In addition, EnvSets can be defined 
+as a stand alone element at the same level as <code>target</code> &#151; i.e., 
+as children of <code>project</code> as well as as children of
+<code>target</code>.</p>
+<p>Enviroment Variables can be specified by nested <code>&lt;env&gt;</code> 
+elements.</p>
+<p>EnvSets can be used in all XHarness process Tasks: 
+<a href="xhexec.html">XhExec</a>, <a href="xhexecbg.html">XhExecBg</a>, 
+<a href="xhjava.html">XhJava</a>, <a href="xhjavabg.html">XhJavaBg</a></li>
+</p>
+
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">id</td>
+    <td valign="top">Unique identifier for this task instance, can be
+        used to reference this task in scripts.</td>
+    <td align="center" rowspan="2">No<br>Mutually exclusive.</td>
+  </tr>
+  <tr>
+    <td valign="top">refid</td>
+    <td valign="top">Reference to an EnvSet defined elsewhere. The id attribute 
+        of the EnvSet's can be used to refer to them.</td>
+  </tr>
+  <tr>
+    <td valign="top">loadenvironment</td>
+    <td valign="top">Load all variables of the system's environment into this 
+        EnvSet. The default is "false".</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">nodefault</td>
+    <td valign="top">Ignore all loaded environment variables that are not also 
+        specified as nested elements and would otherwise be added to the EnvSet 
+        by default. Only effective of loadenvironment="true".
+        The default is "false".</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">description</td>
+    <td valign="top">Room for your comments</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<h3>Parameters specified as nested elements</h3>
+
+<h4><code>envset</code></h4>
+<p>EnvSets may be nested within one another, adding the nested
+environment variables to the parent environment.</p>
+
+<h4><code>env</code></h4>
+<p>Environment variables are specified via nested <code>&lt;env&gt;</code>
+elements.</p>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">key</td>
+    <td valign="top">The name of the environment variable.</td>
+    <td align="center" valign="top">Yes</td>
+  </tr>
+  <tr>
+    <td valign="top">value</td>
+    <td valign="top">The literal value for the environment variable.</td>
+    <td align="center" rowspan="3">Exactly one of these.</td>
+  </tr>
+  <tr>
+    <td valign="top">path</td>
+    <td valign="top">The value for a PATH like environment
+        variable. You can use ; or : as path separators and Ant will
+        convert it to the platform's local conventions.</td>
+  </tr>
+  <tr>
+    <td valign="top">file</td>
+    <td valign="top">The value for the environment variable. Will be
+        replaced by the absolute filename of the file by Ant.</td>
+  </tr>
+  <tr>
+    <td valign="top">append</td>
+    <td valign="top">If the enclosing EnvSet loads the system's enviroment
+        <code>(loadenviromnet="true"</code>) and this variable already exists
+        in the loaded environment, append the value of this argument to the
+        environments value instead of replacing it. The default is "false".</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">prepend</td>
+    <td valign="top">If the enclosing EnvSet loads the system's enviroment
+        <code>(loadenviromnet="true"</code>) and this variable already exists
+        in the loaded environment, prepend the value of this argument to the
+        environments value instead of replacing it. The default is "false".</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+
+<h3>Examples</h3>
+<pre>
+    &lt;envset id=&quot;config.env&quot;&gt;
+        &lt;env key=&quot;IT_DOMAIN_NAME&quot; value=&quot;filedomain&quot;/&gt;
+        &lt;env key=&quot;IT_PRODUCT_DIR&quot; file=&quot;${product.dir}&quot;/&gt;
+        &lt;env key=&quot;IT_CONFIG_DOMAINS_DIR&quot; file=&quot;${product.dir}/etc/domains&quot;/&gt;
+        &lt;env key=&quot;IT_LICENSE_FILE&quot; file=&quot;${product.dir}/etc/licenses.txt&quot;/&gt;
+    &lt;/envset&gt;
+  
+    &lt;envset id=&quot;orbix.only.env&quot;&gt;
+        &lt;env key=&quot;PATH&quot; path=&quot;${product.dir}/asp/6.1/bin:${product.dir}/etc/bin:${product.dir}/bin&quot;/&gt;
+        &lt;env key=&quot;Path&quot; path=&quot;${product.dir}/asp/6.1/bin:${product.dir}/etc/bin:${product.dir}/bin&quot;/&gt;
+        &lt;env key=&quot;LD_LIBRARY_PATH&quot; path=&quot;${product.dir}/shlib&quot;/&gt;
+        &lt;envset refid=&quot;config.env&quot;/&gt;
+    &lt;/envset&gt;
+    
+    &lt;envset id=&quot;orbix.full.env&quot; loadenvironment=&quot;true&quot;&gt;
+        &lt;env key=&quot;PATH&quot; path=&quot;${product.dir}/asp/6.1/bin:${product.dir}/etc/bin:${product.dir}/bin&quot; prepend=&quot;true&quot;/&gt;
+        &lt;env key=&quot;Path&quot; path=&quot;${product.dir}/asp/6.1/bin:${product.dir}/etc/bin:${product.dir}/bin&quot; prepend=&quot;true&quot;/&gt;
+        &lt;env key=&quot;LD_LIBRARY_PATH&quot; path=&quot;${product.dir}/shlib&quot; prepend=&quot;true&quot;/&gt;
+        &lt;envset refid=&quot;config.env&quot;/&gt;
+    &lt;/envset&gt;
+    
+    &lt;envset id=&quot;orbix.required.env&quot; loadenvironment=&quot;true&quot; nodefault=&quot;true&quot;&gt;
+        &lt;env key=&quot;PATH&quot; path=&quot;${product.dir}/asp/6.1/bin:${product.dir}/etc/bin:${product.dir}/bin&quot; prepend=&quot;true&quot;/&gt;
+        &lt;env key=&quot;Path&quot; path=&quot;${product.dir}/asp/6.1/bin:${product.dir}/etc/bin:${product.dir}/bin&quot; prepend=&quot;true&quot;/&gt;
+        &lt;env key=&quot;LD_LIBRARY_PATH&quot; path=&quot;${product.dir}/shlib&quot; prepend=&quot;true&quot;/&gt;
+        &lt;envset refid=&quot;config.env&quot;/&gt;
+    &lt;/envset&gt;
+    
+    &lt;!-- ... --&gt;
+    
+    &lt;xh-exec executable=&quot;itlocator&quot;&gt;
+       &lt;envset refid=&quot;orbix.required.env&quot;/&gt;
+    &lt;/xh-exec&gt;
+</pre>
+<ul>
+<li>EnvSet <code>"config.env"</code> only includes the four listed environment 
+    variables.</li>
+<li>EnvSet <code>"orbix.only.env"</code> includes the three listed environment 
+    variables plus the four defined in EnvSet <code>"config.env"</code>.</li>
+<li>EnvSet <code>"orbix.full.env"</code> includes <b>all</b> environment 
+    variables defined in the system's environment and prepends the three listed 
+    variables to the ones defined in the environment (if they already exist). 
+    Also, it includes the four variables defined in EnvSet 
+    <code>"config.env"</code>, overriding the values from the system's 
+    enviromnent.</li>
+<li>EnvSet <code>"orbix.required.env"</code> only includes the three listed
+    environment variables plus the four defined in EnvSet 
+    <code>"config.env"</code>. If the former three variables were already 
+    defined in the system's environment, the given values are prepended to the 
+    ones defined in the environment.</li>
+</ul>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>Skip Task</title>
+</head>
+
+<body>
+
+<h2>Skip</h2>
+<h3>Description</h3>
+<p>Skip the <a href="testcase.html">TestCase</a> or <a href="testgroup.html">TestGroup</a>
+the Skip Task is contained in, if a certain condition holds true, equivalent to
+the Ant <a href="http://ant.apache.org/manual/CoreTasks/condition.html">Condition Task</a>.</p>
+<p>In addition to the <a href="http://ant.apache.org/manual/CoreTasks/conditions.html">Conditions defined in Ant</a>, 
+the Skip Task also supports XHarness 
+<a href="fileconditions.html">File Conditions</a> and <a href="outputconditions.html">Output Conditions</a>.</p>
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">description</td>
+    <td valign="top">Description of the skip condition in text form.</td>
+    <td valign="top" align="center">No</td>
+  </tr>
+</table>
+<h3><a name="nested">Parameters specified as nested elements</a></h3>
+<p>Skip supports all conditions supported by the Ant 
+<a href="http://ant.apache.org/manual/CoreTasks/condition.html">Condition Task</a>.
+All conditions to test are specified as nested elements, for a complete list see 
+<a href="http://ant.apache.org/manual/CoreTasks/conditions.html">here</a>.</p>
+
+<h3>Examples</h3>
+<pre>
+      &lt;testcase name=&quot;foo_test&quot;&gt;
+          &lt;skip description=&quot;Skipped on all platforms except Windows&quot;&gt;
+              &lt;not&gt;
+                  &lt;os family=&quot;windows&quot;/&gt;
+              &lt;/not&gt;
+          &lt;/skip&gt;
+      &lt;/testcase&gt;
+</pre>
+
+<p>skips the TestCase on all OS platforms except Windows.</p>
+
+<pre>
+      &lt;testgroup name=&quot;bar_group&quot;&gt;
+          &lt;skip description=&quot;Skipped in secure domains and on Irix&quot;&gt;
+              &lt;or&gt;
+                  &lt;contains string=&quot;${domain.name}&quot; substring=&quot;secure&quot;/&gt;
+                  &lt;os name=&quot;irix&quot;/&gt;
+              &lt;/or&gt;
+          &lt;/skip&gt;
+      &lt;/testgroup&gt;
+</pre>
+<p>skips the TestGroup if the property <code>domain.name</code> contains the String "<i>secure</i>" 
+or the OS name is <code>Irix</code>.</p>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>Kill Task</title>
+</head>
+
+<body>
+
+<h2>Kill</h2>
+<h3>Description</h3>
+<p>Kills a running background process. See also <a href="xhexecbg.html">Xh-ExecBg</a> and <a href="xhjavabg.html">Xh-JavaBg</a> Tasks.</p>
+<p>
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">processname</td>
+    <td valign="top">Name of the process.</td>
+    <td align="center" valign="top">Yes</td>
+  </tr>
+  <tr>
+    <td valign="top">failonerror</td>
+    <td valign="top">Fail if the process can not be killed. Default is "true".</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<h3>Example:</h3>
+<pre>  
+       &lt;xh-execbg processname=&quot;server&quot; executable=&quot;myserver&quot;/&gt;
+       
+       &lt;xh-exec executable=&quot;myclient&quot;/&gt;
+       
+       &lt;kill processname=&quot;server&quot;/&gt;
+</pre>
+</body>
+</html>
+

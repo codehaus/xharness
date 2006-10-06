@@ -1,0 +1,52 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>Include Task</title>
+</head>
+
+<body>
+
+<h2>Include</h2>
+<h3>Description</h3>
+<p>Include dynamically includes/imports snippets of XML build files into another build file.
+
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">file</td>
+    <td valign="top">The build file to include.</td>
+    <td align="center" valign="middle">Yes</td>
+  </tr>
+</table>
+<h3>Example</h3>
+<pre>
+File build.xml:
+      &lt;!-- ... --&gt;
+      &lt;target name=&quot;xharness.run&quot;&gt;
+          &lt;property name=&quot;test.descriptor&quot; value=&quot;acceptance.xml&quot;/&gt;
+          
+          &lt;xharness name=&quot;art_svcs&quot; resultsdir=&quot;../buld/results/xml&quot;&gt;
+              &lt;include file=&quot;${test.descriptor}&quot;/&gt;
+          &lt;/xharness&gt;
+          
+          &lt;!-- ... --&gt;
+      &lt;/target&gt;
+      &lt;!-- ... --&gt;
+
+File acceptance.xml:
+      &lt;testgroup name=&quot;acceptance&quot;&gt;
+          &lt;include file=&quot;configuration.xml&quot;/&gt;
+          &lt;include file=&quot;fps.xml&quot;/&gt;
+          &lt;include file=&quot;is2.xml&quot;/&gt;
+          &lt;!-- ... --&gt;
+      &lt;/testgroup&gt;
+</pre>
+</body>
+</html>

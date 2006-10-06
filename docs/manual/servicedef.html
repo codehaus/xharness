@@ -1,0 +1,140 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>ServiceDef Task</title>
+</head>
+
+<body>
+
+<h2>ServiceDef</h2>
+<h3>Description</h3>
+<p>The ServiceDef Task defines the Tasks that make up a Service that provides some
+sort of functionality to a series of TestCases. It comprises of 3 groups of nested Tasks, that
+define, how the Service is started, how it is verified that the Service is still 
+running and finally how the service is shut down.</p>
+<p>Similar to the <a href="http://ant.apache.org/manual/CoreTasks/macrodef.html">MacroDef</a> 
+Task, the ServiceDef Task only <b>defines</b> the 
+Service. It is only actually invoked upon (i.e. started, verified and stopped) when the Service is used
+(i.e. an instance if the service is executed).
+<ul>
+<li>The contents of the <b>Start</b> group are executed, the first time the Service is used.</li>
+<li>The contents of the <b>Verify</b> group are executed, every time the Service is used.</li>
+<li>The contents of the <b>Stop</b> group are executed, when the <a href="testgroup.html">TestGroup</a>
+in which the service was defined has completed all it's Tasks.</li>
+</ul>
+</p>
+
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">name</td>
+    <td valign="top">The name of the Service.</td>
+    <td align="center" valign="middle">Yes</td>
+  </tr>
+</table>
+<p>
+<h3>Examples</h3>
+<h4>Service Definition</h4>
+<pre>
+    &lt;testgroup name=&quot;foo_tests&quot;&gt;
+          &lt;servicedef name=&quot;foo_service&quot;&gt;
+              &lt;start&gt;
+                  &lt;echo message=&quot;Starting fooservice...&quot;/&gt;
+                  &lt;xh-exec executable=&quot;fooserver&quot;&gt;
+                      &lt;arg line=&quot;run -background&quot;/&gt;
+                  &lt;/xh-exec&gt;
+              &lt;/start&gt;
+              &lt;verify&gt;
+                  &lt;echo message=&quot;Testing if fooservice is running...&quot;/&gt;
+                  &lt;xh-exec executable=&quot;fooadmin&quot;&gt;
+                      &lt;arg line=&quot;list&quot;/&gt;
+                  &lt;/xh-exec&gt;
+              &lt;/verify&gt;
+              &lt;assert&gt;
+                &lt;and&gt;
+                  &lt;outputis stream=&quot;stdout&quot;&gt;foo&lt;/outputis&gt;
+                  &lt;outputsize stream=&quot;stderr&quot; equals=&quot;0&quot; mode=&quot;char&quot;/&gt;
+                &lt;/and&gt;
+              &lt;/assert&gt;
+              &lt;stop&gt;
+                  &lt;echo message=&quot;Shutting down fooservice...&quot;/&gt;
+                  &lt;xh-exec executable=&quot;fooadmin&quot;&gt;
+                      &lt;arg line=&quot;foo stop&quot;/&gt;
+                  &lt;/xh-exec&gt;
+              &lt;/stop&gt;
+          &lt;/servicedef&gt;
+          
+          &lt;-- contents of testgroup here --&gt;
+          
+      &lt;testgroup/&gt;
+</pre>
+<p>Note that in the above example the <code>&lt;xh-exec&gt;</code> process in the <code>&lt;start&gt;</code> group 
+must execute the service executable detached from the console. Otherwise the start group
+will block indefinitely. If the service executable can not be run detached from the 
+console, it must be started in a background process task, like <a href="xhexecbg.html">Xh-ExecBg</a>
+or <a href="xhjavabg.html">Xh-JavaBg</a>. See below for more information on start
+groups with background processes.
+</p>
+<h4>Service Use</h4>
+<p>A service definition can be used in two ways. As with <a href="http://ant.apache.org/manual/CoreTasks/macrodef.html">MacroDefs</a>,
+you can inoke the service through a task with the name of the service:</p>
+<pre>
+      &lt;foo_service/&gt;
+</pre>
+<p>Alternatively, the service can be invoked through a <code><b>&lt;service&gt;</b></code> task, that specifies the referenced 
+Service through it's <code>reference</code> attribute. This can be useful, if the service name is given be an ant property:</p>
+<pre>
+      &lt;service reference=&quot;foo_service&quot;/&gt;
+      &lt;service reference=&quot;${servicename}&quot;/&gt;
+</pre>
+<p>When a Service is referenced for the fist time, the contents of the <code><b>&lt;start&gt;</b></code>
+group are executed and the the service is thus started. If the <code>&lt;start&gt;</code> group does not
+produce an error, the contents of the <code><b>&lt;verify&gt;</b></code> group are executed, which verify 
+that the service is running. If on the other hand the <code>&lt;start&gt;</code> group has produce an 
+error and hence the service start has failed, the contents of the <code>&lt;verify&gt;</code> group are not
+executed and the service is marked as failed in the logs.</p>
+<p>On subsequent invocations of the service, only the contents of the <code><b>&lt;verify&gt;</b></code>
+group are executed, provided that the start of the service was successful.</p>
+<p>At the end of the Task that defined the service (the <a href="testgroup.html">TestGroup</a>
+&quot;foo_tests&quot; in the example above) the contents of the <code><b>&lt;stop&gt;</b></code> group are
+executed, that shut down the service.
+<p>If the start group contains any background processes, the <code>&lt;verify&gt;</code> group may be omitted.
+In that case, the verification that the service is still running consists in the test
+whether any of the background processes started in the <code>&lt;start&gt;</code> group are still running:</p>
+<pre>
+           &lt;servicedef name=&quot;foo_service&quot;&gt;
+             &lt;start&gt;
+                  &lt;echo message=&quot;Starting fooservice...&quot;/&gt;
+                  &lt;xh-execbg executable=&quot;fooserver&quot;&gt;
+                      &lt;arg line=&quot;run&quot;/&gt;
+                  &lt;/xh-execbg&gt;
+              &lt;/start&gt;
+              &lt;stop&gt;
+                  &lt;echo message=&quot;Shutting down fooservice...&quot;/&gt;
+                  &lt;xh-exec executable=&quot;fooadmin&quot;&gt;
+                      &lt;arg line=&quot;foo stop&quot;/&gt;
+                  &lt;/xh-exec&gt;
+              &lt;/stop&gt;
+          &lt;/servicedef&gt;
+</pre>
+<h4>The <code>action</code> attribute</h4>
+<pre>
+      &lt;foo_service/&gt;
+      &lt;foo_service action=&quot;start&quot; action=&quot;verify&quot;/&gt;
+      &lt;service reference=&quot;foo_service&quot; action=&quot;stop&quot;/&gt;
+</pre>
+<p>The optional action attribute defines the groups of the service definition that
+are executed. If no action attribute is specified, the default actions "start" (if not
+yet running) and "verify" are performed. This means the 1st and 2nd line in the above 
+example are equivalent.</p>
+<p>The third line in the example will stop the service before the end of the
+enclosing task by executing the contents of the <code>&lt;stop&gt;</code> group.</p>
+</body>
+</html>

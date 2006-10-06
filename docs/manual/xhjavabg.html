@@ -1,0 +1,89 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>Xh-JavaBg Task</title>
+</head>
+
+<body>
+
+<h2>Xh-JavaBg</h2>
+<h3>Description</h3>
+<p>Asynchronously executes a Java process in a separate thread (i.e. in the background).</p>
+<p>Extends the <a href="xhjava.html">Xh-Java Task</a>.</p>
+<p>
+<h3>Additional and modified Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">failonerror</td>
+    <td valign="top">Modified default value. Mark this process as failed, if the command exits with a
+      returncode other than 0. Default is "true"</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">timeout</td>
+    <td valign="top">Modified default value. Enabled by default with a value of 2 hours.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">fork</td>
+    <td valign="top">Modified default value. Runs the java command in a different VM. Default is &quot;true&quot;</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">processname</td>
+    <td valign="top">Name of the process. Used in conjunction with the <a href="kill.html">Kill Task</a>.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">killtimeout</td>
+    <td valign="top">Timeout (in seconds) for waiting until the background process 
+        has terminated during shutdown. Default is 10 seconds.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">prekilltimeout</td>
+    <td valign="top">Sets a timeout value to give the background process time to terminate gracefully. If it does not terminate in the designated timeframe it will be forcibly killed. No default set.</td>
+    <td align="center" valign="top">No</td>
+  </tr> 
+</table>
+<h3>Additional parameters specified as nested elements</h3>
+<h4>envset</h4>
+<p>Use a nested <a href="envset.html"><code>&lt;EnvSet&gt;</code></a>
+element to pass a set of environment variables to the process.</p>
+<h3>Example:</h3>
+<pre>
+    &lt;envset id=&quot;config.env&quot;&gt;
+        &lt;env key=&quot;IT_DOMAIN_NAME&quot; value=&quot;filedomain&quot;/&gt;
+        &lt;env key=&quot;IT_PRODUCT_DIR&quot; file=&quot;${product.dir}&quot;/&gt;
+        &lt;env key=&quot;IT_CONFIG_DOMAINS_DIR&quot; file=&quot;${product.dir}/etc/domains&quot;/&gt;
+        &lt;env key=&quot;IT_LICENSE_FILE&quot; file=&quot;${product.dir}/etc/licenses.txt&quot;/&gt;
+    &lt;/envset&gt;
+  
+    &lt;!-- ... --&gt;
+    
+    &lt;xh-javabg classname=&quot;foo.bar.Main&quot;&gt;
+       &lt;envset refid=&quot;config.env&quot;/&gt;
+    &lt;/xh-javabg&gt;
+</pre>
+<h4>afterwards</h4>
+<p>The contents of the nested afterwards group are executed, after the background process has terminated.</p>
+<h3>Example:</h3>
+<pre>
+    &lt;xh-javabg classname=&quot;foo.bar.Main&quot;&gt;
+       &lt;afterwards&gt;
+           &lt;assert&gt;
+               &lt;-- condition --&gt;
+           &lt;/assert&gt;
+           &lt;echo message=&quot;done&quot;&gt;
+       &lt;/afterwards&gt;
+    &lt;/xh-javabg&gt;
+</pre>
+</body>
+</html>
+

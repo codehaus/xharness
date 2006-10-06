@@ -1,0 +1,263 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>XHarness Output Conditions</title>
+</head>
+
+<body>
+
+<h2>XHarness Output Conditions</h2>
+<h3>Description</h3>
+<p>XHarness adds a number of additional Condition types to the 
+<a href="http://ant.apache.org/manual/CoreTasks/conditions.html">Ant Condition framework</a>
+that operate on the output produced by other Tasks within an XHarness testsuite.</p>
+<p>
+<h3>General Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">stream</td>
+    <td valign="top">Name of the output stream to operate on. Default is "stdout".</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">task</td>
+    <td valign="top">Name of or pointer to the task on which to operate. Default is "-1", i.e. the immediate previous Task.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<h4>Stream attribute</h4>
+<p>The &quot;stream&quot; attribute denotes which output stream of the denoted task the condition operates on.
+There are five ant-internal log streams (verbosities): Error, Warning, Info, Verbose and Debug. In addition,
+XHarness process tasks (<a href="xhexec.html">Xh-Exec</a>, <a href="xhexecbg.html">Xh-ExecBg</a>, 
+<a href="xhjava.html">Xh-Java</a> and <a href="xhjavabg.html">Xh-JavaBg</a>) also log to Stdout and Stderr streams:</p>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Stream Name</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Availability</b></td>
+  </tr>
+  <tr>
+    <td valign="top">error</td>
+    <td valign="top">Ant MSG_ERR log verbosity.</td>
+    <td align="center" valign="top">All Tasks</td>
+  </tr>
+  <tr>
+    <td valign="top">warning</td>
+    <td valign="top">Ant MSG_WARN log verbosity.</td>
+    <td align="center" valign="top">All Tasks</td>
+  </tr>
+  <tr>
+    <td valign="top">info</td>
+    <td valign="top">Ant MSG_INFO log verbosity.</td>
+    <td align="center" valign="top">All Tasks</td>
+  </tr>
+  <tr>
+    <td valign="top">verbose</td>
+    <td valign="top">Ant MSG_VERBOSE log verbosity.</td>
+    <td align="center" valign="top">All Tasks</td>
+  </tr>
+  <tr>
+    <td valign="top">debug</td>
+    <td valign="top">Ant MSG_DEBUG log verbosity.</td>
+    <td align="center" valign="top">All Tasks</td>
+  </tr>
+  <tr>
+    <td valign="top">stdout</td>
+    <td valign="top">Standard Out.</td>
+    <td align="center" valign="top">XHarness Process Tasks</td>
+  </tr>
+  <tr>
+    <td valign="top">stderr</td>
+    <td valign="top">Standard Error.</td>
+    <td align="center" valign="top">XHarness Process Tasks</td>
+  </tr>
+</table>
+<h4>Task attribute</h4>
+<p>The &quot;task&quot; attribute is either a Task name or a positive or negative integer value.</p>
+<p>If it is a task name, the condition operates on the task with the given name in the enclosing 
+group of Tasks. If there are mutliple tasks with the same name in the group, the names of 
+subsequent tasks are appended with a numeric value: &quot;<code>_&lt;num&gt;</code>&quot;:
+<pre>  
+       &lt;echo message=&quot;Hello World&quot;/&gt;
+       &lt;echo message=&quot;Foo Bar&quot;/&gt;
+       
+       &lt;assert&gt;
+           &lt;outputis stream=&quot;warning&quot; task=&quot;echo&quot;&gt;Hello World&lt;/outputis&gt;
+       &lt;/assert&gt;
+       &lt;assert&gt;
+           &lt;outputis stream=&quot;warning&quot; task=&quot;echo_1&quot;&gt;Foo Bar&lt;/outputis&gt;
+       &lt;/assert&gt;
+</pre></p>
+<p>If the task is indicated by a positive integer value, it denotes the n-th task element in the enclosing 
+group of Tasks, counting down from the start of the group. If the task is indicated by a negative integer value, 
+it denotes the n-th task element in the enclosing group of Tasks, counting up from the position of the condition: 
+<pre>  
+       &lt;echo message=&quot;Hello World&quot;/&gt;
+       &lt;echo message=&quot;Foo Bar&quot;/&gt;
+       
+       &lt;assert&gt;
+           &lt;outputis stream=&quot;warning&quot; task=&quot;-1&quot;&gt;Foo Bar&lt;/outputis&gt;
+       &lt;/assert&gt;
+       &lt;assert&gt;
+           &lt;outputis stream=&quot;warning&quot; task=&quot;1&quot;&gt;Hello World&lt;/outputis&gt;
+       &lt;/assert&gt;
+       &lt;assert&gt;
+           &lt;outputis stream=&quot;warning&quot; task=&quot;-4&quot;&gt;Hello World&lt;/outputis&gt;
+       &lt;/assert&gt;
+       &lt;assert&gt;
+           &lt;outputis stream=&quot;warning&quot; task=&quot;2&quot;&gt;Foo Bar&lt;/outputis&gt;
+       &lt;/assert&gt;
+</pre></p>
+<p>As stated in the above table, the default value for the task attribute is "-1" which denotes the immediate previous 
+Task to the condition. There is one exception to that rule though:
+If an output condition is used inside the &lt;afterwards&gt; element of an XHarness background process task 
+(<a href="xhexecbg.html">Xh-ExecBg</a> or <a href="xhjavabg.html">Xh-JavaBg</a>) and the task attribute is
+not specified, the condition operates on the output of the background process itself:
+<pre>  
+    &lt;xh-execbg executable=&quot;echo&quot;&gt;
+        &lt;arg line=&quot;Hello World&quot/&gt;
+       &lt;afterwards&gt;
+           &lt;echo message=&quot;Foo Bar&quot;/&gt;
+           &lt;assert&gt;
+               &lt;and&gt;
+                   &lt;outputis stream=&quot;stdout&quot;&gt;Hello World&lt;/outputis&gt;
+                   &lt;outputis stream=&quot;warning&quot; task=&quot;-1&quot;&gt;Foo Bar&lt;/outputis&gt;
+               &lt;/and&gt;
+           &lt;/assert&gt;
+           &lt;echo message=&quot;done&quot;&gt;
+       &lt;/afterwards&gt;
+    &lt;/xh-execbg&gt;
+</pre>
+<h3>OutputContains</h3>
+<p>Tests that the given stream of the denoted Task contains a given Text String.</p>
+<h4>Additional Parameters</h4>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">string</td>
+    <td valign="top">The string to search for in the output.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<p>The string that the output is searched for can be specified either in the <code>string</code> attribute 
+or as a text element in the CDATA section of the condition.</p>
+<h4>Example</h4>
+<pre>       &lt;echo message=&quot;Hello World&quot;/&gt;
+       
+       &lt;assert&gt;
+           &lt;and&gt;
+               &lt;outputcontains stream=&quot;warning&quot; string=&quot;Hello&quot;/&gt;
+               &lt;outputcontains stream=&quot;warning&quot;&gt;World&lt;/outputcontains&gt;
+           &lt;/and&gt;
+       &lt;/assert&gt;
+
+</pre>
+<h3>OutputIs</h3>
+<p>Tests that the given stream of the denoted Task contains exactly the given Text.</p>
+<h4>Additional Parameters</h4>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">string</td>
+    <td valign="top">The string to search for in the output.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<p>The string that the output must match can be specified either in the <code>string</code> attribute 
+or as a text element in the CDATA section of the condition.</p>
+<h4>Example</h4>
+<pre>       &lt;echo message=&quot;Hello World&quot;/&gt;
+       
+       &lt;assert&gt;
+           &lt;outputis stream=&quot;warning&quot string=&quot;Hello World&quot;/&gt;
+       &lt;/assert&gt;
+       
+       &lt;assert&gt;
+           &lt;outputis task=&quot;-2&quot; stream=&quot;warning&quot;&gt;Hello World&lt;/outputis&gt;
+       &lt;/assert&gt;
+       
+</pre>
+<h3>OutputRegex</h3>
+<p>Tests that the given stream of the denoted Task matches the given regular expression.</p>
+<h4>Additional Parameters</h4>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">string</td>
+    <td valign="top">The string to search for in the output.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<p>The regular expression string can be specified either in the <code>string</code> attribute 
+or as a text element in the CDATA section of the condition.</p>
+<h4>Example</h4>
+<pre>       &lt;echo message=&quot;Hello World&quot;/&gt;
+       
+       &lt;assert&gt;
+           &lt;outputregex stream=&quot;warning&quot;&gt;%H[a-z]* W[a-z]*$&lt;/outputregex&gt;
+       &lt;/assert&gt;
+       
+</pre>
+<p>Note: Some characters of regular expressions may need to be substituted with their respective XML entities to form a valid XML document, e.g. the &quot;<code>&lt;</code>&quot; character must replaced with the entity &quot;<code>&amp;lt;</code>&quot;.
+</p>
+<h3>OutputSize</h3>
+<p>Tests that the given stream of the denoted Task contains the given amount of output.</p>
+<h4>Additional Parameters</h4>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">mode</td>
+    <td valign="top">Count either the number of lines ("lines") or the number of characters ("chars"). Default is "lines".</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">equals</td>
+    <td valign="top">If set, the condition will pass if the output contains <b>exactly</b> the given number of lines or characters.</td>
+    <td align="center" valign="top" rowspan="3">Exactly one, containing a positive integer value.</td>
+  </tr>
+  <tr>
+    <td valign="top">larger</td>
+    <td valign="top">If set, the condition will pass if the output contains <b>more than</b> the given number of lines or characters.</td>
+  </tr>
+  <tr>
+    <td valign="top">smaller</td>
+    <td valign="top">If set, the condition will pass if the output contains <b>less than</b> the given number of lines or characters.</td>
+  </tr>
+</table>
+<h4>Example</h4>
+<pre>       &lt;echo message=&quot;Hello World&quot;/&gt;
+       
+       &lt;assert&gt;
+           &lt;and&gt;
+               &lt;outputsize stream=&quot;warning&quot; mode=&quot;lines&quot; equals="1"/&gt;
+               &lt;outputsize stream=&quot;warning&quot; mode=&quot;chars&quot; larger="10"/&gt;
+               &lt;outputsize stream=&quot;warning&quot; mode=&quot;chars&quot; smaller="12"/&gt;
+           &lt;/and&gt;
+       &lt;/assert&gt;
+       
+</pre>
+</body>
+</html>
+

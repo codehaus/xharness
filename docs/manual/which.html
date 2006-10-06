@@ -1,0 +1,80 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>Which Task</title>
+</head>
+
+<body>
+
+<h2>Which</h2>
+<h3>Description</h3>
+<p>Which is used in conjunction with an executable or file name and a PATH 
+variable and returns the full path of the executable file name, similar to the 
+UNIX &quot;which&quot; command.
+</p>
+
+<p>
+Which utilizes the ANT PathTokenizer function and so is suitable for either UNIX or Windows paths or a mixture 
+of both. This means that we can use the separator characters &quot;\&quot; or &quot;/&quot; and the path separator
+characters &quot;:&quot; or &quot;;&quot;
+</p>
+
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">executable</td>
+    <td valign="top">The file to check for.</td>
+    <td align="center" valign="top">Yes</td>
+  </tr>
+  <tr>
+    <td valign="top">path</td>
+    <td valign="top">Path structure that contains the directories we will search.</td>
+    <td align="center" valign="top">Yes</td>
+  </tr>
+  <tr>
+    <td valign="top">property</td>
+    <td valign="top">The name of the property to set.</td>
+    <td align="center" valign="top">Yes</td>
+  </tr>
+  <tr>
+    <td valign="top">failonerror</td>
+    <td valign="top">Controls whether an error (such as not locating the file) stops the build 
+     or is merely reported to the screen. The default value (false) will not stop the build.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+
+<p>On Windows platforms the Which Task automatically detects the windows typical file
+extensions for executables: <code>&quot;.com&quot;, &quot;.exe&quot; and 
+&quot;.bat&quot;</code> if they are not specified in the <code>executable</code> 
+attribute.
+</p>
+
+<h3>Examples</h3>
+<pre>  
+      &lt;which property=&quot;my.prop&quot; executable=&quot;itlocator.exe&quot;
+             path=&quot;C:\Temp;C:\Program Files\IONA\asp\6.1\bin;Z:\tools&quot;&gt;
+</pre>
+Will set the property <i>my.prop</i> to e.g. 
+<code>C:\Program Files\IONA\asp\6.1\bin\itlocator.exe</code>
+<pre>  
+      &lt;which property=&quot;my.prop&quot; executable=&quot;itlocator&quot;
+             path=&quot;C:\Temp;C:\Program Files\IONA\asp\6.1\bin;Z:\tools&quot;&gt;
+</pre>
+Will also set the property <i>my.prop</i> to e.g. 
+<code>C:\Program Files\IONA\asp\6.1\bin\itlocator.exe</code>
+<pre>  
+      &lt;which property=&quot;my.prop&quot; executable=&quot;itlocator&quot;
+             path=&quot;/usr/bin:/usr/sbin:/usr/atria/bin:/local/products/IONA/asp/6.1/bin&quot;&gt;
+</pre>
+Will set the property <i>my.prop</i> to e.g. 
+<code>/local/products/IONA/asp/6.1/bin/itlocator</code>
+</body>
+</html>

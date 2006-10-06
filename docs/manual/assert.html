@@ -1,0 +1,67 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<title>Assert Task</title>
+</head>
+
+<body>
+
+<h2>Assert</h2>
+<h3>Description</h3>
+<p>Assert is a type of ant <a href="http://ant.apache.org/manual/CoreTasks/condition.html">Condition</a> task that
+will verify if the specified condition is true. If the assertion fails, the Assert The assert task will fail the 
+build process. It can have an optional <code>timeout</code> attribute, that defines the number of seconds until the
+assertion must be true. In that case it will check every second if the condition is true and until the timeout 
+expires.</p>
+<p>In addition to the <a href="http://ant.apache.org/manual/CoreTasks/conditions.html">Conditions defined in Ant</a>, 
+the Assert Task also supports XHarness 
+<a href="fileconditions.html">File Conditions</a> and <a href="outputconditions.html">Output Conditions</a>.</p>
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">timeout</td>
+    <td valign="top">The maximum number of seconds to wait for the
+        condition to be true. Default is 0 sec.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">erroronfail</td>
+    <td valign="top">If used inside an XHarness task, a failing assertion will produce an 
+        Error instead of a Warning. Default is "false". Outside XHarness there is no
+        difference between "true" and "false".</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<h3><a name="nested">Parameters specified as nested elements</a></h3>
+<p>All conditions to test are specified as nested elements, for a
+complete list see <a href="http://ant.apache.org/manual/CoreTasks/conditions.html">here</a>.</p>
+<p>
+<h3>Examples</h3>
+<pre>
+  &lt;assert timeout="10"&gt;
+    &lt;and&gt;
+      &lt;available file="/tmp/classes/com/acme/DataHandler.class"/&gt;
+      &lt;available file="/tmp/classes/com/acme/Transport.class"/&gt;
+    &lt;/and&gt;
+  &lt;/assert&gt;
+</pre>
+<p>will fail if the com.acme.DataHandler and com.acme.Transport classes are not found within 10 seconds.</p>
+<br>
+<pre>
+  &lt;assert&gt;
+    &lt;or&gt;
+      &lt;contains string="${results}" substring="PASSED"/&gt;
+      &lt;contains string="${results}" substring="SUCCESS"/&gt;
+    &lt;/or&gt;
+  &lt;/assert&gt;
+</pre>
+<p>will fail immediately if the contents of the results property does not contain either "PASSED" or "SUCCESS".</p>
+</body>
+</html>
