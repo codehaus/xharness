@@ -1,0 +1,16 @@
+<macrodef name="ServiceClientOnly">
+  <attribute name="server.dir"/>
+  <sequential>
+    <xh-java classname="test.client.TestClient" classpath="classes">
+      <arg line="@{server.dir} echo"/>
+      <arg value="Hello World"/>
+    </xh-java>
+    <assert message="Incorrect output">
+      <and>
+        <outputis stream="stderr"/>
+        <outputcontains>Hello World</outputcontains>
+        <outputsize equals="2"/>
+      </and>
+    </assert>
+  </sequential>
+</macrodef>

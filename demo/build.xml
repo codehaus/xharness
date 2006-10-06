@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<project name="XHarness tests" default="demo" basedir=".">
+
+    <path id="xharness.lib">
+        <pathelement location="../lib/xharness.jar"/>
+        <fileset dir="..">
+          <include name="target/*.jar"/>
+        </fileset>
+        <pathelement path="${java.class.path}"/>
+    </path>
+    
+    <taskdef resource="xharnesstasks.properties" classpathref="xharness.lib" loaderref="xharness.loader"/>
+    <typedef resource="xharnesstypes.properties" classpathref="xharness.lib" loaderref="xharness.loader"/>
+
+    <property name="results.dir" value="./results"/>
+    <property name="xml.results.dir" value="${results.dir}/latest/xml"/>
+    <property name="html.results.dir" value="${results.dir}/latest/html"/>
+
+    <target name="setup.dirs">
+        <mkdir dir="${results.dir}"/>
+        <available file="${results.dir}/latest" type="dir" property="results.dir.exists"/>
+        <antcall target="save.results.dir"/>
+        <mkdir dir="${results.dir}/latest"/>
+        <mkdir dir="${xml.results.dir}"/>
+        <mkdir dir="${html.results.dir}"/>
+    </target>
+
+    <target name="save.results.dir" if="results.dir.exists">
+        <tstamp>
+            <format property="backup.dest.dir" pattern="yyyy-MM-dd-hh-mm-ss" unit="second"/>
+        </tstamp>
+        <move todir="${results.dir}/${backup.dest.dir}">
+            <fileset dir="${results.dir}/latest"/>
+        </move>
+    </target>
+  
+    <target name="build" depends="setup.dirs">
+        <mkdir dir="classes"/>
+        <javac srcdir="src" destdir="classes" debug="true" includeAntRuntime="false"/>
+    </target>
+
+    <target name="demo" depends="setup.dirs,build">
+        <property name="test.pattern" value=""/>
+        <property name="test.name" value="XHarnessDemo"/>
+ 
+        <xharness name="${test.name}" resultsdir="${xml.results.dir}" basedir="." pattern="${test.pattern}">
+            <include file="blocking_service.xml"/>
+            <include file="service_client.xml"/>
+            <include file="client_server_service.xml"/>
+      
+            <testcase name="SimpleClientServer">
+                <include file="client_server.xml"/>
+                <ClientServer/>
+            </testcase>
+      
+            <testgroup name="BlockingServiceTests">
+                <testcase name="ClientOnly">
+                    <BlockingService/>
+                    <ServiceClientOnly server.dir="temp/service1"/>
+                </testcase>
+      
+                <testcase name="ClientServer">
+                    <BlockingService/>
+                    <ServiceClientServer server.dir="temp/service1"/>
+                </testcase>
+            </testgroup>
+
+            <testgroup name="NonblockingServiceTests">
+                <include file="nonblocking_service.xml"/>
+  
+                <testcase name="ClientOnly">
+                    <NonblockingService/>
+                    <ServiceClientOnly server.dir="temp/service2"/>
+                </testcase>
+      
+                <testcase name="ClientServer">
+                    <service reference="NonblockingService"/>
+                    <ServiceClientServer server.dir="temp/service2"/>
+                </testcase>
+            </testgroup>
+        </xharness>
+
+        <antcall target="generate.report"/>
+    </target>
+  
+    <target name="generate.report">
+        <xharnessreport todir="${html.results.dir}" failonerror="true">
+            <fileset dir="${xml.results.dir}">
+                <include name="*.xml"/>
+            </fileset>
+            <report format="frames" todir="${html.results.dir}"/>
+        </xharnessreport>
+    </target>
+  
+    <target name="clean">
+        <delete quiet="true" dir="classes"/>
+    </target>
+  
+    <target name="results.clean">
+        <delete quiet="true" dir="${results.dir}"/>
+    </target>
+  
+    <target name="dist.clean" depends="clean,results.clean"/>
+
+</project>

@@ -1,0 +1,24 @@
+<macrodef name="ServiceClientServer">
+  <attribute name="server.dir"/>
+  <sequential>
+    <xh-javabg classname="test.intermediary.Intermediary" classpath="classes">
+      <arg line="@{server.dir} temp/intermediary"/>
+      <afterwards>
+        <assert message="stderr not empty">
+          <outputis stream="stderr"/>
+        </assert>
+      </afterwards>
+    </xh-javabg>
+    <xh-java classname="test.client.TestClient" classpath="classes">
+      <arg line="temp/intermediary echo"/>
+      <arg value="Hello World"/>
+    </xh-java>
+    <assert message="Incorrect output">
+      <and>
+        <outputis stream="stderr"/>
+        <outputcontains>Hello World</outputcontains>
+        <outputsize equals="2"/>
+      </and>
+    </assert>
+  </sequential>
+</macrodef>
