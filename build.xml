@@ -1,0 +1,324 @@
+<?xml version="1.0"?>
+
+<project name="XHarness" default="jar" basedir=".">
+
+    <!-- 3rd party libraries -->
+    <taskdef resource="checkstyletask.properties" classpath="../../../java/lib/checkstyle/4.1/checkstyle-all.jar"/>
+    <property name="ant.dir" location="../../../java/lib/ant/1.6.5"/>
+    <property name="junit.dir" location="../../../java/lib/junit/3.7"/>
+    <property name="easymock.dir" location="../../../java/lib/easymock/1.2_jdk1.3"/>
+    <property name="cglib.dir" location="../../../java/lib/cglib/2.1_2"/>
+    <property name="emma.dir" location="../../../java/lib/emma/2.0.5312"/>
+    <property name="jcoverage.dir" location="../../../java/jcoverage/1.2.9"/>
+    <property name="clover.dir" location="../../../java/clover/1.1"/>
+
+    <path id="ant.lib">
+        <pathelement location="${ant.dir}/ant.jar" />
+        <pathelement location="${ant.dir}/ant-junit.jar" />
+        <pathelement location="${ant.dir}/ant-launcher.jar" />
+    </path>
+
+    <path id="junit.lib">
+        <pathelement location="${junit.dir}/junit.jar" />
+    </path>
+
+    <path id="easymock.lib">
+        <pathelement location="${easymock.dir}/easymock.jar" />
+        <pathelement location="${easymock.dir}/easymockclassextension.jar" />
+    </path>
+
+    <path id="cglib.lib">
+        <pathelement location="${cglib.dir}/cglib-nodep-2.1_2.jar" />
+    </path>
+
+    <path id="emma.lib">
+        <pathelement location="${emma.dir}/emma.jar" />
+        <pathelement location="${emma.dir}/emma_ant.jar" />
+    </path>
+
+    <path id="jcoverage.lib">
+        <pathelement location="${jcoverage.dir}/jcoverage.jar" />
+        <pathelement location="${jcoverage.dir}/jcoverage-plus.jar" />
+    </path>
+
+    <path id="clover.lib">
+        <pathelement location="${clover.dir}/clover.jar" />
+    </path>
+
+    <!-- build and test directories -->
+    
+    
+    <property name="src.dir" location="src/main/java"/>
+    <property name="test.dir" location="src/test/java"/>
+    <property name="build.base.dir" location="build"/>
+    <property name="build.src.dir" location="${build.base.dir}/classes"/>
+    <property name="build.test.dir" location="${build.base.dir}/testclasses"/>
+    <property name="instrument.dir" location="${build.base.dir}/instclasses"/>
+    <property name="jar.dir" location="lib"/>
+    <property name="jar.src.file" value="xharness.jar"/>
+    <property name="jar.test.file" value="xharness-unittests.jar"/>
+
+    <property name="results.base.dir" location="test/results"/>
+    <property name="latest.results.dir" location="${results.base.dir}/latest"/>
+    <property name="xml.results.dir" location="${latest.results.dir}/xml"/>
+    <property name="html.results.dir" location="${latest.results.dir}/html"/>
+    <property name="coverage.results.dir" location="${latest.results.dir}/coverage"/>
+
+    <!-- classpaths -->
+    
+    <path id="src.build.classpath">
+        <path refid="ant.lib"/>
+    </path>
+
+    <path id="test.build.classpath">
+        <pathelement location="${jar.dir}/${jar.src.file}"/>
+        <path refid="ant.lib"/>
+        <path refid="junit.lib"/>
+        <path refid="easymock.lib"/>
+    </path>
+
+    <path id="test.run.classpath">
+        <pathelement location="${jar.dir}/${jar.test.file}"/>
+        <path refid="test.build.classpath"/>
+        <path refid="cglib.lib"/>
+    </path>
+
+    <path id="emma.run.classpath">
+        <pathelement location="${instrument.dir}"/>
+        <path refid="test.run.classpath"/>
+        <path refid="emma.lib"/>
+    </path>
+
+    <path id="jcoverage.run.classpath">
+        <pathelement location="${instrument.dir}"/>
+        <path refid="test.run.classpath"/>
+        <path refid="jcoverage.lib"/>
+    </path>
+
+    <path id="clover.run.classpath">
+        <pathelement location="${instrument.dir}"/>
+        <path refid="test.run.classpath"/>
+        <path refid="clover.lib"/>
+    </path>
+
+    <!-- setup targets -->
+
+    <target name="setup.build.dirs">
+        <mkdir dir="${build.src.dir}"/>
+        <mkdir dir="${build.test.dir}"/>
+        <mkdir dir="${instrument.dir}"/>
+        <mkdir dir="${jar.dir}"/>
+    </target>
+    
+    <target name="setup.test.dirs">
+        <available file="${latest.results.dir}" type="dir" property="results.exists"/>
+        <antcall target="save.results"/>
+        <mkdir dir="${xml.results.dir}"/>
+        <mkdir dir="${html.results.dir}"/>
+        <mkdir dir="${coverage.results.dir}"/>
+    </target>
+    
+    <!-- clean targets -->
+    
+    <target name="src.clean">
+        <delete quiet="true" dir="${build.src.dir}"/>
+    </target>
+
+    <target name="test.clean">
+        <delete quiet="true" dir="${build.test.dir}"/>
+    </target>
+
+    <target name="instr.clean">
+        <delete quiet="true" dir="${instrument.dir}"/>
+    </target>
+
+    <target name="clean">
+        <delete quiet="true" dir="${build.base.dir}"/>
+    </target>
+
+    <target name="results.clean">
+        <delete quiet="true" dir="${results.base.dir}"/>
+    </target>
+
+    <target name="dist.clean" depends="clean,results.clean">
+        <delete quiet="true" dir="${jar.dir}"/>
+    </target>
+    
+    <!-- build targets -->
+    
+    <target name="build" depends="src.build,test.build"/>
+    
+    <target name="jar" depends="src.jar,test.jar"/>
+    
+    <target name="src.build" depends="setup.build.dirs">
+        <antcall target="do.checkstyle">
+            <param name="checkstyle.src.dir" value="${src.dir}"/>
+        </antcall>
+        
+        <copy todir="${build.src.dir}" failonerror="false">
+          <fileset dir="${src.dir}/../resources">
+             <exclude name="**/*.java" />
+          </fileset>
+        </copy>
+
+        <antcall target="do.compile">
+            <param name="from" value="${src.dir}"/>
+            <param name="to" value="${build.src.dir}"/>
+            <param name="debug" value="true"/>
+            <param name="classpath" value="src.build.classpath"/>
+        </antcall>
+    </target>
+
+    <target name="test.build" depends="setup.build.dirs,src.jar">
+        <antcall target="do.checkstyle">
+            <param name="checkstyle.src.dir" value="${test.dir}"/>
+        </antcall>
+        
+        <antcall target="do.compile">
+            <param name="from" value="${test.dir}"/>
+            <param name="to" value="${build.test.dir}"/>
+            <param name="debug" value="true"/>
+            <param name="classpath" value="test.build.classpath"/>
+        </antcall>
+    </target>
+    
+    <target name="src.jar" depends="src.build">
+        <jar destfile="${jar.dir}/${jar.src.file}" basedir="${build.src.dir}"/>
+    </target>
+    
+    <target name="test.jar" depends="test.build">
+        <jar destfile="${jar.dir}/${jar.test.file}" basedir="${build.test.dir}"/>
+    </target>
+    
+    <!-- test/coverage targets -->
+    
+    <target name="test" depends="test.jar,setup.test.dirs">
+        <antcall target="run.junit">
+            <param name="classpath.ref" value="test.run.classpath"/>
+        </antcall>
+    </target>
+    
+    <target name="emma" depends="test.jar,setup.test.dirs,instr.clean">
+        <taskdef resource="emma_ant.properties" classpathref="emma.lib"/>
+
+        <emma enabled="true">
+            <instr instrpath="${build.src.dir}" destdir="${instrument.dir}" metadatafile="${coverage.results.dir}/metadata.emma">
+                <filter excludes="*.XharnessTester"/>
+            </instr>
+        </emma>
+        
+        <antcall target="run.junit">
+            <param name="classpath.ref" value="emma.run.classpath"/>
+        </antcall>
+        
+        <emma enabled="true">
+            <report sourcepath="${src.dir}">
+                <fileset dir="${coverage.results.dir}">
+                    <include name="*.emma"/>
+                </fileset>
+                <html outfile="${coverage.results.dir}/index.html"/>
+            </report>
+        </emma>
+    </target>
+    
+    <target name="jcoverage" depends="test.jar,setup.test.dirs,instr.clean">
+        <taskdef resource="tasks.properties" classpathref="jcoverage.lib"/>
+
+        <instrument todir="${instrument.dir}">
+            <fileset dir="${build.src.dir}">
+                <exclude name="**/XharnessTester.class"/>
+            </fileset>
+        </instrument>
+        
+        <antcall target="run.junit">
+            <param name="classpath.ref" value="jcoverage.run.classpath"/>
+        </antcall>
+        
+        <report srcdir="${src.dir}" destdir="${coverage.results.dir}"/>
+    </target>
+    
+    <target name="clover" depends="test.jar,setup.test.dirs,instr.clean">
+        <taskdef resource="clovertasks" classpathref="clover.lib"/>
+        <typedef resource="clovertypes" classpathref="clover.lib"/>
+
+        <clover-setup initstring="${coverage.results.dir}/coverage.db" enabled="true">
+            <files>
+                <exclude name="**/XharnessTester.java"/>
+            </files>
+        </clover-setup>
+        
+        <property name="clover.excludes" value="**/XharnessTester.java"/>
+        
+        <copy todir="${instrument.dir}" failonerror="false">
+          <fileset dir="${src.dir}/../resources">
+             <exclude name="**/*.java" />
+          </fileset>
+        </copy>
+
+        <antcall target="do.compile">
+            <param name="from" value="${src.dir}"/>
+            <param name="to" value="${instrument.dir}"/>
+            <param name="debug" value="true"/>
+            <param name="classpath" value="src.build.classpath"/>
+        </antcall>
+
+        <antcall target="run.junit">
+            <param name="classpath.ref" value="clover.run.classpath"/>
+        </antcall>
+        
+        <clover-report>
+           <current outfile="${coverage.results.dir}">
+              <format type="html"/>
+           </current>
+        </clover-report>
+    </target>
+    
+    <!-- util targets -->
+    
+    <target name="do.checkstyle" unless="no.checkstyle">
+        <checkstyle config="etc/checkstyle.xml">
+            <fileset dir="${checkstyle.src.dir}" includes="**/*.java"/>
+        </checkstyle>
+    </target>
+    
+    <target name="do.compile">
+        <javac srcdir="${from}" destdir="${to}" debug="${debug}" includeAntRuntime="false">
+            <classpath>
+                <path refid="${classpath}"/>
+            </classpath>
+        </javac>
+    </target>
+    
+    <target name="run.junit">
+        <junit fork="true">
+            <batchtest todir="${xml.results.dir}">
+                <fileset dir="${test.dir}">
+                    <include name="**/*Test.java"/>
+                </fileset>
+            </batchtest>
+            <classpath>
+                <path refid="${classpath.ref}"/>
+            </classpath>
+            <formatter type="xml"/>
+            <jvmarg value="-Demma.coverage.out.file=${coverage.results.dir}/coverage.emma"/>
+            <jvmarg value="-Demma.coverage.out.merge=true"/>
+        </junit>
+        
+        <junitreport todir="${html.results.dir}">
+            <fileset dir="${xml.results.dir}">
+                <include name="*.xml"/>
+            </fileset>
+            <report format="frames" todir="${html.results.dir}"/>
+        </junitreport>
+    </target>
+
+    <target name="save.results" if="results.exists">
+        <tstamp>
+            <format property="backup.dir" pattern="yyyy-MM-dd-hh-mm-ss" unit="second"/>
+        </tstamp>
+        <move todir="${results.base.dir}/${backup.dir}">
+            <fileset dir="${latest.results.dir}"/>
+        </move>
+    </target>
+</project>
+
