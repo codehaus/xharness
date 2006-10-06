@@ -1,0 +1,30 @@
+ <!-- ====================================================================
+            Ant task and typedefinitions used and exported by XHarness
+     ==================================================================== -->
+
+<taskdef name="xharness" classname="org.codehaus.xharness.tasks.XharnessTask"/>
+<taskdef name="include" classname="org.codehaus.xharness.tasks.IncludeTask"/>
+<taskdef name="testgroup" classname="org.codehaus.xharness.tasks.TestGroupTask"/>
+<taskdef name="testcase" classname="org.codehaus.xharness.tasks.TestCaseTask"/>
+<taskdef name="servicedef" classname="org.codehaus.xharness.tasks.ServiceDef"/>
+<taskdef name="service" classname="org.codehaus.xharness.tasks.ServiceInstance"/>
+
+<taskdef name="xh-exec" classname="org.codehaus.xharness.tasks.XsExecTask"/>
+<taskdef name="xh-execbg" classname="org.codehaus.xharness.tasks.XsExecBgTask"/>
+<taskdef name="xh-java" classname="org.codehaus.xharness.tasks.XsJavaTask"/>
+<taskdef name="xh-javabg" classname="org.codehaus.xharness.tasks.XsJavaBgTask"/>
+<taskdef name="kill" classname="org.codehaus.xharness.tasks.KillTask"/>
+
+<taskdef name="assert" classname="org.codehaus.xharness.tasks.AssertTask"/>
+<taskdef name="skip" classname="org.codehaus.xharness.tasks.SkipTask"/>
+
+<taskdef name="xharnessreport" classname="org.codehaus.xharness.tasks.XsReportTask"/>
+
+<taskdef name="which" classname="org.codehaus.xharness.tasks.WhichTask"/>
+
+<typedef name="envset" classname="org.codehaus.xharness.types.EnvSet"/>
+<typedef name="filecontains" classname="org.codehaus.xharness.types.FileContains"/>
+<typedef name="outputsize" classname="org.codehaus.xharness.types.OutputSize"/>
+<typedef name="outputis" classname="org.codehaus.xharness.types.OutputIs"/>
+<typedef name="outputcontains" classname="org.codehaus.xharness.types.OutputContains"/>
+<typedef name="outputregex" classname="org.codehaus.xharness.types.OutputRegex"/>
