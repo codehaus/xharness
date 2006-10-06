@@ -1,0 +1,145 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.codehaus</groupId>
+    <artifactId>xharness</artifactId>
+    <packaging>jar</packaging>
+    <version>0.1-SNAPSHOT</version>
+    <name>XHarness</name>
+    <url>http://xharness.codehaus.org</url>
+
+    <distributionManagement>
+        <repository>
+            <id>iona</id>
+            <name>IONA Maven Repository</name>
+            <url>scp://maven-repo.boston.amer.iona.com/x1/iona-repository/release</url>
+        </repository>
+        <snapshotRepository>
+            <id>iona-snapshot</id>
+            <name>IONA Maven Snapshot Repository</name>
+            <url>scp://maven-repo.boston.amer.iona.com/x1/iona-repository/snapshot</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>ant</groupId>
+            <artifactId>ant</artifactId>
+            <version>1.6.5</version>
+        </dependency>
+        <dependency>
+            <groupId>ant</groupId>
+            <artifactId>ant-junit</artifactId>
+            <version>1.6.5</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>ant</groupId>
+            <artifactId>ant-launcher</artifactId>
+            <version>1.6.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>3.8.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <version>1.2_Java1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>easymock</groupId>
+            <artifactId>easymockclassextension</artifactId>
+            <version>1.2</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+
+
+
+
+    <build>
+        <!-- grab non-java files from src tree as well -->
+        <resources>
+            <resource>
+                <directory>src/main/java</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**</include>
+                </includes>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <directory>src/test/java</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </testResource>
+            <testResource>
+                <directory>src/test/resources</directory>
+                <includes>
+                    <include>**</include>
+                </includes>
+            </testResource>
+        </testResources>
+
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                    <reportFormat>brief</reportFormat>
+                    <useFile>false</useFile>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.4</source>
+                    <target>1.4</target>
+                    <!--<showDeprecation>true</showDeprecation>-->
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <configLocation>${basedir}/etc/checkstyle.xml</configLocation>
+                    <failsOnError>true</failsOnError>
+                    <consoleOutput>true</consoleOutput>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>process-sources</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>checkstyle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>
+
