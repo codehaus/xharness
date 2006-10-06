@@ -1,0 +1,270 @@
+#!/usr/bin/env perl
+#
+# Copyright 2006 IONA Technologies
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+
+use strict;
+use IO::Select;
+use POSIX qw(:sys_wait_h);
+
+
+# Unfortunately some of our systems do not have an up-to-date
+# Socket module. This does a selective import based on version.
+BEGIN {
+    require Socket;
+    if ($Socket::VERSION > '1.7') {
+        import Socket qw(:DEFAULT TCP_NODELAY);
+    } else {
+        import Socket ();
+    }
+}
+
+(my $me = $0) =~ s:^.*[\\\/]::;
+
+my $exit_status = 0;
+
+my $debug = $ENV{ASYNC_EXEC_DEBUG} || undef;
+if ($debug) {
+    open(DEBUG, ">>$debug");
+    my $s = select(DEBUG);
+    $| = 1;
+    select($s);
+}
+
+my $usage = "usage: $me <argument file>\n";
+unless (@ARGV == 1) {
+    if ($debug) {
+        print DEBUG "$$: usage error: $usage";
+        close DEBUG;
+    }
+    die $usage;
+}
+
+my $argfile = $ARGV[0];
+
+END {
+    print DEBUG "$$: removing $argfile\n" if $debug;
+    unlink $argfile;
+    close DEBUG if $debug;
+}
+
+print DEBUG "$$: using arguments from $argfile\n" if $debug;
+open(IN, "$argfile") || die "$me: cannot open $argfile: $!\n";
+my @args = <IN>;
+close IN;
+chomp @args;
+my ($default_timeout, $port, $exec_cmd, @exec_args) = @args;
+if ($default_timeout !~ /^\d+/) {
+    print STDERR "$me: $argfile: illegal default timeout: \"$default_timeout\"\n";
+    print STDERR "$me: $argfile contents were as follows:\n";
+    print STDERR '   ', join("\n   ", @args), "\n";
+    die "$me: number expected for default timeout\n";
+}
+if ($port !~ /^\d+/) {
+    print STDERR "$me: $argfile: illegal port: \"$port\"\n";
+    print STDERR "$me: $argfile contents were as follows:\n";
+    print STDERR '   ', join("\n   ", @args), "\n";
+    die "$me: number expected for port\n";
+}
+die "$me: $argfile: no launch command provided\n" unless $exec_cmd;
+if ($debug) {
+    print DEBUG "$$: command line: $exec_cmd ", join(' ', @exec_args), "\n";
+    print DEBUG "$$: default timeout set to $default_timeout seconds\n";
+}
+
+local *S;
+my $tcp = getprotobyname('tcp');
+socket(S, PF_INET, SOCK_STREAM, $tcp) || die "$me: socket failed: $!\n";
+my $sin = sockaddr_in($port, INADDR_LOOPBACK);
+connect(S, $sin) || die "$me: connect to port $port failed: $!\n";
+if ($Socket::VERSION > '1.7') {
+    no strict 'subs';
+    setsockopt(S, $tcp, TCP_NODELAY, pack('l', 1));
+}
+my $selsave = select(S); $| = 1; select($selsave);
+print DEBUG "$$: connected to port $port\n" if $debug;
+
+my %proc;
+my $indent = '';
+my @pids;
+my $child_pid = undef;
+
+sub kill_parents_first {
+    my ($pid) = @_;
+    if ($pid != $$ && $pid != 1) {
+        print DEBUG "$$: ${indent}add $pid\n" if $debug;
+        push @pids, $pid;
+    }
+    if (exists($proc{$pid})) {
+        if ($debug) {
+            print DEBUG "$$: ${indent}adding $pid children\n";
+            $indent .= '  ';
+        }
+        foreach my $p (@{$proc{$pid}}) {
+            kill_parents_first($p);
+        }
+        $indent =~ s/  $// if $debug;
+    }
+}
+
+sub kill_children {
+    my ($sig) = @_;
+    if (defined($sig)) {
+        print DEBUG "$$: cleaning up from signal $sig\n" if $debug;
+        if ($sig eq 'CHLD') {
+            if ($child_pid) {
+                print DEBUG "$$: waiting for child $child_pid\n" if $debug;
+                if (waitpid($child_pid, 0) == $child_pid) {
+                    $exit_status = WEXITSTATUS($?) if WIFEXITED($?);
+                    $child_pid = undef;
+                }
+            }
+        }
+    }
+    # Clear %proc and @pids since a signal can occur
+    # after we've already entered this function.
+    #
+    %proc = ();
+    @pids = ();
+    # Set the handler for CHLD back to default so the
+    # backtick command invocation doesn't trigger this handler.
+    $SIG{CHLD} = 'DEFAULT';
+
+    my $cmd = 'ps -eo pid,pgid,ppid';
+    $cmd .= ',args' if $debug;
+    my @procs = `$cmd`;
+    die "$me: fatal error: \"$cmd\" failed\n" unless ($? == 0);
+    shift @procs;   # throw away ps heading
+    foreach my $proc (@procs) {
+        $proc =~ s/^\s+//;
+        my ($pid, $pgid, $ppid, $task) = split(/\s+/, $proc, 4);
+        chomp $task;
+        next unless ($pgid == $$ && $task ne $cmd);
+        print DEBUG "$$: $proc" if $debug;
+        push @{$proc{$ppid}}, $pid;
+    }
+    # Kill UNIX parent processes before children, in order to prevent any
+    # shell scripts from writing error messages to stderr about terminated
+    # background children processes.
+    #
+    # Note that we call kill_parents_first twice, first for the process
+    # tree rooted at this process, then for processes in our process
+    # group that have been adopted by the init process (PID 1).
+    #
+    kill_parents_first($$);
+    kill_parents_first(1);
+    if (@pids) {
+        print DEBUG "$$: kill -2 pids: ", join(' ', @pids), "\n" if $debug;
+        kill 2, @pids;
+    }
+    if ($child_pid) {
+        print DEBUG "$$: non-blocking wait for child $child_pid\n" if $debug;
+        if (waitpid($child_pid, &POSIX::WNOHANG) == $child_pid) {
+            $exit_status = WEXITSTATUS($?) if WIFEXITED($?);
+            $child_pid = undef;
+        }
+    }
+    foreach my $pid (@pids) {
+        print DEBUG "$$: checking pid $pid\n" if $debug;
+        next unless kill 0, $pid;
+        print DEBUG "$$: kill -15 $pid\n" if $debug;
+        kill 15, $pid;
+        if ($pid == $child_pid) {
+            print DEBUG "$$: non-blocking wait for child $pid\n" if $debug;
+            if (waitpid($child_pid, &POSIX::WNOHANG) == $child_pid) {
+                $exit_status = WEXITSTATUS($?) if WIFEXITED($?);
+                $child_pid = undef;
+            }
+        } else {
+            sleep 3;
+        }
+        if (kill 0, $pid) {
+            print DEBUG "$$: kill -9 $pid\n" if $debug;
+            kill 9, $pid;
+        }
+    }
+    if (defined($sig)) {
+        if ($child_pid) {
+            print DEBUG "$$: waiting for child $child_pid\n" if $debug;
+            if (waitpid($child_pid, 0) == $child_pid) {
+                $exit_status = WEXITSTATUS($?) if WIFEXITED($?);
+                $child_pid = undef;
+            }
+        }
+        print DEBUG "$$: closing sockets\n" if $debug;
+        close NS;
+        close S;
+        if ($debug) {
+            print DEBUG "$$: exiting after signal $sig";
+            print DEBUG " with status $exit_status" if ($sig eq 'CHLD');
+            print DEBUG "\n";
+        }
+        exit $exit_status;
+    }
+}
+
+$ENV{UNIX95} = 'XPG4' if ($^O eq 'hpux');
+
+setpgrp(0, 0);
+defined($child_pid = fork) || die "$me: fork failed: $!\n";
+if ($child_pid == 0) {
+    close S;
+    close DEBUG if $debug;
+    select STDOUT;
+    $| = 1;
+    exec($exec_cmd, @exec_args) || die "$me: exec \"$exec_cmd\" failed: $!\n";
+}
+
+my @signals = ('HUP', 'INT', 'QUIT', 'TERM', 'CHLD');
+foreach my $sig (@signals) {
+    $SIG{$sig} = 'kill_children';
+}
+
+print DEBUG "$$: waiting for command\n" if $debug;
+my $rset = IO::Select->new();
+$rset->add(*S);
+my @fh = IO::Select->select($rset, undef, undef, $default_timeout);
+if (@fh == 0) {
+    print DEBUG "$$: socket timeout waiting for shutdown\n" if $debug;
+    kill_children();
+    if ($child_pid) {
+        print DEBUG "$$: waiting for child $child_pid\n" if $debug;
+        if (waitpid($child_pid, 0) == $child_pid) {
+            $exit_status = WEXITSTATUS($?) if WIFEXITED($?);
+            $child_pid = undef;
+        }
+    }
+    close S;
+    print DEBUG "$$: exiting with status $exit_status\n" if $debug;
+    exit $exit_status;
+}
+$SIG{CHLD} = 'DEFAULT';
+my $cmd = <S>;
+chomp $cmd;
+print DEBUG "$$: received \"$cmd\", now killing children\n" if $debug;
+kill_children();
+if ($child_pid) {
+    print DEBUG "$$: waiting for child $child_pid\n" if $debug;
+    if (waitpid($child_pid, 0) == $child_pid) {
+        $exit_status = WEXITSTATUS($?) if WIFEXITED($?);
+        $child_pid = undef;
+    }
+}
+print DEBUG "$$: sending acknowledgement\n" if $debug;
+print S "ok\n";
+print DEBUG "$$: closing socket\n" if $debug;
+close S;
+print DEBUG "$$: exiting with status $exit_status\n" if $debug;
+exit $exit_status;
