@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<project name="XHarness tests" default="test" basedir=".">
+
+    <path id="xharness.lib">
+        <pathelement location="../../lib/xharness.jar"/>
+        <fileset dir="../..">
+          <include name="target/*.jar"/>
+        </fileset>
+        <pathelement location="../../target/classes"/>
+        <pathelement location="../../target/test-classes"/>
+        <pathelement path="${java.class.path}"/>
+    </path>
+    
+    <taskdef resource="xharnesstasks.properties" classpathref="xharness.lib" loaderref="xharness.loader"/>
+    <typedef resource="xharnesstypes.properties" classpathref="xharness.lib" loaderref="xharness.loader"/>
+
+  <target name="setup.dirs">
+    <property name="results.dir" value="./results"/>
+    <property name="xml.results.dir" value="${results.dir}/latest/xml"/>
+    <property name="html.results.dir" value="${results.dir}/latest/html"/>
+    <mkdir dir="${results.dir}"/>
+    <available file="${results.dir}/latest" type="dir" property="results.dir.exists"/>
+    <antcall target="save.results.dir"/>
+    <mkdir dir="${results.dir}/latest"/>
+    <mkdir dir="${xml.results.dir}"/>
+    <mkdir dir="${html.results.dir}"/>
+  </target>
+
+  <target name="save.results.dir" if="results.dir.exists">
+    <tstamp>
+      <format property="backup.dest.dir" pattern="yyyy-MM-dd-hh-mm-ss" unit="second"/>
+    </tstamp>
+    <move todir="${results.dir}/${backup.dest.dir}">
+      <fileset dir="${results.dir}/latest"/>
+    </move>
+  </target>
+
+  <target name="test" depends="setup.dirs">
+    <property name="test.pattern" value=""/>
+    <property name="test.name" value=""/>
+ 
+    <xharness name="${test.name}" resultsdir="${xml.results.dir}" basedir="." pattern="${test.pattern}">
+      <!--include file="passing.xml"/-->
+      <include file="failing.xml"/>
+    </xharness>
+
+    <antcall target="generate.report"/>
+  </target>
+  
+  <target name="generate.report">
+    <xharnessreport todir="${html.results.dir}" failonerror="true">
+      <fileset dir="${xml.results.dir}">
+        <include name="*.xml"/>
+      </fileset>
+      <report format="frames" todir="${html.results.dir}"/>
+    </xharnessreport>
+  </target>
+</project>

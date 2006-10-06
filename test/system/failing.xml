@@ -1,0 +1,5 @@
+<testgroup name="failing">
+  <xh-exec executable="which.exe" dir="../failing">
+    <arg line="java.exe"/>
+  </xh-exec>
+</testgroup>

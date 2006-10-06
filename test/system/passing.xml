@@ -1,0 +1,44 @@
+<testgroup name="passing">
+  <testgroup name="service_tests">
+    <testgroup name="simple">
+      <servicedef name="testservice">
+        <start>
+          <echo message="Hello World!"/>
+        </start>
+        <verify>
+          <echo message="Are you still there?"/>
+        </verify>
+        <stop>
+          <echo message="Bye!"/>
+        </stop>
+      </servicedef>
+      <testcase name="test1">
+        <testservice/>
+      </testcase>
+    </testgroup>
+    <testgroup name="bgproc_start">
+      <servicedef name="testservice">
+        <start>
+          <delete quiet="true" file="block.txt"/>
+          <delete quiet="true" file="touch.txt"/>
+          <xh-javabg classname="org.codehaus.xharness.testutil.XharnessTester"
+                   classpathref="xharness.lib">
+            <arg line="-block block.txt -touch touch.txt"/>
+          </xh-javabg>
+        </start>
+        <verify>
+          <xh-java classname="org.codehaus.xharness.testutil.XharnessTester"
+                   classpathref="xharness.lib">
+            <arg line="-check touch.txt"/>
+          </xh-java>
+        </verify>
+        <stop>
+          <echo message="Bye!"/>
+        </stop>
+      </servicedef>
+      <testcase name="test1">
+        <testservice/>
+      </testcase>
+    </testgroup>
+  </testgroup>
+</testgroup>
