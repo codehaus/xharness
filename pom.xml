@@ -5,51 +5,11 @@
     <groupId>org.codehaus.xharness</groupId>
     <artifactId>xharness</artifactId>
     <packaging>jar</packaging>
-    <version>0.1-SNAPSHOT</version>
+    <version>1.0-SNAPSHOT</version>
     <name>XHarness</name>
     <url>http://xharness.codehaus.org</url>
     <description>XHarness runs your system tests</description>
     <inceptionYear>2006</inceptionYear>
-
-    <ciManagement>
-        <system>Continuum</system>
-        <url>unknown</url>
-        <notifiers>
-            <notifier>
-                <configuration>
-                    <address>dev@xharness.codehaus.org</address>
-                </configuration>
-            </notifier>
-        </notifiers>
-    </ciManagement>
-
-    <scm>
-        <connection>scm:svn:https://svn.codehaus.org/xharness/trunk</connection>
-        <developerConnection>scm:svn:https://${maven.username}@svn.codehaus.org/xharness/trunk</developerConnection>
-        <url>https://svn.codehaus.org/xharness/trunk</url>
-    </scm>
-
-    <issueManagement>
-        <system>jira</system>
-        <url>http://jira.codehaus.org/browse/xharness</url>
-    </issueManagement>
-
-    <distributionManagement>
-        <repository>
-            <id>xharness</id>
-            <name>XHarness Central Repository</name>
-            <url>dav:https://dav.codehaus.org/dist/xharness/</url>
-        </repository>
-        <snapshotRepository>
-            <id>xharness-snapshots</id>
-            <name>XHarness Central Development Repository</name>
-            <url>dav:https://dav.codehaus.org/snapshots.dist/xharness/</url>
-        </snapshotRepository>
-        <site>
-            <id>xharness-site</id>
-            <url>dav:https://dav.codehaus.org/xharness/</url>
-        </site>
-    </distributionManagement>
 
     <!--dependencyManagement-->
         <dependencies>
@@ -121,7 +81,6 @@
             </testResource>
         </testResources>
 
-
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -162,7 +121,115 @@
                 </executions>
             </plugin>
         </plugins>
+        <extensions>
+            <extension>
+            	<groupId>org.apache.maven.wagon</groupId>
+            	<artifactId>wagon-webdav</artifactId>
+            	<version>1.0-beta-1</version>
+            </extension>
+        </extensions>
     </build>
+
+    <profiles>
+    	<profile>
+            <id>no.checkstyle</id>
+            <properties>
+                <checkstyle.excludes>**/*.java</checkstyle.excludes>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>fast.install</id>
+            <properties>
+                <maven.test.skip>true</maven.test.skip>
+                <checkstyle.excludes>**/*.java</checkstyle.excludes>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>clover</id>
+            <properties>
+                <checkstyle.excludes>**/*.java</checkstyle.excludes>
+            </properties>
+            <reporting>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-clover-plugin</artifactId>
+                        <configuration>
+                            <licenseLocation>${clover.license.file}</licenseLocation>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </reporting>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-clover-plugin</artifactId>
+                        <configuration>
+                            <includes>
+                            </includes>
+                            <excludes>
+                                <exclude>**/*Test.java</exclude>
+                                <exclude>**/AllTests.java</exclude>
+                            </excludes>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>main</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>instrument</goal>
+                                    <goal>clover</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <!--ciManagement>
+        <system>Continuum</system>
+        <url>unknown</url>
+        <notifiers>
+            <notifier>
+                <configuration>
+                    <address>dev@xharness.codehaus.org</address>
+                </configuration>
+            </notifier>
+        </notifiers>
+    </ciManagement-->
+
+    <scm>
+        <connection>scm:svn:https://svn.codehaus.org/xharness/trunk</connection>
+        <developerConnection>scm:svn:https://${maven.username}@svn.codehaus.org/xharness/trunk</developerConnection>
+        <url>https://svn.codehaus.org/xharness/trunk</url>
+    </scm>
+
+    <issueManagement>
+        <system>jira</system>
+        <url>http://jira.codehaus.org/browse/xharness</url>
+    </issueManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>xharness.codehaus.org</id>
+            <name>XHarness Central Repository</name>
+            <url>dav:https://dav.codehaus.org/dist/xharness/</url>
+        </repository>
+        <snapshotRepository>
+            <id>xharness.codehaus.org</id>
+            <name>XHarness Central Development Repository</name>
+            <url>dav:https://dav.codehaus.org/snapshots.dist/xharness/</url>
+        </snapshotRepository>
+        <site>
+            <id>xharness.codehaus.org</id>
+            <url>dav:https://dav.codehaus.org/xharness/</url>
+        </site>
+    </distributionManagement>
 
     <mailingLists>
         <mailingList>
