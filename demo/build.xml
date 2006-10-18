@@ -2,7 +2,9 @@
 <project name="XHarness tests" default="demo" basedir=".">
 
     <path id="xharness.lib">
-        <pathelement location="../lib/xharness.jar"/>
+        <fileset dir="..">
+          <include name="lib/xharness*.jar"/>
+        </fileset>
         <fileset dir="..">
           <include name="target/*.jar"/>
         </fileset>
