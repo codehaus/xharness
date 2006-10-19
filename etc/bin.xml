@@ -27,6 +27,9 @@
             <directory>demo</directory>
         </fileSet>
         <fileSet>
+            <directory>docs</directory>
+        </fileSet>
+        <fileSet>
             <directory>target</directory>
             <outputDirectory>lib</outputDirectory>
             <includes>

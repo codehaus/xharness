@@ -29,28 +29,5 @@
                 <exclude>etc/src.xml</exclude>
             </excludes>
         </fileSet>
-
-        <!--fileSet>
-            <includes>
-                <include>DISCLAIMER</include>
-                <include>LICENSE*</include>
-                <include>licenses/*.*</include>
-                <include>NOTICE</include>
-                <include>README</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>etc</directory>
-            <outputDirectory>etc</outputDirectory>
-            <includes>
-                <include>xharness.xml</include>
-                <include>checkstyle.xml</include>
-            </includes>
-        </fileSet>
-        <fileSet>
-            <directory>demo</directory>
-            <directory>docs</directory>
-            <directory>src</directory>
-        </fileSet-->
     </fileSets>
 </assembly>
