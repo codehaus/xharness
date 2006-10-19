@@ -1146,7 +1146,7 @@ function refresh() {
     <table width="100%">
     <tr>
         <td align="left"></td>
-        <td align="right">Designed for use with <a href="http://xharness.codehaus.org/documentation/manual/index.html" target="_blank">XHarness</a> and <a href="http://jakarta.apache.org/" target="_blank">Ant</a>.</td>
+        <td align="right">Designed for use with <a href="http://xharness.codehaus.org" target="_blank">XHarness</a> and <a href="http://ant.apache.org" target="_blank">Ant</a>.</td>
     </tr>
     </table>
     <hr size="1"/>
