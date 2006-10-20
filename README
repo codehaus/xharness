@@ -1,0 +1,53 @@
+
+                                   XHarness
+ 
+
+  What is it? 
+  -----------
+  
+  XHarness is a system test harness for Apache Ant 1.6.x. It allows people to 
+  describe their product/system tests in the form of XML as part of an ant 
+  build file, describing the tasks and processes that comprise the test cases 
+  and what their expected behaviour is. It has powerful process management 
+  capabilities, that extend the existing Ant process tasks (exec, java) to 
+  allow asynchronous execution of java and native processes (e.g. for 
+  client-server tests), synchronization between multiple processes and complex 
+  assertions on process and task output (stdout/stderr, file output, coupled 
+  with timeouts, etc.). It also has the concept of a "service" that 
+  encapsulates the necessary infrastructure for testcases to run (e.g. a 
+  Webserver) and adds a number of other useful tasks to the Ant framework, 
+  like environment sets and an equivalent to the Unix "which" command. 
+  XHarness tests are executed by the Ant framework and the output produced by 
+  all tasks and the test results are captured. In that respect, XHarness works 
+  similar to the Ant junit task in that it runs testcases and tasks/processes 
+  associated with these tests and at the end produces an HTML summary of the 
+  tests, listing the result of each testcase as well as the output of the 
+  testcase's tasks and processes.
+
+  
+  The Latest Version
+  ------------------
+
+  Details of the latest version can be found on the Codehaus XHarness
+  Project web site <http://xharness.codehaus.org/>.
+
+
+  Documentation
+  -------------
+
+  Documentation is available in HTML format, in the docs/ directory.
+  For information about the xharness tasks and types, see
+  docs/manual/index.html
+
+
+  Licensing
+  ---------
+
+  This software is licensed under the terms you may find in the file 
+  named "LICENSE" in this directory.
+  
+
+  Thank you for using XHarness.
+
+                         The Codehaus XHarness Project
+                        <http://xharness.codehaus.org/>

@@ -25,8 +25,8 @@
                 <exclude>**/surefire*</exclude>
                 <exclude>**/cobertura.ser</exclude>
                 <exclude>**/*.deprecated</exclude>
-                <exclude>etc/bin.xml</exclude>
-                <exclude>etc/src.xml</exclude>
+                <exclude>etc/assembly-bin.xml</exclude>
+                <exclude>etc/assembly-src.xml</exclude>
             </excludes>
         </fileSet>
     </fileSets>
