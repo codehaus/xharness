@@ -25,6 +25,8 @@
                 <exclude>**/surefire*</exclude>
                 <exclude>**/cobertura.ser</exclude>
                 <exclude>**/*.deprecated</exclude>
+                <exclude>**/pom.xml.*</exclude>
+                <exclude>**/release.properties</exclude>
                 <exclude>etc/assembly-bin.xml</exclude>
                 <exclude>etc/assembly-src.xml</exclude>
             </excludes>
