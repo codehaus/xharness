@@ -46,22 +46,37 @@
         <property name="test.name" value="XHarnessDemo"/>
  
         <xharness name="${test.name}" resultsdir="${xml.results.dir}" basedir="." pattern="${test.pattern}">
-            <include file="blocking_service.xml"/>
             <include file="service_client.xml"/>
             <include file="client_server_service.xml"/>
       
-            <testcase name="SimpleClientServer">
-                <include file="client_server.xml"/>
-                <ClientServer/>
-            </testcase>
+            <testgroup name="Simple">
+                <testcase name="ClientOnly">
+                    <xh-java classname="test.standalone.HelloWorld" classpath="classes">
+                      <arg value="Hi There"/>
+                    </xh-java>
+                    <assert message="Incorrect output">
+                      <and>
+                        <outputis stream="stderr"/>
+                        <outputcontains>Hello World</outputcontains>
+                        <outputcontains>Hi There</outputcontains>
+                        <outputsize equals="2"/>
+                      </and>
+                    </assert>
+                </testcase>
+                <testcase name="ClientToServer">
+                    <include file="client_server.xml"/>
+                    <ClientServer/>
+                </testcase>
+            </testgroup>
       
             <testgroup name="BlockingServiceTests">
-                <testcase name="ClientOnly">
+                <include file="blocking_service.xml"/>
+                <testcase name="ClientToService">
                     <BlockingService/>
                     <ServiceClientOnly server.dir="temp/service1"/>
                 </testcase>
       
-                <testcase name="ClientServer">
+                <testcase name="ClientToServerToService">
                     <BlockingService/>
                     <ServiceClientServer server.dir="temp/service1"/>
                 </testcase>
@@ -70,12 +85,12 @@
             <testgroup name="NonblockingServiceTests">
                 <include file="nonblocking_service.xml"/>
   
-                <testcase name="ClientOnly">
+                <testcase name="ClientToNbService">
                     <NonblockingService/>
                     <ServiceClientOnly server.dir="temp/service2"/>
                 </testcase>
       
-                <testcase name="ClientServer">
+                <testcase name="ClientToServerToNbService">
                     <service reference="NonblockingService"/>
                     <ServiceClientServer server.dir="temp/service2"/>
                 </testcase>

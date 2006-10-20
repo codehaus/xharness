@@ -28,7 +28,7 @@ public class TestClient extends ClientBase {
 
     public static void main(String[] args) throws IOException {
         if (args.length < 2) {
-            System.out.println("Usage: EchoClient serverDir operation [message]*");
+            System.out.println("Usage: TestClient serverDir operation [message]*");
             System.exit(1);
         }
         TestClient client = new TestClient(args[0]);
