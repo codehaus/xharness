@@ -38,13 +38,13 @@ import org.codehaus.xharness.types.EnvSet;
 import org.codehaus.xharness.types.EnvironmentVariable;
 
 /**
- * Extension of the standard ant Exec task that adds the following.
- * - support for nested EnvSet types 
- * - output capturing (stdout/stderr) 
- * - Watchdog that allows process killing
- * - Intelligent executable and dir setting depneding on current.test.directory property
+ * Extension of the standard ant Exec task that adds the following:
+ * - support for nested EnvSet types.
+ * - output capturing (stdout/stderr). 
+ * - Watchdog that allows process killing.
+ * - Intelligent executable and dir setting depneding on current.test.directory property.
  * 
- * @autor Gregor Heine
+ * @author Gregor Heine
  * @see org.apache.tools.ant.taskdefs.ExecTask
  */
 public class XhExecTask extends ExecTask implements LoggableProcess {
@@ -143,11 +143,10 @@ public class XhExecTask extends ExecTask implements LoggableProcess {
 
     /**
      * Override of
-     * {@link org.apache.tools.ant.taskdefs.ExecTask#maybeSetResultPropertyValue()}.
+     * {@link org.apache.tools.ant.taskdefs.ExecTask#maybeSetResultPropertyValue(int)}.
      * Captures the return value for later processing.
      * 
-     * @param result
-     *            the return value of the process
+     * @param result the return value of the process
      */
     protected void maybeSetResultPropertyValue(int result) {
         super.maybeSetResultPropertyValue(result);

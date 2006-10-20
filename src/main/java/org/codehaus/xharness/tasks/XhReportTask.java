@@ -49,7 +49,7 @@ import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 /**
- * Aggregates all &lt;junit&gt; XML formatter testsuite data under
+ * Aggregates all &lt;XHarness&gt; XML formatter testsuite data under
  * a specific directory and transforms the results via XSLT.
  * It is not particulary clean but
  * should be helpful while I am thinking about another technique.
@@ -59,10 +59,11 @@ import org.xml.sax.SAXException;
  * (obviously) in the forked JVM. A solution could be to write a
  * TestListener that will receive events from the TestRunner via sockets. This
  * is IMHO the simplest way to do it to avoid this file hacking thing.
+ * 
+ * Modified version of {@link org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator}.
  *
  * @author <a href="mailto:sbailliez@imediation.com">Stephane Bailliez</a>
- *
- * @ant.task name="junitreport" category="testing"
+ * @author Gregor Heine
  */
 public class XhReportTask extends Task implements XMLConstants {
     /** The default directory: <tt>&#046;</tt>. It is resolved from the project directory */

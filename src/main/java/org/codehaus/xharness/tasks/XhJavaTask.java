@@ -34,14 +34,14 @@ import org.codehaus.xharness.types.EnvSet;
 import org.codehaus.xharness.types.EnvironmentVariable;
 
 /**
- * Extension of the standard ant Java task that adds the following: -
- * support for nested EnvSet types - output capturing (stdout/stderr) - Watchdog
- * that allows process killing - override the JVM, via java system property
- * "java.vm" - adds the VM argument "-XdoCloseWithReadPending" on the HP-UX
- * platform. - adds the system property "java.net.preferIPv4Stack=true" on
- * AIX/JDK 1.4.
+ * Extension of the standard ant Java task that adds the following: 
+ * - support for nested EnvSet types - output capturing (stdout/stderr). 
+ * - Watchdog that allows process killing.
+ * - override the JVM, via java system property "java.vm"
+ * - adds the VM argument "-XdoCloseWithReadPending" on the HP-UX platform. 
+ * - adds the system property "java.net.preferIPv4Stack=true" on AIX/JDK 1.4.
  * 
- * @autor Gregor Heine
+ * @author Gregor Heine
  * @see org.apache.tools.ant.taskdefs.Java
  */
 public class XhJavaTask extends Java implements LoggableProcess {

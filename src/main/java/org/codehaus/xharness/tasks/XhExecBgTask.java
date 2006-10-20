@@ -36,6 +36,8 @@ import org.codehaus.xharness.procutil.ProcessRegistry;
 import org.codehaus.xharness.procutil.ScriptLauncher;
 
 /**
+ * The XhExecBgTask is an asynchronous extension of the XhExecTask.
+ * 
  * @author Gregor Heine
  */
 public class XhExecBgTask extends XhExecTask implements Runnable, BgProcess {

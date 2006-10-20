@@ -270,35 +270,36 @@ public class LineBuffer {
     }
     
     /**
-     * Get an Iterator over {@link LogLine} instances that represent all lines in this buffer. 
+     * Get an Iterator over {@link org.codehaus.xharness.log.LogLine} instances that 
+     * represent all lines in this buffer. 
      * 
      * @see org.codehaus.xharness.log.LogLine
-     * @return An Iterator over {@link LogLine} instances. 
+     * @return An Iterator over {@link org.codehaus.xharness.log.LogLine} instances. 
      */
     public Iterator iterator() {
         return new LineIterator(minPriority, maxPriority);
     }
     
     /**
-     * Get an Iterator over {@link LogLine} instances that represent all lines 
-     * of the given priority in this buffer. 
+     * Get an Iterator over {@link org.codehaus.xharness.log.LogLine} instances that 
+     * represent all lines of the given priority in this buffer. 
      * 
      * @see org.codehaus.xharness.log.LogLine
      * @param priority The priority of the lines in the returned Iterator.
-     * @return An Iterator over {@link LogLine} instances. 
+     * @return An Iterator over {@link org.codehaus.xharness.log.LogLine} instances. 
      */
     public Iterator iterator(int priority) {
         return new LineIterator(priority, priority);
     }
     
     /**
-     * Get an Iterator over {@link LogLine} instances that represent all lines 
-     * of the given priority in this buffer. 
+     * Get an Iterator over {@link org.codehaus.xharness.log.LogLine} instances that 
+     * represent all lines of the given priority in this buffer. 
      * 
      * @see org.codehaus.xharness.log.LogLine
      * @param minPrio The minimum priority of the lines in the returned Iterator.
      * @param maxPrio The maximum priority of the lines in the returned Iterator.
-     * @return An Iterator over {@link LogLine} instances. 
+     * @return An Iterator over {@link org.codehaus.xharness.log.LogLine} instances. 
      */
     public Iterator iterator(int minPrio, int maxPrio) {
         return new LineIterator(minPrio, maxPrio);

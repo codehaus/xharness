@@ -82,7 +82,7 @@ public class ProcessLogger extends TaskLogger implements IDeferredLogger {
     
     /**
      * Called when this logger's Task has finished. Because the Task may be a
-     * continue running in the background (XsExecBgTask/XsJavaBgTask), the
+     * continue running in the background (XhExecBgTask/XhJavaBgTask), the
      * output is not flushed yet. This is done in {@link #deferredShutdown()}.
      */
     protected void taskFinishedInternal() {

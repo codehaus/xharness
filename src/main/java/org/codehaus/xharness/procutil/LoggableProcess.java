@@ -21,7 +21,7 @@ import org.codehaus.xharness.log.LineBuffer;
 
 /**
  * Interface implemented by process tasks, that can log the process output
- * to a {@LineBuffer}.
+ * to a {@link org.codehaus.xharness.log.LineBuffer}.
  * 
  * @author Gregor Heine
  */

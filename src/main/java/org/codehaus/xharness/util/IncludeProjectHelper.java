@@ -47,7 +47,7 @@ import org.xml.sax.helpers.XMLReaderAdapter;
 
 /**
  * Customized ProjectHelper that allows the import of Ant buildfiles into the
- * current project. Used by {@link IncludeTask}.
+ * current project. Used by {@link org.codehaus.xharness.tasks.IncludeTask}.
  *
  * @author  Gregor Heine
  */

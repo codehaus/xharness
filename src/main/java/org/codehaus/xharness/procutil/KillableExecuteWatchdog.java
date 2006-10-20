@@ -27,7 +27,6 @@ import org.apache.tools.ant.taskdefs.ExecuteWatchdog;
  *
  * @author  Gregor Heine
  */
-
 public class KillableExecuteWatchdog extends ExecuteWatchdog {
     private boolean deliberatelyKilled = false;
 

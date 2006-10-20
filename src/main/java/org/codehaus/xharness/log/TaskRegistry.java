@@ -87,7 +87,7 @@ public class TaskRegistry {
     /**
      * Returns a child logger of the current test logger (testcase/testgroup/etc.) with
      * the given id. The id can be either a logging name or a positive or negative integer
-     * value. See {@see TestLogger.getTask()}.
+     * value. See {link org.codehaus.xharness.log.TestLogger#getTask(String)}.
      * 
      * @param id The logger Id.
      * @return The TaskLogger eith the given Id or <code>null</code> if there is no

@@ -20,8 +20,8 @@ package org.codehaus.xharness.procutil;
 import org.apache.tools.ant.BuildException;
 
 /**
- * Interface implemented by Tasks that can run in the background (i.e. a separate
- * Thread).
+ * Interface implemented by Tasks that can run asynchronously in the background 
+ * (i.e. a separate Thread).
  * 
  * @author Gregor Heine
  */

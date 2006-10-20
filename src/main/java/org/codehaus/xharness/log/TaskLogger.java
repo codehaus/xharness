@@ -393,8 +393,8 @@ public class TaskLogger implements BuildListener {
      * Returns the process command, if the logger's Task is a LoggableProcess, otherwise
      * an empty String.
      * 
-     * @see XsExecTask
-     * @see XsJavaTask
+     * @see org.codehaus.xharness.tasks.XhExecTask
+     * @see org.codehaus.xharness.tasks.XhJavaTask
      * @return The process command or "".
      */
     protected String getCommand() {
@@ -408,8 +408,8 @@ public class TaskLogger implements BuildListener {
      * Returns the process return value, if the logger's Task is a LoggableProcess, 
      * otherwise an empty String.
      * 
-     * @see XsExecTask
-     * @see XsJavaTask
+     * @see org.codehaus.xharness.tasks.XhExecTask
+     * @see org.codehaus.xharness.tasks.XhJavaTask
      * @return The process return value or "".
      */
     protected int getRetVal() {
