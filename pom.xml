@@ -289,12 +289,12 @@
         <repository>
             <id>xharness.codehaus.org</id>
             <name>XHarness Central Repository</name>
-            <url>dav:https://dav.codehaus.org/dist/xharness/</url>
+            <url>dav:https://dav.codehaus.org/repository/xharness/</url>
         </repository>
         <snapshotRepository>
             <id>xharness.codehaus.org</id>
             <name>XHarness Central Development Repository</name>
-            <url>dav:https://dav.codehaus.org/snapshots.dist/xharness/</url>
+            <url>dav:https://dav.codehaus.org/snapshots.repository/xharness/</url>
         </snapshotRepository>
         <site>
             <id>xharness.codehaus.org</id>
