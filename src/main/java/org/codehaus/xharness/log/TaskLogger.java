@@ -48,6 +48,7 @@ import org.codehaus.xharness.util.StopWatch;
  */
 public class TaskLogger implements BuildListener {
     protected final StopWatch stopWatch = new StopWatch(true);
+    private boolean taskRunning = true;
 
     private TaskRegistry registry;
     private Task myTask; 
@@ -91,6 +92,15 @@ public class TaskLogger implements BuildListener {
     }
 
     // -- Accessors
+
+    /**
+     * Test if this TaskLogger's Task is still running.
+     *
+     * @return true, if the logger's Task hasn't finished yet, otherwise false.
+     */
+    public final boolean isTaskRunning() {
+        return taskRunning;
+    }
     
     /**
      * Get the XHarness TaskRegistry for this test suite.
@@ -301,6 +311,7 @@ public class TaskLogger implements BuildListener {
     protected void taskFinishedInternal() {
         getRegistry().getProject().removeBuildListener(this);
         stopWatch.stop();
+        taskRunning = false;
         
         int result;
         String resultDescription;

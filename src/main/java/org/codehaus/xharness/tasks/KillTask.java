@@ -35,9 +35,9 @@ public class KillTask extends Task {
                     "You must provide a process name in order to use the KillProcess task");
         }
 
-        log("KillProcess: killing processname " + procName, Project.MSG_VERBOSE);
-        BgProcess proc = ProcessRegistry.getProcess(procName);
         try {
+            BgProcess proc = ProcessRegistry.getProcess(procName);
+            log("KillProcess: killing processname " + procName, Project.MSG_VERBOSE);
             proc.kill();
         } catch (BuildException b) {
             if (failonerror) {
