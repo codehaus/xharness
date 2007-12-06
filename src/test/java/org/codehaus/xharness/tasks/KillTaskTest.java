@@ -95,7 +95,19 @@ public class KillTaskTest extends TestCase {
         ctrl.verify();
     }
     
-    public void testExecuteFailOnError() throws Exception {
+    public void testExecuteNotRegistered() throws Exception {
+        KillTask kill = new KillTask();
+        kill.setProject(project);
+        kill.setProcessname(PROC_NAME);
+        
+        try {
+            kill.execute();
+        } catch (BuildException be) {
+            assertEquals("Wrong message", "Process foo not registered.", be.getMessage());
+        }
+    }
+
+    public void testExecuteNoFailOnError() throws Exception {
         KillTask kill = new KillTask();
         kill.setProject(project);
         kill.setProcessname(PROC_NAME);
@@ -109,5 +121,14 @@ public class KillTaskTest extends TestCase {
         ProcessRegistry.registerProcess(PROC_NAME, proc);
         kill.execute();
         ctrl.verify();
+    }
+    
+    public void testExecuteNoFailOnErrorNotRegistered() throws Exception {
+        KillTask kill = new KillTask();
+        kill.setProject(project);
+        kill.setProcessname(PROC_NAME);
+        kill.setFailonerror(false);
+        
+        kill.execute();
     }
 }

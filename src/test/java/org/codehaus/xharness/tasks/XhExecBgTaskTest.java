@@ -118,8 +118,8 @@ public class XhExecBgTaskTest extends TestCase {
         assertTrue("Server has not passed", server.passed());
         assertEquals("Wrong user dir", System.getProperty("user.dir"), server.getReceivedData());
         server.getSocket().close();
-        // wait 500ms for process to terminate
-        Thread.sleep(500);
+        // wait 1sec for process to terminate
+        Thread.sleep(1000);
         assertTrue("Process is still running", !task.isRunning());
         try {
             ProcessRegistry.getProcess(PROC_NAME);
