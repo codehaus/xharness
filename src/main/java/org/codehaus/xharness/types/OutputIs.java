@@ -65,7 +65,7 @@ public class OutputIs extends AbstractOutput {
             return ret;
         } else if (iter.hasNext()) {
             LogLine line = (LogLine)iter.next();
-            if (!iter.hasNext() && getText().equals(line.getText())) {
+            if (!iter.hasNext() && getText().equals(line.getText(filterANSI()))) {
                 log(logPrefix() + "is \"" + getText() + "\"", Project.MSG_VERBOSE);
                 return true;
             }

@@ -17,10 +17,13 @@
 
 package org.codehaus.xharness.log;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A LogLine is an entry in a LineBuffer. It consists of a line of text (String)
- * and an associated log level/priority. 
+ * and an associated log level/priority. An ANSI code filter is provided to 
+ * allow for reading of text without ANSI control characters.
  * 
  * @author Gregor Heine
  */
@@ -46,6 +49,27 @@ public class LogLine {
      */
     public String getText() {
         return this.textLine;
+    }
+
+    /**
+     * Returns the text of the log line excluding ANSI 
+     * escape code if true, returns unfiltered text
+     * otherwise.
+     *
+     * @param ignoreANSI retrieve all text excluding ANSI code.
+     * @return The text String with or without ANSI codes.
+     */
+    public String getText(boolean ignoreANSI) {
+        if (ignoreANSI) {
+            String txt = getText();
+
+            Pattern pattern = Pattern.compile("\\u001B\\[\\d+m");
+            Matcher matcher = pattern.matcher(txt);
+            txt = matcher.replaceAll("");
+
+            return txt; //Stripped line.
+        }
+        return getText();
     }
     
     /**

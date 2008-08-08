@@ -102,8 +102,7 @@ public class OutputContainsTest extends TestCase {
         tlCtrl.verify();
         prCtrl.verify();
     }
-    
-    
+
     public void testEvalTrue() throws Exception {
         LineBuffer buffer = new LineBuffer(LogPriority.STDERR);
         buffer.logLine("All good things must come to an end");
@@ -128,6 +127,7 @@ public class OutputContainsTest extends TestCase {
         condition.setProject(new Project());
         condition.addText("Scottie");
         condition.setTask("foo");
+        condition.setIgnoreANSI(true);
         Stream stream = new Stream();
         stream.setValue("stderr");
         condition.setStream(stream);
@@ -147,7 +147,52 @@ public class OutputContainsTest extends TestCase {
         tlCtrl.verify();
         prCtrl.verify();
     }
-    
+
+    public void testFilterANSIEvalTrue() throws Exception {
+        LineBuffer buffer = new LineBuffer(LogPriority.STDERR);
+        buffer.logLine("All good things must come to an end");
+        buffer.logLine("Beam me up, \\u001B\\[1mScottie\\u001B\\[1m");
+
+        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
+        Project project = (Project)prCtrl.getMock();
+
+        MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
+        XharnessTask task = (XharnessTask)xhCtrl.getMock();
+        task.getProject();
+        xhCtrl.setReturnValue(project);
+
+        MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
+        TaskLogger logger = (TaskLogger)tlCtrl.getMock();
+        logger.getLineBuffer();
+        tlCtrl.setReturnValue(buffer);
+        logger.getFullName();
+        tlCtrl.setReturnValue("foo/bar");
+
+        OutputContains condition = new OutputContains();
+        condition.setProject(new Project());
+        condition.addText("Scottie");
+        condition.setTask("foo");
+        condition.setIgnoreANSI(true);
+        Stream stream = new Stream();
+        stream.setValue("stderr");
+        condition.setStream(stream);
+
+        xhCtrl.replay();
+        tlCtrl.replay();
+        prCtrl.replay();
+        TaskRegistry registry = null;
+        try {
+            registry = TaskRegistry.init(task);
+            registry.setCurrentTest(new MockTestLogger(registry, logger));
+            assertTrue("Condition evaled incorrectly", condition.eval());
+        } finally {
+            MockTaskRegistry.reset();
+        }
+        xhCtrl.verify();
+        tlCtrl.verify();
+        prCtrl.verify();
+    }    
+
     private static class MockTestLogger extends TestLogger {
         private TaskLogger taskLogger;
         

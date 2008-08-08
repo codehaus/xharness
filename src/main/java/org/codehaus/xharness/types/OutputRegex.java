@@ -34,7 +34,7 @@ public class OutputRegex extends OutputIs {
         Iterator iter = getOutputIterator();
         while (iter.hasNext()) {
             LogLine line = (LogLine)iter.next();
-            if (pattern.matcher(line.getText()).find()) {
+            if (pattern.matcher(line.getText(filterANSI())).find()) {
                 log(logPrefix() + "matches pattern \"" + getText() + "\"", Project.MSG_VERBOSE);
                 return true;
             }

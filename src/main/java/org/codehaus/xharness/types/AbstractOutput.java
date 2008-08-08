@@ -33,6 +33,20 @@ public abstract class AbstractOutput extends ProjectComponent implements Conditi
     private Stream stream = null;
     private TaskLogger taskLogger = null;
     private String taskName;
+    private boolean ignoreANSI = false;
+
+    /**
+     * Set Ignore ANSI control characters in stream text.
+     *
+     * @param ignoreansi ignore ansi control characters.
+     */
+    public void setIgnoreANSI(boolean ignoreansi) {
+        ignoreANSI = ignoreansi;
+    }
+
+    public boolean filterANSI() {
+        return ignoreANSI;
+    }
     
     /**
      * Set the task to check.

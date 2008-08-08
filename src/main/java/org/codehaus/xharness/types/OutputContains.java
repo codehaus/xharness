@@ -25,6 +25,7 @@ import org.apache.tools.ant.Project;
 import org.codehaus.xharness.log.LogLine;
 
 public class OutputContains extends OutputIs {
+
     public boolean eval() throws BuildException {
         if (getText() == null || "".equals(getText())) {
             return true;
@@ -32,7 +33,7 @@ public class OutputContains extends OutputIs {
         Iterator iter = getOutputIterator();
         while (iter.hasNext()) {
             LogLine line = (LogLine)iter.next();
-            if (line.getText().indexOf(getText()) >= 0) {
+            if (line.getText(filterANSI()).indexOf(getText()) >= 0) {
                 log(logPrefix() + "contains \"" + getText() + "\"", Project.MSG_VERBOSE);
                 return true;
             }
