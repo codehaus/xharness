@@ -267,4 +267,11 @@ print S "ok\n";
 print DEBUG "$$: closing socket\n" if $debug;
 close S;
 print DEBUG "$$: exiting with status $exit_status\n" if $debug;
+
+# exit codes corresponding to signals 2(130), 15(143) and a strange exit code 208 are OK
+#
+if ($exit_status eq 130 || $exit_status eq 143 || $exit_status eq 208)
+{
+    $exit_status = 0;
+}
 exit $exit_status;
