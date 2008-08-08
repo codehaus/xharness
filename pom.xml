@@ -148,7 +148,7 @@
                 <artifactId>maven-release-plugin</artifactId>
                 <configuration>
                     <tagBase>https://svn.codehaus.org/xharness/tags/</tagBase>
-                    <preparationGoals>clean install source:jar javadoc:jar assembly:assembly cobertura:cobertura</preparationGoals>
+                    <preparationGoals>source:jar javadoc:jar cobertura:cobertura</preparationGoals>
                 </configuration>
             </plugin>
         </plugins>
