@@ -171,7 +171,12 @@ public class LineBufferTest extends TestCase {
         assertEquals("Wrong priority", 2, line.getPriority());
         assertEquals("Wrong element", "spam", line.getText());
 
-        iter.remove();
+        try {
+            iter.remove();
+            fail("Expected UnsupportedOperationException");
+        } catch (UnsupportedOperationException uoe) {
+        	// pass
+        }
 
         assertTrue("Out of elements", iter.hasNext());
         line = (LogLine)iter.next();
@@ -186,6 +191,11 @@ public class LineBufferTest extends TestCase {
         line = (LogLine)iter.next();
         assertEquals("Wrong priority", 1, line.getPriority());
         assertEquals("Wrong element", "foo", line.getText());
+
+        assertTrue("Out of elements", iter.hasNext());
+        line = (LogLine)iter.next();
+        assertEquals("Wrong priority", 2, line.getPriority());
+        assertEquals("Wrong element", "spam", line.getText());
 
         assertTrue("Out of elements", iter.hasNext());
         line = (LogLine)iter.next();

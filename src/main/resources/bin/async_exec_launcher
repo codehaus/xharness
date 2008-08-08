@@ -272,6 +272,7 @@ print DEBUG "$$: exiting with status $exit_status\n" if $debug;
 #
 if ($exit_status eq 130 || $exit_status eq 143 || $exit_status eq 208)
 {
+    print DEBUG "$$: changing received exit status $exit_status to 0\n" if $debug;
     $exit_status = 0;
 }
 exit $exit_status;

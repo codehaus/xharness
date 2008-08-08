@@ -18,6 +18,7 @@
 package org.codehaus.xharness.log;
 
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.ListIterator;
@@ -271,7 +272,9 @@ public class LineBuffer {
     
     /**
      * Get an Iterator over {@link org.codehaus.xharness.log.LogLine} instances that 
-     * represent all lines in this buffer. 
+     * represent all lines in this buffer. This Iterator operates on a snapshot of data
+     * to avoid ConcurrentModificationException, using a copy-on-write technique. Thus it
+     * does not support remove() operation
      * 
      * @see org.codehaus.xharness.log.LogLine
      * @return An Iterator over {@link org.codehaus.xharness.log.LogLine} instances. 
@@ -282,7 +285,9 @@ public class LineBuffer {
     
     /**
      * Get an Iterator over {@link org.codehaus.xharness.log.LogLine} instances that 
-     * represent all lines of the given priority in this buffer. 
+     * represent all lines of the given priority in this buffer. This Iterator operates on
+     * a snapshot of data to avoid ConcurrentModificationException, using a copy-on-write 
+     * technique. Thus it does not support remove() operation
      * 
      * @see org.codehaus.xharness.log.LogLine
      * @param priority The priority of the lines in the returned Iterator.
@@ -294,7 +299,9 @@ public class LineBuffer {
     
     /**
      * Get an Iterator over {@link org.codehaus.xharness.log.LogLine} instances that 
-     * represent all lines of the given priority in this buffer. 
+     * represent all lines of the given priority in this buffer. This Iterator operates on
+     * a snapshot of data to avoid ConcurrentModificationException, using a copy-on-write
+     * technique. Thus it does not support remove() operation 
      * 
      * @see org.codehaus.xharness.log.LogLine
      * @param minPrio The minimum priority of the lines in the returned Iterator.
@@ -324,7 +331,9 @@ public class LineBuffer {
         public LineIterator(int minPrio, int maxPrio) {
             minPriority = minPrio;
             maxPriority = maxPrio;
-            iter = log.iterator();
+            synchronized (log) {
+                iter = Arrays.asList(log.toArray()).iterator();
+            }
         }
         
         public boolean hasNext() {
@@ -344,7 +353,7 @@ public class LineBuffer {
         }
         
         public void remove() {
-            iter.remove();
+            throw new UnsupportedOperationException();
         }
     }
 }
