@@ -1,7 +1,7 @@
 09/02/2008: XHarness 1.0-SNAPSHOT (To be included in 1.0-beta3)
 
     New features:
-
+    * XHARNESS-3: Improve ScriptLauncher to have default 10 backlog instead of Zero.
 
     Bug fixes:
     * XHARNESS-5: XhExecTaskTest failing on Mac OSX.
