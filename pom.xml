@@ -345,5 +345,17 @@
         <name>The Codehaus</name>
         <url>http://www.codehaus.org/</url>
     </organization>
+
+    <developers>
+        <developer>
+            <id>greheine</id>
+            <name>Gregor Heine</name>
+            <email>gregor_DOT_heine_AT_gmail_DOT_com</email>
+            <roles>
+                <role>Despot</role>
+                <role>Developer</role>
+            </roles>
+        </developer>
+    </developers>
 </project>
 

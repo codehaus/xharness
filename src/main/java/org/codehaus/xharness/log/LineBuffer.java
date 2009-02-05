@@ -21,6 +21,7 @@ package org.codehaus.xharness.log;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.ListIterator;
 import java.util.StringTokenizer;
 
@@ -32,7 +33,7 @@ import java.util.StringTokenizer;
  */
 public class LineBuffer {
     
-    private LinkedList log;
+    private List log;
     private int defaultPriority;
     private int minPriority = Integer.MAX_VALUE;
     private int maxPriority = Integer.MIN_VALUE;
@@ -97,7 +98,7 @@ public class LineBuffer {
             StringTokenizer tok = tokenize(text);
             synchronized (log) {
                 while (tok.hasMoreTokens()) {
-                    log.addLast(new LogLine(priority, tok.nextToken()));
+                    log.add(new LogLine(priority, tok.nextToken()));
                 }
                 if (priority < minPriority) {
                     minPriority = priority;
@@ -136,7 +137,7 @@ public class LineBuffer {
                         }
                     }
                     if (!found) {
-                        log.addLast(new LogLine(prio2, newLine));
+                        log.add(new LogLine(prio2, newLine));
                     }
                 }
                 if (prio2 < minPriority) {

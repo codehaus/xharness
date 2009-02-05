@@ -1,17 +1,19 @@
-09/08/2008: XHarness 1.0-SNAPSHOT (To be included in 1.0-beta3)
-
-    New features:
+05/02/2009: XHarness 1.0-beta3
 
     Bug fixes:
-    * XHARNESS-5: XhExecTaskTest failing on Mac OSX.
+    * Improve Script Launcher Server Socket to have default 10 backlog instead of Zero (XHARNESS-3)
+    * XhExecTaskTest failing on Mac OSX (XHARNESS-5)
+    * NullPointerException in TestGroupTask.execute (XHARNESS-9)
 
 
 08/08/2008: XHarness 1.0-beta2
 
     New features:
-    * Add attribute to output matching to ignore ANSI markups. Default behaviour is ignoreansi=false, when true output matching will ignore ANSI markups to text.
+    * Add attribute to output matching to ignore ANSI markups. Default behaviour is 
+      ignoreansi=false, when true output matching will ignore ANSI markups to text (XHARNESS-1)
 
     Bug fixes:
     * Fixed KillTask failing despite failonerror=false when process task is not registered
-    * Fixed unix launcher to ignore exit codes corresponding to signals 2(130), 15(143) and a strange exit code 208
+    * Fixed unix launcher to ignore exit codes corresponding to signals 2(130), 15(143) and a 
+      strange exit code 208
     * Fixed ConcurrentModificationException in LineBuffer
