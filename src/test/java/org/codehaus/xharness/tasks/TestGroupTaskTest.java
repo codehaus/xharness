@@ -499,6 +499,37 @@ public class TestGroupTaskTest extends TestCase {
         group.execute();
         ukeCtrl.verify();
     }
+
+    public void testExecuteErrorNullTask() throws Exception {
+        
+        // For XHARNESS-9
+        
+        TestGroupTask group = new TestGroupTask();
+        group.setProject(project);
+        
+        MockControl ukeCtrl = MockClassControl.createControl(UnknownElement.class);
+        UnknownElement mockUke = (UnknownElement)ukeCtrl.getMock();
+        mockUke.getProject();
+        ukeCtrl.setReturnValue(project, 2);
+        mockUke.maybeConfigure();
+        mockUke.getLocation();
+        ukeCtrl.setReturnValue(new Location(""));
+        mockUke.getTask();
+        ukeCtrl.setReturnValue(null);
+        mockUke.execute();
+        ukeCtrl.setThrowable(new BuildException());
+
+        ukeCtrl.replay();
+        group.addTask(mockUke);
+        try {
+            group.execute();
+            fail("Expected BuildException");
+        } catch (BuildException be) {
+            assertEquals("Wrong message", "Task <unknown> failed", be.getMessage());
+        }
+        ukeCtrl.verify();        
+    }
+    
     
     public void testSimilar() throws Exception {
         RuntimeConfigurable rc1 = new RuntimeConfigurable(null, "mocktask1");

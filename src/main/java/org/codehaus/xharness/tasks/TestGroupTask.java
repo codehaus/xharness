@@ -175,7 +175,10 @@ public class TestGroupTask extends Task implements TaskContainer {
                             error = new BuildException("Testgroup " + name + " failed", ex);
                         }
                     } else {
-                        String name = currentTask.getTaskName();
+                        String name = "<unknown>";
+                        if (currentTask != null) {
+                            name = currentTask.getTaskName();
+                        }
                         error = new BuildException("Task " + name + " failed", ex);
                     }
                     if (failOnError()) {
