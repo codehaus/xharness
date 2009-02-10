@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
@@ -30,16 +31,15 @@ import java.net.URLConnection;
 import java.util.jar.JarFile;
 
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.types.Reference;
 import org.apache.tools.ant.types.Resource;
 import org.apache.tools.ant.util.FileUtils;
 
 /**
  * Exposes a URL as a Resource.
  * 
- * NOTE: This class is a copy of org.apache.tools.ant.types.resources.URLResource in Ant 1.7.1
- * It is needed for compatibility between XHarness and both Ant 1.6 and Ant 1.7. 
+ * NOTE: This class is a slightly modified copy of org.apache.tools.ant.types.resources.URLResource
+ * in Ant 1.7.1. It's been ported back to compile and work with Ant 1.6.x.
+ * It is needed for compatibility between XHarness and Ant 1.7. 
  * For more info see org.codehaus.xharness.tasks.XhAggregateTransformer.
  * 
  * @see org.codehaus.xharness.tasks.XhAggregateTransformer
@@ -49,7 +49,8 @@ import org.apache.tools.ant.util.FileUtils;
 public class URLResource extends Resource {
     private static final FileUtils FILE_UTILS = FileUtils.getFileUtils();
     private static final int NULL_URL
-        = Resource.getMagicNumber("null URL".getBytes());
+        = getMagicNumber("null URL".getBytes());
+    private static final int MAGIC = getMagicNumber("Resource".getBytes());
 
     private URL url;
     private URLConnection conn;
@@ -90,7 +91,6 @@ public class URLResource extends Resource {
      * @param u the URL to expose.
      */
     public synchronized void setURL(URL u) {
-        checkAttributesAllowed();
         url = u;
     }
 
@@ -111,22 +111,7 @@ public class URLResource extends Resource {
      * @return a URL object.
      */
     public synchronized URL getURL() {
-        if (isReference()) {
-            return ((URLResource) getCheckedRef()).getURL();
-        }
         return url;
-    }
-
-    /**
-     * Overrides the super version.
-     * @param r the Reference to set.
-     */
-    public synchronized void setRefid(Reference r) {
-        //not using the accessor in this case to avoid side effects
-        if (url != null) {
-            throw tooManyAttributes();
-        }
-        super.setRefid(r);
     }
 
     /**
@@ -135,9 +120,6 @@ public class URLResource extends Resource {
      * @return the name of this resource.
      */
     public synchronized String getName() {
-        if (isReference()) {
-            return ((Resource) getCheckedRef()).getName();
-        }
         String name = getURL().getFile();
         return "".equals(name) ? name : name.substring(1);
     }
@@ -147,8 +129,7 @@ public class URLResource extends Resource {
      * @return a String representation of this URLResource.
      */
     public synchronized String toString() {
-        return isReference()
-            ? getCheckedRef().toString() : String.valueOf(getURL());
+        return String.valueOf(getURL());
     }
 
     /**
@@ -156,9 +137,6 @@ public class URLResource extends Resource {
      * @return true if this resource exists.
      */
     public synchronized boolean isExists() {
-        if (isReference()) {
-            return ((Resource) getCheckedRef()).isExists();
-        }
         return isExists(false);
     }
 
@@ -204,9 +182,6 @@ public class URLResource extends Resource {
      * of {@link java.io.File File}.
      */
     public synchronized long getLastModified() {
-        if (isReference()) {
-            return ((Resource) getCheckedRef()).getLastModified();
-        }
         if (!isExists(false)) {
             return 0L;
         }
@@ -218,9 +193,7 @@ public class URLResource extends Resource {
      * @return boolean whether the resource is a directory.
      */
     public synchronized boolean isDirectory() {
-        return isReference()
-            ? ((Resource) getCheckedRef()).isDirectory()
-            : getName().endsWith("/");
+        return getName().endsWith("/");
     }
 
     /**
@@ -229,9 +202,6 @@ public class URLResource extends Resource {
      *         compatibility with java.io.File), or UNKNOWN_SIZE if not known.
      */
     public synchronized long getSize() {
-        if (isReference()) {
-            return ((Resource) getCheckedRef()).getSize();
-        }
         if (!isExists(false)) {
             return 0L;
         }
@@ -254,9 +224,6 @@ public class URLResource extends Resource {
         if (this == another) {
             return true;
         }
-        if (isReference()) {
-            return getCheckedRef().equals(another);
-        }
         if (!(another.getClass().equals(getClass()))) {
             return false;
         }
@@ -271,9 +238,6 @@ public class URLResource extends Resource {
      * @return hash code as int.
      */
     public synchronized int hashCode() {
-        if (isReference()) {
-            return getCheckedRef().hashCode();
-        }
         return MAGIC * ((getURL() == null) ? NULL_URL : getURL().hashCode());
     }
 
@@ -286,9 +250,6 @@ public class URLResource extends Resource {
      *         supported for this Resource type.
      */
     public synchronized InputStream getInputStream() throws IOException {
-        if (isReference()) {
-            return ((Resource) getCheckedRef()).getInputStream();
-        }
         connect();
         try {
             return conn.getInputStream();
@@ -307,9 +268,6 @@ public class URLResource extends Resource {
      * @throws IOException if the URL cannot be opened.
      */
     public synchronized OutputStream getOutputStream() throws IOException {
-        if (isReference()) {
-            return ((Resource) getCheckedRef()).getOutputStream();
-        }
         connect();
         try {
             return conn.getOutputStream();
@@ -332,11 +290,15 @@ public class URLResource extends Resource {
                 conn = u.openConnection();
                 conn.connect();
             } catch (IOException e) {
-                log(e.toString(), Project.MSG_ERR);
+                e.printStackTrace();
                 conn = null;
                 throw e;
             }
         }
+    }
+
+    protected static int getMagicNumber(byte[] seed) {
+        return new BigInteger(seed).intValue();
     }
 
     /**
