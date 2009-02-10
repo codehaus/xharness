@@ -134,7 +134,7 @@ public class ResultFormatter implements XMLConstants {
             addAttribute(ATTR_PARENT, logger.getParentName());
         }
         
-        addAttribute(ATTR_NAME, logger.getName());
+        addAttribute(ATTR_TASK_NAME, logger.getName());
         addAttribute(ATTR_FULL_NAME, logger.getFullName());
         addAttribute(ATTR_TIME, Float.toString((float)time / (float)1000.0));
 

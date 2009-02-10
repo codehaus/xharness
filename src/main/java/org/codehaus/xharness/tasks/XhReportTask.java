@@ -18,13 +18,7 @@
 package org.codehaus.xharness.tasks;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.URL;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -32,13 +26,10 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
-import org.apache.tools.ant.Task;
+import org.apache.tools.ant.taskdefs.optional.junit.AggregateTransformer;
 import org.apache.tools.ant.taskdefs.optional.junit.DOMUtil;
-import org.apache.tools.ant.types.FileSet;
-import org.apache.tools.ant.util.DOMElementWriter;
-import org.apache.tools.ant.util.JAXPUtils;
+import org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator;
 import org.apache.tools.ant.util.StringUtils;
 
 import org.codehaus.xharness.log.XMLConstants;
@@ -65,24 +56,7 @@ import org.xml.sax.SAXException;
  * @author <a href="mailto:sbailliez@imediation.com">Stephane Bailliez</a>
  * @author Gregor Heine
  */
-public class XhReportTask extends Task implements XMLConstants {
-    /** The default directory: <tt>&#046;</tt>. It is resolved from the project directory */
-    public static final String DEFAULT_DIR = ".";
-
-    /** the default file name: <tt>TESTS-TestSuites.xml</tt>. */
-    public static final String DEFAULT_FILENAME = "TESTS-TestSuites.xml";
-
-    /** the list of all filesets, that should contains the xml to aggregate. */
-    protected Vector filesets = new Vector();
-
-    /** the name of the result file. */
-    protected String toFile;
-
-    /** the directory to write the file to. */
-    protected File toDir;
-
-    protected Vector transformers = new Vector();
-
+public class XhReportTask extends XMLResultAggregator implements XMLConstants {
     private boolean failOnError = false;
     private Vector failedTests = new Vector();
 
@@ -93,30 +67,9 @@ public class XhReportTask extends Task implements XMLConstants {
      * @return The transformer.
      */
     public AggregateTransformer createReport() {
-        AggregateTransformer transformer = new AggregateTransformer(this);
+        AggregateTransformer transformer = new XhAggregateTransformer(this);
         transformers.addElement(transformer);
         return transformer;
-    }
-
-    /**
-     * Set the name of the aggregegated results file. It must be relative
-     * from the <tt>todir</tt> attribute. If not set it will use {@link #DEFAULT_FILENAME}
-     * @param  value   the name of the file.
-     * @see #setTodir(File)
-     */
-    public void setTofile(String value) {
-        toFile = value;
-    }
-
-    /**
-     * Set the destination directory where the results should be written. If not
-     * set if will use {@link #DEFAULT_DIR}. When given a relative directory
-     * it will resolve it from the project directory.
-     * @param value    the directory where to write the results, absolute or
-     * relative.
-     */
-    public void setTodir(File value) {
-        toDir = value;
     }
 
     /**
@@ -128,39 +81,14 @@ public class XhReportTask extends Task implements XMLConstants {
     }
 
     /**
-     * Add a new fileset containing the XML results to aggregate.
-     * 
-     * @param fs The new fileset of xml results.
-     */
-    public void addFileSet(FileSet fs) {
-        filesets.addElement(fs);
-    }
-
-    /**
      * Aggregate all testsuites into a single document and write it to the
      * specified directory and file.
      * @throws  BuildException  thrown if there is a serious error while writing
      *          the document.
      */
     public void execute() throws BuildException {
-        Element rootElement = createDocument();
-        File destFile = getDestinationFile();
-        // write the document
-        try {
-            writeDOMTree(rootElement.getOwnerDocument(), destFile);
-        } catch (IOException e) {
-            throw new BuildException("Unable to write test aggregate to '" + destFile + "'", e);
-        }
-        // apply transformation
-        Enumeration enu = transformers.elements();
-        while (enu.hasMoreElements()) {
-            AggregateTransformer transformer =
-                (AggregateTransformer)enu.nextElement();
-            transformer.setXmlDocument(rootElement.getOwnerDocument());
-            transformer.transform();
-        }
+        super.execute();
         if (failedTests.size() > 0) {
-
             log("The following tests failed:", Project.MSG_WARN);
             Enumeration e = failedTests.elements();
             while (e.hasMoreElements()) {
@@ -169,83 +97,15 @@ public class XhReportTask extends Task implements XMLConstants {
             if (failOnError) {
                 throw new BuildException("Failed tests detected!");
             }
-
         }
     }
-
-    /**
-     * Get the full destination file where to write the result. It is made of
-     * the <tt>todir</tt> and <tt>tofile</tt> attributes.
-     * @return the destination file where should be written the result file.
-     */
-    protected File getDestinationFile() {
-        if (toFile == null) {
-            toFile = DEFAULT_FILENAME;
-        }
-        if (toDir == null) {
-            toDir = getProject().resolveFile(DEFAULT_DIR);
-        }
-        return new File(toDir, toFile);
+    
+    public File getDestinationFile() {
+        return super.getDestinationFile();
     }
 
-    /**
-     * Get all <code>.xml</code> files in the fileset.
-     *
-     * @return all files in the fileset that end with a '.xml'.
-     */
     protected File[] getFiles() {
-        Vector v = new Vector();
-        final int size = filesets.size();
-        for (int i = 0; i < size; i++) {
-            FileSet fs = (FileSet)filesets.elementAt(i);
-            DirectoryScanner ds = fs.getDirectoryScanner(getProject());
-            ds.scan();
-            String[] f = ds.getIncludedFiles();
-            for (int j = 0; j < f.length; j++) {
-                String pathname = f[j];
-                if (pathname.endsWith(".xml")) {
-                    File file = new File(ds.getBasedir(), pathname);
-                    file = getProject().resolveFile(file.getPath());
-                    v.addElement(file);
-                }
-            }
-        }
-
-        File[] files = new File[v.size()];
-        v.copyInto(files);
-        return files;
-    }
-
-    //----- from now, the methods are all related to DOM tree manipulation
-
-    /**
-     * Write the DOM tree to a file.
-     * @param doc the XML document to dump to disk.
-     * @param file the filename to write the document to. Should obviouslly be a .xml file.
-     * @throws IOException thrown if there is an error while writing the content.
-     */
-    protected void writeDOMTree(Document doc, File file) throws IOException {
-        OutputStream out = null;
-        PrintWriter wri = null;
-        try {
-            out = new FileOutputStream(file);
-            wri = new PrintWriter(new OutputStreamWriter(out, "UTF8"));
-            wri.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n");
-            (new DOMElementWriter()).write(doc.getDocumentElement(), wri, 0, "  ");
-            wri.flush();
-            // writers do not throw exceptions, so check for them.
-            if (wri.checkError()) {
-                throw new IOException("Error while writing DOM content");
-            }
-        } finally {
-            if (wri != null) {
-                wri.close();
-                out = null;
-            }
-            if (out != null) {
-                out.close();
-            }
-        }
+        return super.getFiles();
     }
 
     /**
@@ -277,7 +137,7 @@ public class XhReportTask extends Task implements XMLConstants {
                         || "failed".equals(result)
                         || "invalid".equals(result)) {
                     failedTests.add(elem.getAttribute(ATTR_PARENT)
-                            + "/" + elem.getAttribute(ATTR_NAME));
+                            + "/" + elem.getAttribute(ATTR_TASK_NAME));
                 }
             } catch (SAXException e) {
                 // a testcase might have failed and write a zero-length document,
@@ -305,40 +165,6 @@ public class XhReportTask extends Task implements XMLConstants {
             return DocumentBuilderFactory.newInstance().newDocumentBuilder();
         } catch (Exception exc) {
             throw new ExceptionInInitializerError(exc);
-        }
-    }
-
-    /**
-     * Subclass of {@link org.apache.tools.ant.taskdefs.optional.junit.AggregateTransformer}
-     * that loads the XHarness XSLT stylesheets instead of the junit ones.
-     *
-     * @author  Gregor Heine
-     */
-    class AggregateTransformer 
-        extends org.apache.tools.ant.taskdefs.optional.junit.AggregateTransformer {
-        
-        public AggregateTransformer(Task task) {
-            super(task);
-        }
-
-        protected String getStylesheetSystemId() throws IOException {
-            String xslname = "frames.xsl";
-
-            if (styleDir == null) {
-                URL url = getClass().getResource("/org/codehaus/xharness/xsl/" + xslname);
-
-                if (url == null) {
-                    throw new FileNotFoundException(
-                            "Could not find jar resource /org/codehaus/xharness/xsl/" + xslname);
-                }
-                return url.toExternalForm();
-            }
-            File file = new File(styleDir, xslname);
-
-            if (!file.exists()) {
-                throw new FileNotFoundException("Could not find file '" + file + "'");
-            }
-            return JAXPUtils.getSystemId(file);
         }
     }
 }

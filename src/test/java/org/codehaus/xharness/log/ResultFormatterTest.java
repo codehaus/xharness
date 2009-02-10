@@ -86,7 +86,7 @@ public class ResultFormatterTest extends TestCase {
         assertEquals("Wrong order id", "1", elem.getAttribute(XMLConstants.ATTR_ORDERID));
         assertEquals("Wrong time", "12.345", elem.getAttribute(XMLConstants.ATTR_TIME));
         assertEquals("Wrong parent", "foo", elem.getAttribute(XMLConstants.ATTR_PARENT));
-        assertEquals("Wrong name", "bar", elem.getAttribute(XMLConstants.ATTR_NAME));
+        assertEquals("Wrong name", "bar", elem.getAttribute(XMLConstants.ATTR_TASK_NAME));
         assertEquals("Wrong fullname", "", elem.getAttribute(XMLConstants.ATTR_FULL_NAME));
         assertEquals("Wrong reference", "spam", elem.getAttribute(XMLConstants.ATTR_REFERENCE));
         assertEquals("Wrong ret val", "", elem.getAttribute(XMLConstants.ATTR_RETVAL));
@@ -147,7 +147,7 @@ public class ResultFormatterTest extends TestCase {
         assertEquals("Wrong order id", "1", elem.getAttribute(XMLConstants.ATTR_ORDERID));
         assertEquals("Wrong time", "12.345", elem.getAttribute(XMLConstants.ATTR_TIME));
         assertEquals("Wrong parent", "bar", elem.getAttribute(XMLConstants.ATTR_PARENT));
-        assertEquals("Wrong name", "spam", elem.getAttribute(XMLConstants.ATTR_NAME));
+        assertEquals("Wrong name", "spam", elem.getAttribute(XMLConstants.ATTR_TASK_NAME));
         assertEquals("Wrong fullname", "foo/bar", elem.getAttribute(XMLConstants.ATTR_FULL_NAME));
         assertEquals("Wrong reference", "eggs", elem.getAttribute(XMLConstants.ATTR_REFERENCE));
         elem = getDoc("TASK_foo_bar_1.xml");
@@ -155,7 +155,7 @@ public class ResultFormatterTest extends TestCase {
         assertEquals("Wrong order id", "2", elem.getAttribute(XMLConstants.ATTR_ORDERID));
         assertEquals("Wrong time", "54.321", elem.getAttribute(XMLConstants.ATTR_TIME));
         assertEquals("Wrong parent", "c", elem.getAttribute(XMLConstants.ATTR_PARENT));
-        assertEquals("Wrong name", "d", elem.getAttribute(XMLConstants.ATTR_NAME));
+        assertEquals("Wrong name", "d", elem.getAttribute(XMLConstants.ATTR_TASK_NAME));
         assertEquals("Wrong fullname", "foo/bar", elem.getAttribute(XMLConstants.ATTR_FULL_NAME));
         assertEquals("Wrong reference", "e", elem.getAttribute(XMLConstants.ATTR_REFERENCE));
 
@@ -197,7 +197,7 @@ public class ResultFormatterTest extends TestCase {
         Element elem = getDoc("TASK_foo_bar.xml");
         verifyResult(elem, "task", "Warning");
         assertEquals("Wrong parent", "foo", elem.getAttribute(XMLConstants.ATTR_PARENT));
-        assertEquals("Wrong name", "bar", elem.getAttribute(XMLConstants.ATTR_NAME));
+        assertEquals("Wrong name", "bar", elem.getAttribute(XMLConstants.ATTR_TASK_NAME));
         assertEquals("Wrong fullname", "_foo/bar", elem.getAttribute(XMLConstants.ATTR_FULL_NAME));
         assertEquals("Wrong reference", "", elem.getAttribute(XMLConstants.ATTR_REFERENCE));
         assertEquals("Wrong ret val", "0", elem.getAttribute(XMLConstants.ATTR_RETVAL));
@@ -391,7 +391,7 @@ public class ResultFormatterTest extends TestCase {
         Element elem = getDoc("XHARNESS_foo.xml");
         verifyResult(elem, "xharness", "Passed");
         assertEquals("Wrong parent", "", elem.getAttribute(XMLConstants.ATTR_PARENT));
-        assertEquals("Wrong name", "bar", elem.getAttribute(XMLConstants.ATTR_NAME));
+        assertEquals("Wrong name", "bar", elem.getAttribute(XMLConstants.ATTR_TASK_NAME));
         assertEquals("Wrong fullname", "foo", elem.getAttribute(XMLConstants.ATTR_FULL_NAME));
         assertEquals("Wrong reference", "spam", elem.getAttribute(XMLConstants.ATTR_REFERENCE));
         tlCtrl.verify();

@@ -1,16 +1,15 @@
 package org.codehaus.xharness.tasks;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.DirectoryScanner;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
+import org.apache.tools.ant.taskdefs.optional.junit.AggregateTransformer;
 import org.apache.tools.ant.types.FileSet;
-import org.apache.tools.ant.util.JAXPUtils;
 
-import org.codehaus.xharness.tasks.XhReportTask.AggregateTransformer;
+import org.codehaus.xharness.tasks.XhAggregateTransformer;
 import org.codehaus.xharness.testutil.TempDir;
 
 import org.easymock.MockControl;
@@ -106,40 +105,23 @@ public class XhReportTaskTest extends TestCase {
         XhReportTask task = new XhReportTask();
         
         AggregateTransformer transformer = task.createReport();
-        assertTrue("Null Transformer", transformer != null);
-        String ssi = transformer.getStylesheetSystemId();
+        assertTrue(transformer instanceof XhAggregateTransformer);
+        String ssi = ((XhAggregateTransformer)transformer).getStylesheetSystemId();
         assertTrue("Wrong stylesheet", ssi.endsWith("/org/codehaus/xharness/xsl/frames.xsl"));
     }
     
-    public void testCreateReportWrongStyledir() throws Exception {
+    public void testSetStyledir() throws Exception {
         XhReportTask task = new XhReportTask();
-        
+        MockControl ctrl = MockClassControl.createControl(Project.class);
+        Project project = (Project)ctrl.getMock();
+        project.log(task, "This task doesn't support the styledir attribute. It is ignored.", Project.MSG_WARN);
+        ctrl.getMock();
+        task.setProject(project);
         AggregateTransformer transformer = task.createReport();
-        assertTrue("Null Transformer", transformer != null);
+        assertTrue(transformer instanceof XhAggregateTransformer);
+        ctrl.replay();
         transformer.setStyledir(new File("."));
-        try {
-            transformer.getStylesheetSystemId();
-            fail("Expected FileNotFoundException");
-        } catch (FileNotFoundException fnfe) {
-            // ignore
-        }
-    }
-    
-    public void testCreateReportStyledirOK() throws Exception {
-        XhReportTask task = new XhReportTask();
-        
-        AggregateTransformer transformer = task.createReport();
-        assertTrue("Null Transformer", transformer != null);
-        transformer.setStyledir(tempDir);
-        File f = new File(tempDir, "frames.xsl");
-        try {
-            f.createNewFile();
-            assertEquals("Wrong stylesheet ", 
-                         JAXPUtils.getSystemId(f), 
-                         transformer.getStylesheetSystemId());
-        } finally {
-            f.delete();
-        }
+        ctrl.verify();
     }
     
     public void testGetFiles() throws Exception {

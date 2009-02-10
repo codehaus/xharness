@@ -69,7 +69,7 @@ public interface XMLConstants {
     String ATTR_ORDERID = "orderid";
 
     /** task name attribute. */
-    String ATTR_NAME = "name";
+    String ATTR_TASK_NAME = "name";
 
     /** task full name attribute. */
     String ATTR_FULL_NAME = "fullname";
