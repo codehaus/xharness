@@ -1,9 +1,14 @@
 <?xml version="1.0"?>
 <project name="XHarness tests" default="demo" basedir=".">
 
+    <property name="results.dir" value="./results"/>
+    <property name="latest.results.dir" value="${results.dir}/latest"/>
+    <property name="xml.results.dir" value="${latest.results.dir}/xml"/>
+    <property name="lib.dir" value="./lib"/>
+
     <path id="xharness.lib">
         <fileset dir="..">
-          <include name="lib/xharness*.jar"/>
+          <include name="${lib.dir}/xharness*.jar"/>
         </fileset>
         <fileset dir="..">
           <include name="target/*.jar"/>
@@ -13,37 +18,19 @@
     
     <taskdef resource="xharnesstasks.properties" classpathref="xharness.lib" loaderref="xharness.loader"/>
     <typedef resource="xharnesstypes.properties" classpathref="xharness.lib" loaderref="xharness.loader"/>
-
-    <property name="results.dir" value="./results"/>
-    <property name="xml.results.dir" value="${results.dir}/latest/xml"/>
-    <property name="html.results.dir" value="${results.dir}/latest/html"/>
-
-    <target name="setup.dirs">
-        <mkdir dir="${results.dir}"/>
-        <available file="${results.dir}/latest" type="dir" property="results.dir.exists"/>
-        <antcall target="save.results.dir"/>
-        <mkdir dir="${results.dir}/latest"/>
-        <mkdir dir="${xml.results.dir}"/>
-        <mkdir dir="${html.results.dir}"/>
-    </target>
-
-    <target name="save.results.dir" if="results.dir.exists">
-        <tstamp>
-            <format property="backup.dest.dir" pattern="yyyy-MM-dd-hh-mm-ss" unit="second"/>
-        </tstamp>
-        <move todir="${results.dir}/${backup.dest.dir}">
-            <fileset dir="${results.dir}/latest"/>
-        </move>
-    </target>
-  
-    <target name="build" depends="setup.dirs">
+      
+    <target name="build" depends="setup.classpath,setup.dirs">
         <mkdir dir="classes"/>
-        <javac srcdir="src" destdir="classes" debug="true" includeAntRuntime="false"/>
+        <javac srcdir="src" destdir="classes" debug="true">
+            <classpath refid="test.classpath"/>
+        </javac>
     </target>
 
-    <target name="demo" depends="setup.dirs,build">
+    <target name="demo" depends="setup.classpath,setup.dirs,build">
         <property name="test.pattern" value=""/>
         <property name="test.name" value="XHarnessDemo"/>
+        
+        <mkdir dir="${xml.results.dir}"/>
  
         <xharness name="${test.name}" resultsdir="${xml.results.dir}" basedir="." pattern="${test.pattern}">
             <include file="service_client.xml"/>
@@ -66,6 +53,14 @@
                 <testcase name="ClientToServer">
                     <include file="client_server.xml"/>
                     <ClientServer/>
+                </testcase>
+                <testcase name="JUnit">
+                    <mkdir dir="${latest.results.dir}/junit"/>
+                    <junit showoutput="true">
+                        <test name="test.junit.MyTest" todir="${latest.results.dir}/junit"/>
+                        <classpath refid="test.classpath"/>
+                        <formatter type="xml"/>
+                    </junit>
                 </testcase>
             </testgroup>
       
@@ -95,28 +90,69 @@
                     <ServiceClientServer server.dir="temp/service2"/>
                 </testcase>
             </testgroup>
+            
+            <delete quiet="true" dir="temp"/>
         </xharness>
 
         <antcall target="generate.report"/>
     </target>
   
     <target name="generate.report">
-        <xharnessreport todir="${html.results.dir}" failonerror="true">
+        <mkdir dir="${latest.results.dir}/html"/>
+        
+        <xharnessreport todir="${latest.results.dir}/html" failonerror="true">
             <fileset dir="${xml.results.dir}">
                 <include name="*.xml"/>
             </fileset>
-            <report format="frames" todir="${html.results.dir}"/>
+            <report format="frames" todir="${latest.results.dir}/html"/>
         </xharnessreport>
     </target>
   
     <target name="clean">
         <delete quiet="true" dir="classes"/>
+        <delete quiet="true" dir="temp"/>
     </target>
   
     <target name="results.clean">
         <delete quiet="true" dir="${results.dir}"/>
     </target>
   
-    <target name="dist.clean" depends="clean,results.clean"/>
+    <target name="dist.clean" depends="clean,results.clean">
+        <delete quiet="true" dir="${lib.dir}"/>
+    </target>
 
+    <target name="setup.dirs">
+        <mkdir dir="${results.dir}"/>
+        <available file="${latest.results.dir}" type="dir" property="results.dir.exists"/>
+        <antcall target="save.results.dir"/>
+        <mkdir dir="${latest.results.dir}"/>
+    </target>
+    
+    <target name="setup.classpath">
+        <path id="test.classpath">
+            <pathelement location="${lib.dir}/junit.jar" />
+            <pathelement location="./classes" />
+        </path>
+        
+        <available property="junit.jar.available" file="${lib.dir}/junit.jar" />
+        
+        <antcall target="download.junit.jar" />
+
+    </target>
+    
+    <target name="download.junit.jar" unless="junit.jar.available">
+        <mkdir dir="${lib.dir}"/>
+        <get src="http://repo2.maven.org/maven2/junit/junit/3.8.2/junit-3.8.2.jar" 
+             dest="${lib.dir}/junit.jar" />
+    </target>
+
+    <target name="save.results.dir" if="results.dir.exists">
+        <tstamp>
+            <format property="backup.dest.dir" pattern="yyyy-MM-dd-hh-mm-ss" unit="second"/>
+        </tstamp>
+        <move todir="${results.dir}/${backup.dest.dir}">
+            <fileset dir="${latest.results.dir}"/>
+        </move>
+    </target>
+  
 </project>

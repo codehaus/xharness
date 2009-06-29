@@ -6,6 +6,7 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Reference;
+import org.codehaus.xharness.TestHelper;
 import org.easymock.MockControl;
 import org.easymock.classextension.MockClassControl;
 
@@ -121,8 +122,15 @@ public class EnvSetTest extends TestCase {
     public void testLoadEnvironmentNoDefault() throws Exception {
         MockControl prCtrl = MockClassControl.createControl(Project.class);
         Project project = (Project)prCtrl.getMock();
-        project.resolveFile("/foo/bar");
-        prCtrl.setReturnValue(new File("/foo/bar"));
+        if (TestHelper.isAnt16()) {
+            project.resolveFile("/foo/bar");
+            prCtrl.setReturnValue(new File("./foo/bar"));
+        } else if (TestHelper.isAnt17()) {
+            project.getBaseDir();
+            prCtrl.setReturnValue(new File("."));
+        } else {
+            fail("Unknown/unsupported Ant version " + TestHelper.getAntVersion());
+        }
         
 
         prCtrl.replay();

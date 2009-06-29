@@ -9,6 +9,7 @@ import org.apache.tools.ant.RuntimeConfigurable;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.UnknownElement;
 
+import org.codehaus.xharness.TestHelper;
 import org.codehaus.xharness.exceptions.AssertionWarningException;
 import org.codehaus.xharness.exceptions.TestSkippedException;
 import org.codehaus.xharness.log.TaskRegistry;
@@ -516,6 +517,10 @@ public class TestGroupTaskTest extends TestCase {
         ukeCtrl.setReturnValue(new Location(""));
         mockUke.getTask();
         ukeCtrl.setReturnValue(null);
+        if (!TestHelper.isAnt16()) {
+            mockUke.getRealThing();
+            ukeCtrl.setReturnValue(null);
+        }
         mockUke.execute();
         ukeCtrl.setThrowable(new BuildException());
 
@@ -594,6 +599,10 @@ public class TestGroupTaskTest extends TestCase {
         ctrl.setReturnValue(new Location(""));
         mockUke.getTask();
         ctrl.setReturnValue(nested, 1);
+        if (!TestHelper.isAnt16()) {
+            mockUke.getRealThing();
+            ctrl.setReturnValue(nested, 1);
+        }
         mockUke.execute();
         if (exception != null) {
             ctrl.setThrowable(exception);

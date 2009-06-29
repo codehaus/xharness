@@ -9,6 +9,7 @@ import org.apache.tools.ant.Task;
 import org.apache.tools.ant.taskdefs.optional.junit.AggregateTransformer;
 import org.apache.tools.ant.types.FileSet;
 
+import org.codehaus.xharness.TestHelper;
 import org.codehaus.xharness.tasks.XhAggregateTransformer;
 import org.codehaus.xharness.testutil.TempDir;
 
@@ -245,8 +246,11 @@ public class XhReportTaskTest extends TestCase {
         File[] outFiles = null;
         try {
             task.execute();
+            fail("Expected BuildException");
+        } catch (NullPointerException npe) {
+            assertTrue(!TestHelper.isAnt16());
         } catch (BuildException be) {
-            // ignore
+            assertTrue(TestHelper.isAnt16());
         }
         outFiles = tempDir.listFiles();
         assertEquals("Invalid no. files in outout dir", 1, outFiles.length);
