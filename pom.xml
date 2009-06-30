@@ -13,8 +13,6 @@
     <properties>
         <ant.group.id>ant</ant.group.id>
         <ant.version>1.6.5</ant.version>
-        <!--ant.group.id>org.apache.ant</ant.group.id>
-        <ant.version>1.7.1</ant.version-->
         <junit.version>3.8.2</junit.version>
         <build.dir>target</build.dir>
     </properties>
@@ -383,6 +381,7 @@
             <id>xharness.codehaus.org</id>
             <name>XHarness Central Development Repository</name>
             <url>dav:https://dav.codehaus.org/snapshots.repository/xharness/</url>
+            <uniqueVersion>false</uniqueVersion>
         </snapshotRepository>
         <site>
             <id>xharness.codehaus.org</id>
@@ -433,6 +432,10 @@
         <name>The Codehaus</name>
         <url>http://www.codehaus.org/</url>
     </organization>
+
+    <prerequisites>
+        <maven>2.0.8</maven>
+    </prerequisites>
 
     <developers>
         <developer>

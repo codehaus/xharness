@@ -249,14 +249,27 @@ public class TaskRegistry {
     }
 
     private static int loadTaskId(File resultsDir) {
+        Properties props = loadProperties(new File(resultsDir, "xharness.properties"));
+        return getIntValue(props.getProperty("TASK_ID"), 0);
+    }
+
+    private static void saveTaskId(File resultsDir, int taskId) {
+        File propsFile = new File(resultsDir, "xharness.properties");
+        Properties props = loadProperties(propsFile);
+        props.put("TASK_ID", Integer.toString(taskId));
+        int suitCount = getIntValue(props.getProperty("SUITES"), 0);
+        props.put("SUITES", Integer.toString(++suitCount));
+        saveProperties(props, propsFile);
+    }
+    
+    private static Properties loadProperties(File propsFile) {
         Properties props = new Properties();
         InputStream is = null;
         try {
-            File f = new File(resultsDir, "xharness.properties");
-            is = new BufferedInputStream(new FileInputStream(f));
+            is = new BufferedInputStream(new FileInputStream(propsFile));
             props.load(is);
         } catch (IOException ioe) {
-            return 0;
+            // ignore
         } finally {
             if (is != null) {
                 try {
@@ -266,24 +279,16 @@ public class TaskRegistry {
                 }
             }
         }
-        String idVal = props.getProperty("TASK_ID", "0");
-        try {
-            return Integer.parseInt(idVal);
-        } catch (NumberFormatException nfe) {
-            return 0;
-        }
+        return props;
     }
-
-    private static void saveTaskId(File resultsDir, int taskId) {
-        Properties props = new Properties();
-        props.put("TASK_ID", Integer.toString(taskId));
+    
+    private static boolean saveProperties(Properties props, File propsFile) {
         OutputStream os = null;
         try {
-            File f = new File(resultsDir, "xharness.properties");
-            os = new BufferedOutputStream(new FileOutputStream(f));
+            os = new BufferedOutputStream(new FileOutputStream(propsFile));
             props.store(os, "XHarness execution properties");
         } catch (IOException ioe) {
-            // ignore
+            return false;
         } finally {
             if (os != null) {
                 try {
@@ -292,6 +297,18 @@ public class TaskRegistry {
                     // ignore
                 }
             }
+        }
+        return true;
+    }
+    
+    private static int getIntValue(String str, int def) {
+        if (str == null) {
+            return def;
+        }
+        try {
+            return Integer.parseInt(str);
+        } catch (NumberFormatException nfe) {
+            return def;
         }
     }
 }
