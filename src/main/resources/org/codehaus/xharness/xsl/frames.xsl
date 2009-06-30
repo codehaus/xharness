@@ -306,7 +306,7 @@ function refresh() {
                     <td>
                         <xsl:choose>
                             <xsl:when test="@fullname = ''">
-                                <a href="summary.html"><xsl:text>&lt;root&gt;</xsl:text></a>
+                                <a href="overview-summary.html"><xsl:text>&lt;root&gt;</xsl:text></a>
                             </xsl:when>
                             <xsl:otherwise>
                                 <a href="{@fullname}/summary.html"><xsl:value-of select="@fullname"/></a>
@@ -371,7 +371,7 @@ function refresh() {
                       <td nowrap="nowrap">
                           <xsl:choose>
                               <xsl:when test="@fullname = ''">
-                                  <a href="summary.html" target="mainFrame"><xsl:text>&lt;root&gt;</xsl:text></a>
+                                  <a href="overview-summary.html" target="mainFrame"><xsl:text>&lt;root&gt;</xsl:text></a>
                               </xsl:when>
                               <xsl:otherwise>
                                   <a href="{@fullname}/summary.html" target="mainFrame"><xsl:value-of select="@fullname"/></a>
@@ -515,11 +515,10 @@ function refresh() {
         </head>
         <body>
             <h2>
-                <a href="summary.html" target="mainFrame">
-                    <xsl:call-template name="display.link">
-                        <xsl:with-param name="link"><xsl:value-of select="@fullname"/></xsl:with-param>
-                    </xsl:call-template>
-                </a>
+                <xsl:call-template name="display.link">
+                    <xsl:with-param name="link.text"><xsl:value-of select="@fullname"/></xsl:with-param>
+                    <xsl:with-param name="href.prefix"/>
+                </xsl:call-template>
             </h2>
             <h3>Services</h3>
             <table width="100%">
@@ -642,25 +641,18 @@ function refresh() {
               <tr valign="top">
                   <th width="10%">Name</th>
                   <td align="left">
-                      <xsl:call-template name="display.link">
-                          <xsl:with-param name="link"><xsl:value-of select="@fullname"/></xsl:with-param>
+                      <xsl:call-template name="display.linktext">
+                          <xsl:with-param name="link.text"><xsl:value-of select="@fullname"/></xsl:with-param>
                       </xsl:call-template>
                   </td>
               </tr>
               <tr valign="top">
                   <th width="10%">Parent</th>
                   <td align="left">
-                      <a>
-                          <xsl:attribute name="href">
-                              <xsl:if test="/results/start[@fullname = current()/@parent] | /results/stop[@fullname = current()/@parent]">
-                                  <xsl:text>../</xsl:text>
-                              </xsl:if>
-                              <xsl:text>summary.html</xsl:text>
-                          </xsl:attribute>
-                          <xsl:call-template name="display.link">
-                              <xsl:with-param name="link"><xsl:value-of select="@parent"/></xsl:with-param>
-                          </xsl:call-template>
-                      </a>
+                      <xsl:call-template name="display.link">
+                          <xsl:with-param name="link.text"><xsl:value-of select="@parent"/></xsl:with-param>
+                          <xsl:with-param name="href.prefix"/>
+                      </xsl:call-template>
                   </td>
               </tr>
               <tr valign="top">
@@ -712,37 +704,56 @@ function refresh() {
         <tr valign="top">
             <th width="10%" nowrap="nowrap">Name</th>
             <td>
-                <xsl:call-template name="display.link">
-                    <xsl:with-param name="link"><xsl:value-of select="@fullname"/></xsl:with-param>
+                <xsl:call-template name="display.linktext">
+                    <xsl:with-param name="link.text"><xsl:value-of select="@fullname"/></xsl:with-param>
                 </xsl:call-template>
             </td>
         </tr>
         <tr valign="top">
             <th width="10%" nowrap="nowrap">Parent</th>
             <td>
-                <a href="../summary.html">
-                    <xsl:call-template name="display.link">
-                        <xsl:with-param name="link"><xsl:value-of select="@parent"/></xsl:with-param>
-                    </xsl:call-template>
-                </a>
+                <xsl:choose>
+                    <xsl:when test="self::verify">
+                        <a>
+                            <xsl:attribute name="href">
+                              <xsl:call-template name="path"><xsl:with-param name="path" select="@fullname"/></xsl:call-template>
+                              <xsl:value-of select="@reference"/>
+                              <xsl:text>/summary.html</xsl:text>
+                            </xsl:attribute>
+                            <xsl:value-of select="@reference"/>
+                        </a>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <xsl:call-template name="display.link">
+                            <xsl:with-param name="link.text"><xsl:value-of select="@parent"/></xsl:with-param>
+                            <xsl:with-param name="href.prefix"><xsl:text>../</xsl:text></xsl:with-param>
+                        </xsl:call-template>
+                    </xsl:otherwise>
+                </xsl:choose>
             </td>
         </tr>
         <xsl:if test="@reference">
           <tr valign="top">
-            <th width="10%" nowrap="nowrap">
-                <xsl:choose>
-                    <xsl:when test="self::verify">Service</xsl:when>
-                    <xsl:otherwise>Reference</xsl:otherwise>
-                </xsl:choose>
-            </th>
+            <th width="10%" nowrap="nowrap">Reference</th>
             <td>
-              <a>
-                <xsl:attribute name="href">
-                  <xsl:call-template name="path"><xsl:with-param name="path" select="@fullname"/></xsl:call-template>
-                  <xsl:value-of select="@reference"/>
-                  <xsl:text>/summary.html</xsl:text>
-                </xsl:attribute>
-                <xsl:value-of select="@reference"/></a>
+                <xsl:choose>
+                    <xsl:when test="self::verify">
+                        <xsl:call-template name="display.link">
+                            <xsl:with-param name="link.text"><xsl:value-of select="@parent"/></xsl:with-param>
+                            <xsl:with-param name="href.prefix"><xsl:text>../</xsl:text></xsl:with-param>
+                        </xsl:call-template>
+                    </xsl:when>
+                    <xsl:otherwise>
+                        <a>
+                            <xsl:attribute name="href">
+                              <xsl:call-template name="path"><xsl:with-param name="path" select="@fullname"/></xsl:call-template>
+                              <xsl:value-of select="@reference"/>
+                              <xsl:text>/summary.html</xsl:text>
+                            </xsl:attribute>
+                            <xsl:value-of select="@reference"/>
+                        </a>
+                    </xsl:otherwise>
+                </xsl:choose>
             </td>
           </tr>
         </xsl:if>
@@ -931,7 +942,7 @@ function refresh() {
     <xsl:param name="from"/>
     <xsl:param name="link.to"/>
     <xsl:param name="link.from"/>
-    <tr valign="top">       
+    <tr valign="top">
         <xsl:attribute name="class">
             <xsl:choose>
                 <xsl:when test="@result = 'Skipped'">Skipped</xsl:when>
@@ -943,11 +954,10 @@ function refresh() {
         <td><xsl:value-of select="$type"/></td>
         <td><a href="{$link.to}.html"><xsl:value-of select="$service"/></a></td>
         <td>
-            <a href="{$link.from}/Summary.html">
-                <xsl:call-template name="display.link">
-                    <xsl:with-param name="link"><xsl:value-of select="$from"/></xsl:with-param>
-                </xsl:call-template>
-            </a>
+            <xsl:call-template name="display.link">
+                <xsl:with-param name="link.text"><xsl:value-of select="$from"/></xsl:with-param>
+                <xsl:with-param name="href.prefix"><xsl:value-of select="$link.from"/><xsl:text>/</xsl:text></xsl:with-param>
+            </xsl:call-template>
         </td>
         <td><xsl:call-template name="format.output"><xsl:with-param name="output" select="description"/></xsl:call-template></td>
         <td><xsl:value-of select="@time"/></td>
@@ -1086,13 +1096,35 @@ function refresh() {
     
     
 <xsl:template name="display.link">
-    <xsl:param name="link"/>
+    <xsl:param name="link.text"/>
+    <xsl:param name="href.prefix"/>
+    <a target="mainFrame">
+        <xsl:attribute name="href">
+            <xsl:value-of select="$href.prefix"/>
+            <xsl:choose>
+                <xsl:when test="$link.text = ''">
+                    <xsl:text>overview-summary.html</xsl:text>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:text>summary.html</xsl:text>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:attribute>
+        <xsl:call-template name="display.linktext">
+            <xsl:with-param name="link.text"><xsl:value-of select="$link.text"/></xsl:with-param>
+        </xsl:call-template>
+    </a>
+</xsl:template>
+
+
+<xsl:template name="display.linktext">
+    <xsl:param name="link.text"/>
     <xsl:choose>
-        <xsl:when test="$link = ''">
+        <xsl:when test="$link.text = ''">
             <xsl:text>&lt;root&gt;</xsl:text>
         </xsl:when>
         <xsl:otherwise>
-            <xsl:value-of select="$link"/>
+            <xsl:value-of select="$link.text"/>
         </xsl:otherwise>
     </xsl:choose>
 </xsl:template>

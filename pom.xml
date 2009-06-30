@@ -24,11 +24,13 @@
             <groupId>${ant.group.id}</groupId>
             <artifactId>ant</artifactId>
             <version>${ant.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${ant.group.id}</groupId>
             <artifactId>ant-junit</artifactId>
             <version>${ant.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${ant.group.id}</groupId>
@@ -248,14 +250,14 @@
         </profile>
 
         <profile>
-            <id>fast.install</id>
+            <id>fastinstall</id>
             <activation>
                 <property>
-                  <name>fast.install</name>
+                  <name>fastinstall</name>
                 </property>
             </activation>
             <properties>
-                <maven.test.skip>true</maven.test.skip>
+                <maven.test.skip.exec>true</maven.test.skip.exec>
                 <checkstyle.excludes>**/*.java</checkstyle.excludes>
             </properties>
         </profile>
@@ -307,9 +309,7 @@
         <profile>
             <id>ant17</id>
             <activation>
-                <property>
-                  <name>!no.ant17</name>
-                </property>
+                <activeByDefault>true</activeByDefault>
             </activation>
             <build>
                 <plugins>
@@ -317,15 +317,15 @@
                         <artifactId>maven-invoker-plugin</artifactId>
                         <configuration>
                             <projectsDirectory>${basedir}</projectsDirectory>
-                            <pomIncludes>
-                                <pomInclude>pom.xml</pomInclude>
-                            </pomIncludes>
+                            <pom>pom.xml</pom>
+                            <profiles>
+                                <profile>no.ant17</profile>
+                            </profiles>
                             <streamLogs>true</streamLogs>
                             <properties>
                                 <ant.group.id>org.apache.ant</ant.group.id>
                                 <ant.version>1.7.1</ant.version>
                                 <build.dir>target/ant17</build.dir>
-                                <no.ant17>true</no.ant17>
                             </properties>
                             <goals>
                                 <goal>compile</goal>
@@ -343,6 +343,10 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+
+        <profile>
+            <id>no.ant17</id>
         </profile>
     </profiles>
 
