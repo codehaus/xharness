@@ -43,11 +43,11 @@ public class XharnessTaskTest extends TestCase {
     }
     
     public void setUp() throws Exception {
-        resultsDir = TempDir.createTempDir(new File("."));
+        resultsDir = TempDir.createTempDir();
     }
     
     public void tearDown() throws Exception {
-        TempDir.removeFiles(resultsDir);
+        TempDir.removeTempFile(resultsDir);
     }
     
     public void testAttributes() throws Exception {

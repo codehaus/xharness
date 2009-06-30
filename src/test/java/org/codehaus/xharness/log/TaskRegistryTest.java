@@ -7,6 +7,7 @@ import org.apache.tools.ant.RuntimeConfigurable;
 
 import org.codehaus.xharness.tasks.TestCaseTask;
 import org.codehaus.xharness.tasks.XharnessTask;
+import org.codehaus.xharness.testutil.TempDir;
 
 import org.easymock.MockControl;
 import org.easymock.classextension.MockClassControl;
@@ -58,13 +59,11 @@ public class TaskRegistryTest extends TestCase {
         task.getName();
         tkCtrl.setReturnValue("foo");
         task.getResultsdir();
-        tkCtrl.setReturnValue(null);
+        tkCtrl.setReturnValue(null, 2);
         task.getBasedir();
         tkCtrl.setReturnValue(null);
         task.getProject();
         tkCtrl.setReturnValue(project);
-        task.getErrorProperty();
-        tkCtrl.setReturnValue(null);
         
         prCtrl.replay();
         tkCtrl.replay();
@@ -91,13 +90,11 @@ public class TaskRegistryTest extends TestCase {
         xhTask.getName();
         xhCtrl.setReturnValue("foo");
         xhTask.getResultsdir();
-        xhCtrl.setReturnValue(null);
+        xhCtrl.setReturnValue(null, 2);
         xhTask.getBasedir();
-        xhCtrl.setReturnValue(null);
+        xhCtrl.setReturnValue(null, 3);
         xhTask.getProject();
         xhCtrl.setReturnValue(project);
-        xhTask.getErrorProperty();
-        xhCtrl.setReturnValue(null);
         xhTask.getRuntimeConfigurableWrapper();
         xhCtrl.setReturnValue(new RuntimeConfigurable(new Object(), "xharness"));
         
@@ -162,7 +159,7 @@ public class TaskRegistryTest extends TestCase {
         prCtrl.setDefaultMatcher(MockControl.ALWAYS_MATCHER);
         Project project = (Project)prCtrl.getMock();
         project.setNewProperty("prop", "true");
-        prCtrl.setVoidCallable(2);
+        prCtrl.setVoidCallable(1);
         project.addBuildListener(null);
         prCtrl.setVoidCallable(3);
 
@@ -175,7 +172,7 @@ public class TaskRegistryTest extends TestCase {
         xhTask.getBasedir();
         xhCtrl.setReturnValue(null, 3);
         xhTask.getResultsdir();
-        xhCtrl.setReturnValue(null, 3);
+        xhCtrl.setReturnValue(null, 6);
         xhTask.getProject();
         xhCtrl.setReturnValue(project, 3);
         xhTask.getErrorProperty();
@@ -244,13 +241,11 @@ public class TaskRegistryTest extends TestCase {
         xhTask.getPattern();
         xhCtrl.setReturnValue(null);
         xhTask.getResultsdir();
-        xhCtrl.setReturnValue(null);
+        xhCtrl.setReturnValue(null, 2);
         xhTask.getBasedir();
-        xhCtrl.setReturnValue(baseDir);
+        xhCtrl.setReturnValue(baseDir, 8);
         xhTask.getProject();
         xhCtrl.setReturnValue(project);
-        xhTask.getErrorProperty();
-        xhCtrl.setReturnValue(null);
         
         MockControl tlCtrl = MockClassControl.createControl(TestLogger.class); 
         TestLogger logger = (TestLogger)tlCtrl.getMock();
@@ -272,5 +267,44 @@ public class TaskRegistryTest extends TestCase {
         prCtrl.verify();
         xhCtrl.verify();
         tlCtrl.verify();
+    }
+    
+    public void testTaskId() throws Exception {
+        File tempDir = TempDir.createTempDir();
+        
+        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
+        Project project = (Project)prCtrl.getMock();
+
+        MockControl tkCtrl = MockClassControl.createControl(XharnessTask.class);
+        XharnessTask task = (XharnessTask)tkCtrl.getMock();
+        task.getPattern();
+        tkCtrl.setReturnValue(null, 2);
+        task.getName();
+        tkCtrl.setReturnValue("foo", 2);
+        task.getResultsdir();
+        tkCtrl.setReturnValue(tempDir, 5);
+        task.getBasedir();
+        tkCtrl.setReturnValue(null, 2);
+        task.getProject();
+        tkCtrl.setReturnValue(project, 2);
+
+        prCtrl.replay();
+        tkCtrl.replay();
+
+        TaskRegistry registry = TaskRegistry.init(task);
+        assertEquals(1, registry.getNextId());
+        assertEquals(2, registry.getNextId());
+        assertFalse(new File(tempDir, "xharness.properties").exists());
+        registry.shutdown(null);
+        assertTrue(new File(tempDir, "xharness.properties").isFile());
+        assertEquals(3, registry.getNextId());
+        assertEquals(4, registry.getNextId());
+        registry = TaskRegistry.init(task);
+        assertEquals(4, registry.getNextId());
+        assertEquals(5, registry.getNextId());
+        prCtrl.verify();
+        tkCtrl.verify();
+
+        TempDir.removeTempFile(tempDir);
     }
 }

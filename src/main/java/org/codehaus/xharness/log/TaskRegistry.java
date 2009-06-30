@@ -17,7 +17,15 @@
 
 package org.codehaus.xharness.log;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.apache.tools.ant.Project;
@@ -44,18 +52,16 @@ public class TaskRegistry {
     private TestLogger currentTestLogger;
     private Pattern pattern;
     private Project project;
-    private File baseDir;
-    private String errorProperty;
+    private XharnessTask xhTask;
     
     protected TaskRegistry() {
         // for testing only!
     }
     
     private TaskRegistry(XharnessTask task) {
+        xhTask = task;
         project = task.getProject();
-        baseDir = task.getBasedir();
-        errorProperty = task.getErrorProperty();
-        currentTaskId = 0;
+        currentTaskId = loadTaskId(task.getResultsdir());
         String patStr = task.getPattern();
         if (patStr != null && !"".equals(patStr)) {
             pattern = Pattern.compile(patStr);
@@ -132,9 +138,10 @@ public class TaskRegistry {
      * @param error The occurred error.
      */
     public static void setErrorProperty(Throwable error) {
-        if (error != null && singleton != null && singleton.errorProperty != null) {
+        if (error != null && singleton != null && singleton.xhTask != null 
+            && singleton.xhTask.getErrorProperty() != null) {
             Project proj = singleton.getProject();
-            proj.setNewProperty(singleton.errorProperty, "true");
+            proj.setNewProperty(singleton.xhTask.getErrorProperty(), "true");
         }
     }
     
@@ -149,6 +156,9 @@ public class TaskRegistry {
             currentTestLogger.taskFinishedInternal();
         }
         singleton = null;
+        if (xhTask != null) {
+            saveTaskId(xhTask.getResultsdir(), currentTaskId);
+        }
     }
     
     /**
@@ -171,13 +181,13 @@ public class TaskRegistry {
         if (testLogger != null && currentTestLogger != testLogger) {
             currentTestLogger = testLogger;
             
-            if (baseDir != null) {
+            if (xhTask != null && xhTask.getBasedir() != null) {
                 String testName = currentTestLogger.getFullName();
                 if (testName == null) {
                     testName = "";
                 }
                 
-                File testDir = new File(baseDir, testName);
+                File testDir = new File(xhTask.getBasedir(), testName);
                 String absPath = testDir.getAbsolutePath();
 
                 if (!testDir.isDirectory()) {
@@ -236,5 +246,52 @@ public class TaskRegistry {
      */
     protected static void reset() {
         singleton = null;
+    }
+
+    private static int loadTaskId(File resultsDir) {
+        Properties props = new Properties();
+        InputStream is = null;
+        try {
+            File f = new File(resultsDir, "xharness.properties");
+            is = new BufferedInputStream(new FileInputStream(f));
+            props.load(is);
+        } catch (IOException ioe) {
+            return 0;
+        } finally {
+            if (is != null) {
+                try {
+                    is.close();
+                } catch (IOException ioe) {
+                    // ignore
+                }
+            }
+        }
+        String idVal = props.getProperty("TASK_ID", "0");
+        try {
+            return Integer.parseInt(idVal);
+        } catch (NumberFormatException nfe) {
+            return 0;
+        }
+    }
+
+    private static void saveTaskId(File resultsDir, int taskId) {
+        Properties props = new Properties();
+        props.put("TASK_ID", Integer.toString(taskId));
+        OutputStream os = null;
+        try {
+            File f = new File(resultsDir, "xharness.properties");
+            os = new BufferedOutputStream(new FileOutputStream(f));
+            props.store(os, "XHarness execution properties");
+        } catch (IOException ioe) {
+            // ignore
+        } finally {
+            if (os != null) {
+                try {
+                    os.close();
+                } catch (IOException ioe) {
+                    // ignore
+                }
+            }
+        }
     }
 }

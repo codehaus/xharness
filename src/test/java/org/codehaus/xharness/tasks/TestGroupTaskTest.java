@@ -81,7 +81,7 @@ public class TestGroupTaskTest extends TestCase {
     }
     
     public void testExecutePatternMismatch() throws Exception {
-        File resultsDir = TempDir.createTempDir(new File("."));
+        File resultsDir = TempDir.createTempDir();
         XharnessTask xhTask = new XharnessTask();
         xhTask.setName("bar");
         xhTask.setPattern("spam");
@@ -114,7 +114,7 @@ public class TestGroupTaskTest extends TestCase {
             if (registry != null) {
                 registry.shutdown(null);
             }
-            TempDir.removeFiles(resultsDir);
+            TempDir.removeTempFile(resultsDir);
         }
         
     }

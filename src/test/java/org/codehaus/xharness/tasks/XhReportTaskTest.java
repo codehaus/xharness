@@ -49,11 +49,11 @@ public class XhReportTaskTest extends TestCase {
     }
     
     public void setUp() throws Exception {
-        tempDir = TempDir.createTempDir(new File("."));
+        tempDir = TempDir.createTempDir();
     }
     
     public void tearDown() throws Exception {
-        TempDir.removeFiles(tempDir);
+        TempDir.removeTempFile(tempDir);
     }
     
     public void testFailOnError() throws Exception {
