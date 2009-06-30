@@ -102,8 +102,10 @@ public class XhJavaBgTaskTest extends TestCase {
                                System.getProperty("user.dir"), 
                                server.getReceivedData());
         server.getSocket().close();
-        // wait 500ms for process to terminate
-        Thread.sleep(500);
+        // wait for process to terminate
+        for (int i = 100; i > 0 && task.isRunning(); i--) {
+            Thread.sleep(100);
+        }
         assertTrue("Process is still running", !task.isRunning());
         try {
             ProcessRegistry.getProcess(PROC_NAME);
@@ -176,8 +178,10 @@ public class XhJavaBgTaskTest extends TestCase {
                                System.getProperty("user.dir"), 
                                server.getReceivedData());
         server.getSocket().close();
-        // wait 500 for process to terminate
-        Thread.sleep(500);
+        // wait for process to terminate
+        for (int i = 100; i > 0 && task.isRunning(); i--) {
+            Thread.sleep(100);
+        }
         task.kill();
         assertTrue("Process is still running", !task.isRunning());
     }
@@ -268,8 +272,10 @@ public class XhJavaBgTaskTest extends TestCase {
         }
         assertTrue("Process is not running", task.isRunning());
         server.getSocket().close();
-        // wait 500ms for process to terminate
-        Thread.sleep(500);
+        // wait for process to terminate
+        for (int i = 100; i > 0 && task.isRunning(); i--) {
+            Thread.sleep(100);
+        }
         assertTrue("Process is still running", !task.isRunning());
         wdCtrl.verify();
     }
