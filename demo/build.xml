@@ -8,9 +8,6 @@
 
     <path id="xharness.lib">
         <fileset dir="..">
-          <include name="${lib.dir}/xharness*.jar"/>
-        </fileset>
-        <fileset dir="..">
           <include name="target/*.jar"/>
         </fileset>
         <pathelement path="${java.class.path}"/>

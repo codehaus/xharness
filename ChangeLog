@@ -1,19 +1,24 @@
-05/02/2009: XHarness 1.0-beta3
-
+01/07/2009: XHarness 1.0-beta-4
+    New features:
+      * Added support for Ant 1.7.x (XHARNESS-6)
+      * Maintain test order across multiple test suites (XHARNESS-12)
     Bug fixes:
-    * Improve Script Launcher Server Socket to have default 10 backlog instead of Zero (XHARNESS-3)
-    * XhExecTaskTest failing on Mac OSX (XHARNESS-5)
-    * NullPointerException in TestGroupTask.execute (XHARNESS-9)
+      * Fixed navigation links in HTML summary (XHARNESS-11)
+      * Changed ant dependencies in pom to provided scope (XHARNESS-13)
+
+05/02/2009: XHarness 1.0-beta3
+    Bug fixes:
+      * Improve Script Launcher Server Socket to have default 10 backlog instead of Zero (XHARNESS-3)
+      * XhExecTaskTest failing on Mac OSX (XHARNESS-5)
+      * NullPointerException in TestGroupTask.execute (XHARNESS-9)
 
 
 08/08/2008: XHarness 1.0-beta2
-
     New features:
-    * Add attribute to output matching to ignore ANSI markups. Default behaviour is 
-      ignoreansi=false, when true output matching will ignore ANSI markups to text (XHARNESS-1)
-
+      * Add attribute to output matching to ignore ANSI markups. Default behaviour is 
+        ignoreansi=false, when true output matching will ignore ANSI markups to text (XHARNESS-1)
     Bug fixes:
-    * Fixed KillTask failing despite failonerror=false when process task is not registered
-    * Fixed unix launcher to ignore exit codes corresponding to signals 2(130), 15(143) and a 
-      strange exit code 208
-    * Fixed ConcurrentModificationException in LineBuffer
+      * Fixed KillTask failing despite failonerror=false when process task is not registered
+      * Fixed unix launcher to ignore exit codes corresponding to signals 2(130), 15(143) and a 
+        strange exit code 208
+      * Fixed ConcurrentModificationException in LineBuffer
