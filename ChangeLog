@@ -21,4 +21,4 @@
       * Fixed KillTask failing despite failonerror=false when process task is not registered
       * Fixed unix launcher to ignore exit codes corresponding to signals 2(130), 15(143) and a 
         strange exit code 208
-      * Fixed ConcurrentModificationException in LineBuffer
+      * Fixed ConcurrentModificationException in LineBuffer (XHARNESS-7)
