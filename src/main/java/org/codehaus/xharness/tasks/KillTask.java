@@ -37,12 +37,14 @@ public class KillTask extends Task {
 
         try {
             BgProcess proc = ProcessRegistry.getProcess(procName);
-            log("KillProcess: killing processname " + procName, Project.MSG_VERBOSE);
+            log("KillTask: killing process " + procName, Project.MSG_VERBOSE);
             proc.kill();
         } catch (BuildException b) {
             if (failonerror) {
                 throw b;
             }
+            log("KillTask: failed to kill process " + procName + ": " + b.toString(), 
+                Project.MSG_WARN);
         }
     }
 

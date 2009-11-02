@@ -6,16 +6,20 @@
     <property name="xml.results.dir" value="${latest.results.dir}/xml"/>
     <property name="lib.dir" value="./lib"/>
 
-    <path id="xharness.lib">
-        <fileset dir="..">
-          <include name="target/*.jar"/>
-        </fileset>
-        <pathelement path="${java.class.path}"/>
-    </path>
-    
-    <taskdef resource="xharnesstasks.properties" classpathref="xharness.lib" loaderref="xharness.loader"/>
-    <typedef resource="xharnesstypes.properties" classpathref="xharness.lib" loaderref="xharness.loader"/>
-      
+    <loadfile property="xharness.version" srcFile="../pom.xml">
+        <filterchain>
+            <linecontains>
+              <contains value="&lt;version&gt;"/>
+            </linecontains>
+            <headfilter lines="1"/>
+            <striplinebreaks/>
+            <tokenfilter>
+                <replaceregex pattern="&lt;version&gt;(.+)&lt;/version&gt;" replace="\1"/>
+                <trim/>
+            </tokenfilter>
+        </filterchain>
+    </loadfile>
+
     <target name="build" depends="setup.classpath,setup.dirs">
         <mkdir dir="classes"/>
         <javac srcdir="src" destdir="classes" debug="true">
@@ -23,7 +27,7 @@
         </javac>
     </target>
 
-    <target name="demo" depends="setup.classpath,setup.dirs,build">
+    <target name="demo" depends="build">
         <property name="test.pattern" value=""/>
         <property name="test.name" value="XHarnessDemo"/>
         
@@ -126,6 +130,20 @@
     </target>
     
     <target name="setup.classpath">
+        <property name="target.dir" value="../target"/>
+        <available property="xharness.jar.available" file="${target.dir}/xharness-${xharness.version}.jar" />
+        <antcall target="download.xharness.jar" />
+        
+        <path id="xharness.lib">
+            <fileset dir="..">
+              <include name="target/*.jar"/>
+            </fileset>
+            <pathelement path="${java.class.path}"/>
+        </path>
+        
+        <taskdef resource="xharnesstasks.properties" classpathref="xharness.lib" loaderref="xharness.loader"/>
+        <typedef resource="xharnesstypes.properties" classpathref="xharness.lib" loaderref="xharness.loader"/>
+          
         <path id="test.classpath">
             <pathelement location="${lib.dir}/junit.jar" />
             <pathelement location="./classes" />
@@ -137,6 +155,16 @@
 
     </target>
     
+    <target name="download.xharness.jar" unless="xharness.jar.available">
+        <condition property="xharness.maven.repo" value="http://snapshots.repository.codehaus.org">
+            <contains string="${xharness.version}" substring="SNAPSHOT" casesensitive="true" />
+        </condition>
+        <property name="xharness.maven.repo" value="http://repo2.maven.org/maven2" />
+        <mkdir dir="${target.dir}"/>
+        <get src="${xharness.maven.repo}/org/codehaus/xharness/xharness/${xharness.version}/xharness-${xharness.version}.jar" 
+             dest="${target.dir}/xharness-${xharness.version}.jar" />
+    </target>
+
     <target name="download.junit.jar" unless="junit.jar.available">
         <mkdir dir="${lib.dir}"/>
         <get src="http://repo2.maven.org/maven2/junit/junit/3.8.2/junit-3.8.2.jar" 
