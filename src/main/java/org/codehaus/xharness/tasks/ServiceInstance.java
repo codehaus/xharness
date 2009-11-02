@@ -25,6 +25,7 @@ import org.apache.tools.ant.ComponentHelper;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 
+import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.exceptions.ServiceVerifyException;
 
 /**
@@ -85,7 +86,7 @@ public class ServiceInstance extends Task {
         
         if (serviceDef == null) {
             if (serviceName == null) {
-                throw new BuildException("No Service Definition found!");
+                throw new FatalException("No Service Definition found!");
             } else {
                 ComponentHelper helper = ComponentHelper.getComponentHelper(getProject());
                 AntTypeDefinition def = helper.getDefinition(serviceName);
@@ -93,7 +94,7 @@ public class ServiceInstance extends Task {
                 if (obj instanceof ServiceInstance) {
                     serviceDef = ((ServiceInstance)obj).getServiceDef();
                 } else {
-                    throw new BuildException("No Service Definition found!");
+                    throw new FatalException("No Service Definition found!");
                 }
             }
         }

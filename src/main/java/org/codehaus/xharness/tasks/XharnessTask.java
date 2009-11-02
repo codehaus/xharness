@@ -22,6 +22,7 @@ import java.io.File;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
+import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.log.TaskRegistry;
 
 /**
@@ -105,7 +106,7 @@ public class XharnessTask extends TestGroupTask {
      */
     public void execute() throws BuildException {
         if (resultsdir == null) {
-            throw new BuildException("Required attribute \"resultsdir\" not set!");
+            throw new FatalException("Required attribute \"resultsdir\" not set!");
         }
 
         TaskRegistry registry = TaskRegistry.init(this);
@@ -116,7 +117,11 @@ public class XharnessTask extends TestGroupTask {
             exception = be;
         } finally {
             registry.shutdown(exception);
-            log("Completed " + toString(), Project.MSG_INFO);
+            if (exception instanceof FatalException) {
+                log("Fatal error. Terminated " + toString(), Project.MSG_INFO);
+            } else {
+                log("Completed " + toString(), Project.MSG_INFO);
+            }
         }
     }
 

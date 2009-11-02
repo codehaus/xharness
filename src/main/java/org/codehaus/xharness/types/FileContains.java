@@ -27,6 +27,7 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectComponent;
 import org.apache.tools.ant.taskdefs.condition.Condition;
+import org.codehaus.xharness.exceptions.FatalException;
 
 public class FileContains extends ProjectComponent implements Condition {
     private File file;
@@ -50,7 +51,7 @@ public class FileContains extends ProjectComponent implements Condition {
         if (text == null) {
             text = getProject().replaceProperties(txt);
         } else {
-            throw new BuildException("Cannot use string argument and CDATA");
+            throw new FatalException("Cannot use string argument and CDATA");
         }
     }
 
@@ -63,13 +64,13 @@ public class FileContains extends ProjectComponent implements Condition {
         if (text == null) {
             text = getProject().replaceProperties(txt);
         } else {
-            throw new BuildException("Cannot use string argument and CDATA");
+            throw new FatalException("Cannot use string argument and CDATA");
         }
     }
 
     public boolean eval() throws BuildException {
         if (getText() == null) {
-            throw new BuildException("text not defined");
+            throw new FatalException("text not defined");
         }
         try {
             BufferedReader reader = getFileReader();

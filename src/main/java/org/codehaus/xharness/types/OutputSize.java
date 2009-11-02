@@ -22,6 +22,7 @@ import java.util.Iterator;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
+import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.log.LogLine;
 
 public class OutputSize extends AbstractOutput {
@@ -48,10 +49,10 @@ public class OutputSize extends AbstractOutput {
     
     public boolean eval() throws BuildException {
         if (equals >= 0 && (larger >= 0 || smaller >= 0) || larger >= 0 && smaller >= 0) {
-            throw new BuildException("Can only set one of: equals, larger, smaller");
+            throw new FatalException("Can only set one of: equals, larger, smaller");
         }
         if (equals < 0 && larger < 0 && smaller < 0) {
-            throw new BuildException("Must set one of: equals, larger, smaller");
+            throw new FatalException("Must set one of: equals, larger, smaller");
         }
         boolean lineMode;
         if (mode.toLowerCase().startsWith("line")) {
@@ -59,7 +60,7 @@ public class OutputSize extends AbstractOutput {
         } else if (mode.toLowerCase().startsWith("char")) {
             lineMode = false;
         } else {
-            throw new BuildException("Invalid mode attribute: " + mode);
+            throw new FatalException("Invalid mode attribute: " + mode);
         }
         
         int numLines = 0;

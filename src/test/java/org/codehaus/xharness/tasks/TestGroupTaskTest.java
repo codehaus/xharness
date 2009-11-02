@@ -517,6 +517,8 @@ public class TestGroupTaskTest extends TestCase {
         ukeCtrl.setReturnValue(new Location(""));
         mockUke.getTask();
         ukeCtrl.setReturnValue(null);
+        mockUke.getTaskName();
+        ukeCtrl.setReturnValue("foo");
         if (!TestHelper.isAnt16()) {
             mockUke.getRealThing();
             ukeCtrl.setReturnValue(null);
@@ -530,7 +532,7 @@ public class TestGroupTaskTest extends TestCase {
             group.execute();
             fail("Expected BuildException");
         } catch (BuildException be) {
-            assertEquals("Wrong message", "Task <unknown> failed", be.getMessage());
+            assertEquals("Wrong message", "Task foo failed", be.getMessage());
         }
         ukeCtrl.verify();        
     }

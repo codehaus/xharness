@@ -22,6 +22,7 @@ import java.util.Iterator;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
+import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.log.LogLine;
 
 public class OutputIs extends AbstractOutput {
@@ -36,7 +37,7 @@ public class OutputIs extends AbstractOutput {
         if (text == null) {
             text = getProject().replaceProperties(txt);
         } else {
-            throw new BuildException("Cannot use string argument and CDATA");
+            throw new FatalException("Cannot use string argument and CDATA");
         }
     }
 
@@ -49,7 +50,7 @@ public class OutputIs extends AbstractOutput {
         if (text == null) {
             text = getProject().replaceProperties(txt);
         } else {
-            throw new BuildException("Cannot use string argument and CDATA");
+            throw new FatalException("Cannot use string argument and CDATA");
         }
     }
 

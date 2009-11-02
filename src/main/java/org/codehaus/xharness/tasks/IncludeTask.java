@@ -20,12 +20,12 @@ package org.codehaus.xharness.tasks;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.TaskContainer;
 import org.apache.tools.ant.util.FileUtils;
 
+import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.util.IncludeProjectHelper;
 
 
@@ -56,7 +56,7 @@ public class IncludeTask extends Task implements TaskContainer {
      */
     public void addTask(Task task) {
         if (nestedTask != null) {
-            throw new BuildException("Invalid XML");
+            throw new FatalException("Invalid XML");
         }
         nestedTask = task;
     }
@@ -70,7 +70,7 @@ public class IncludeTask extends Task implements TaskContainer {
      */
     public void execute() {
         if (file == null) {
-            throw new BuildException("import requires file attribute");
+            throw new FatalException("import requires file attribute");
         }
 
         File buildFileParent = getProject().getBaseDir();
@@ -89,7 +89,7 @@ public class IncludeTask extends Task implements TaskContainer {
             String message = "Cannot find " + file 
                            + " imported from " + buildFileParent.getAbsolutePath();
 
-            throw new BuildException(message);
+            throw new FatalException(message);
         }
 
         importedFile = new File(getPath(importedFile));

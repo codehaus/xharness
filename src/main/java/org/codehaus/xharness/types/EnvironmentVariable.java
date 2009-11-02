@@ -22,6 +22,7 @@ import java.io.File;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.types.Environment;
 import org.apache.tools.ant.types.Path;
+import org.codehaus.xharness.exceptions.FatalException;
 
 /**
  * Extension of the Ant Environment.Variable class. Adds a set of new
@@ -161,7 +162,7 @@ public class EnvironmentVariable extends Environment.Variable {
      */
     private void setMode(int mode) throws BuildException {
         if (replaceMode != REPLACE) {
-            throw new BuildException(
+            throw new FatalException(
                     "Only \"prepend\" OR \"append\" equals \"true\" allowed!");
         }
         replaceMode = mode;

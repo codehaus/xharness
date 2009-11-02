@@ -23,6 +23,7 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.PathTokenizer;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
+import org.codehaus.xharness.exceptions.FatalException;
 
 
 
@@ -67,11 +68,11 @@ public class WhichTask extends Task {
      */
     public void execute() throws BuildException {
         if (executable == null) {
-            throw new BuildException("The executable attribute is required.");
+            throw new FatalException("The executable attribute is required.");
         } else if (path == null) {
-            throw new BuildException("The path attribute is required.");
+            throw new FatalException("The path attribute is required.");
         } else if (property == null) {
-            throw new BuildException("The property attribute is required.");
+            throw new FatalException("The property attribute is required.");
         }
 
         boolean found = false;

@@ -24,6 +24,7 @@ import org.apache.tools.ant.taskdefs.condition.Condition;
 import org.apache.tools.ant.taskdefs.condition.ConditionBase;
 
 import org.codehaus.xharness.exceptions.AssertionWarningException;
+import org.codehaus.xharness.exceptions.FatalException;
 
 /**
  * Performs a repeated check on an ant condition.
@@ -61,10 +62,10 @@ public class AssertTask extends ConditionBase {
      */
     public void execute() throws BuildException {
         if (countConditions() > 1) {
-            throw new BuildException("You must not nest more than one condition into <assert>");
+            throw new FatalException("You must not nest more than one condition into <assert>");
         }
         if (countConditions() < 1) {
-            throw new BuildException("You must nest a condition into <assert>");
+            throw new FatalException("You must nest a condition into <assert>");
         }
 
         int to = timeout;

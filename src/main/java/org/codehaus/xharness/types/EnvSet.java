@@ -147,9 +147,7 @@ public class EnvSet extends DataType {
         Object o = getRefid().getReferencedObject(p);
 
         if (!(o instanceof EnvSet)) {
-            String msg = getRefid().getRefId() + " doesn\'t denote an envset";
-
-            throw new BuildException(msg);
+            throw new BuildException(getRefid().getRefId() + " doesn\'t denote an envset");
         } else {
             return (EnvSet)o;
         }

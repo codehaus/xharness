@@ -29,6 +29,7 @@ import org.apache.tools.ant.taskdefs.ExecTask;
 import org.apache.tools.ant.taskdefs.ExecuteWatchdog;
 import org.apache.tools.ant.types.Commandline;
 
+import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.log.LineBuffer;
 import org.codehaus.xharness.log.LoggingRedirector;
 import org.codehaus.xharness.log.TaskRegistry;
@@ -175,7 +176,7 @@ public class XhExecTask extends ExecTask implements LoggableProcess {
     protected void setupExecutableAndDir() {
         String executableName = getExecutable();
         if (executableName == null) {
-            throw new BuildException("executable not set!");
+            throw new FatalException("executable not set!");
         }
 
         String ctdProperty = getProject().getProperty(TaskRegistry.CURRENT_TEST_DIR_PROPERY);
@@ -205,21 +206,19 @@ public class XhExecTask extends ExecTask implements LoggableProcess {
     }
 
     private boolean isAbsoluteFilename(String filename) {
-        boolean isAbsolute = false;
-
         // The following test is for a windows executable and checks whether or not
         // the filename begins with a drive-letter, followed
-        // by colon, followed by slash e.g. Z:\
+        // by colon, followed by (back)slash e.g. C:\
         //
-        if (ON_WINDOWS && filename.length() >= 3 
+        if (ON_WINDOWS && filename.length() > 2 
             && Character.isLetter(filename.charAt(0))
             && filename.charAt(1) == ':' 
             && (filename.charAt(2) == '\\' || filename.charAt(2) == '/')) {
-            isAbsolute = true;
-        } else if (filename.length() >= 1 
+            return true;
+        } else if (filename.length() > 0 
                    && (filename.charAt(0) == '\\' || filename.charAt(0) == '/')) {
-            isAbsolute = true;
+            return true;
         }
-        return isAbsolute;
+        return false;
     }
 }

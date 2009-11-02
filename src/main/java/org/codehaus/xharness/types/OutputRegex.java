@@ -23,12 +23,13 @@ import java.util.regex.Pattern;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
+import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.log.LogLine;
 
 public class OutputRegex extends OutputIs {
     public boolean eval() throws BuildException {
         if (getText() == null) {
-            throw new BuildException("Missing regular expression");
+            throw new FatalException("Missing regular expression");
         } 
         Pattern pattern = Pattern.compile(getText());
         Iterator iter = getOutputIterator();

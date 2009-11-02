@@ -259,6 +259,9 @@ public class TestLogger extends TaskLogger {
      * @return The ServiceLogger or <code>null</code>.
      */
     protected ServiceLogger getService(String name) {
+        if (name == null) {
+            return null;
+        }
         TaskLogger logger = getLogger(name);
         if (logger instanceof ServiceLogger) {
             return (ServiceLogger)logger;

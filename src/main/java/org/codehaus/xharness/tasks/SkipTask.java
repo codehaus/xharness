@@ -22,6 +22,7 @@ import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.taskdefs.condition.Condition;
 import org.apache.tools.ant.taskdefs.condition.ConditionBase;
 
+import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.exceptions.TestSkippedException;
 
 
@@ -60,10 +61,10 @@ public class SkipTask extends ConditionBase {
      */
     public void execute() throws BuildException {
         if (countConditions() > 1) {
-            throw new BuildException("You must not nest more than one condition into <skip>");
+            throw new FatalException("You must not nest more than one condition into <skip>");
         }
         if (countConditions() < 1) {
-            throw new BuildException("You must nest a condition into <skip>");
+            throw new FatalException("You must nest a condition into <skip>");
         }
         Condition c = (Condition)getConditions().nextElement();
         if (c.eval()) {

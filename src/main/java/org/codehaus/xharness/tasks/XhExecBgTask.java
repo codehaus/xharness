@@ -31,6 +31,7 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.Sequential;
 import org.apache.tools.ant.types.Commandline;
 
+import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.procutil.BgProcess;
 import org.codehaus.xharness.procutil.ProcessRegistry;
 import org.codehaus.xharness.procutil.ScriptLauncher;
@@ -333,7 +334,7 @@ public class XhExecBgTask extends XhExecTask implements Runnable, BgProcess {
             os.close();
         } catch (Exception ex) {
             log("***** unable to create arguments file: " + ex, Project.MSG_ERR);
-            throw new BuildException("Unableto create laucher arguments file "
+            throw new FatalException("Unable to create laucher arguments file "
                                    + launcherArgsFile + ": " + ex);
         }
 

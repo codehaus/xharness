@@ -25,6 +25,7 @@ import org.apache.tools.ant.ProjectHelper;
 import org.apache.tools.ant.taskdefs.AntlibDefinition;
 
 import org.codehaus.xharness.exceptions.AssertionWarningException;
+import org.codehaus.xharness.exceptions.FatalException;
 
 /**
  * Describe class <code>ServiceDef</code> here.
@@ -77,7 +78,7 @@ public class ServiceDef extends AntlibDefinition  {
      */
     public ServiceGroupTask createStart() {
         if (nestedStart != null) {
-            throw new BuildException("Only one start allowed");
+            throw new FatalException("Only one start allowed");
         }
         nestedStart = new ServiceGroupTask();
         nestedStart.setName("start");
@@ -86,7 +87,7 @@ public class ServiceDef extends AntlibDefinition  {
 
     public ServiceVerifyTask createVerify() {
         if (nestedVerify != null) {
-            throw new BuildException("Only one verify allowed");
+            throw new FatalException("Only one verify allowed");
         }
         nestedVerify = new ServiceVerifyTask();
         nestedVerify.setName("verify");
@@ -95,7 +96,7 @@ public class ServiceDef extends AntlibDefinition  {
 
     public ServiceGroupTask createStop() {
         if (nestedStop != null) {
-            throw new BuildException("Only one stop allowed");
+            throw new FatalException("Only one stop allowed");
         }
         nestedStop = new ServiceGroupTask();
         nestedStop.setName("stop");

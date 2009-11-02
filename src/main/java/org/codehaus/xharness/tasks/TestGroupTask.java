@@ -30,8 +30,11 @@ import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.TaskContainer;
 import org.apache.tools.ant.UnknownElement;
+import org.apache.tools.ant.UnsupportedAttributeException;
+import org.apache.tools.ant.UnsupportedElementException;
 
 import org.codehaus.xharness.exceptions.AssertionWarningException;
+import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.exceptions.TestSkippedException;
 import org.codehaus.xharness.log.TaskRegistry;
 
@@ -112,6 +115,15 @@ public class TestGroupTask extends Task implements TaskContainer {
 
             try {
                 currentTask.perform();
+            } catch (FatalException ex) {
+                log("Fatal: " + ex.getMessage(), Project.MSG_ERR);
+                throw ex;
+            } catch (UnsupportedElementException ex) {
+                log("Fatal: " + ex.getMessage(), Project.MSG_ERR);
+                throw ex;
+            } catch (UnsupportedAttributeException ex) {
+                log("Fatal: " + ex.getMessage(), Project.MSG_ERR);
+                throw ex;
             } catch (TestSkippedException ex) {
                 currentTask = unwrapTask(currentTask);
                 if (!(currentTask instanceof TestGroupTask)) {
@@ -244,9 +256,11 @@ public class TestGroupTask extends Task implements TaskContainer {
     
     private Task unwrapTask(Task task) {
         if (task instanceof UnknownElement) {
-            return unwrapTask(((UnknownElement)task).getTask());
+            Task subTask = ((UnknownElement)task).getTask();
+            return subTask == null ? task : unwrapTask(subTask);
         } else if (task instanceof IncludeTask) {
-            return unwrapTask(((IncludeTask)task).getNestedTask());
+            Task subTask = ((IncludeTask)task).getNestedTask();
+            return subTask == null ? task : unwrapTask(subTask);
         }
         return task;
         
