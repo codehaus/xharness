@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Stack;
 
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.ProjectComponent;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.TaskAdapter;
 import org.apache.tools.ant.UnknownElement;
@@ -32,6 +33,7 @@ import org.apache.tools.ant.taskdefs.Parallel;
 import org.apache.tools.ant.taskdefs.Sequential;
 
 import org.codehaus.xharness.procutil.LoggableProcess;
+import org.codehaus.xharness.tasks.AssertTask;
 import org.codehaus.xharness.tasks.IncludeTask;
 import org.codehaus.xharness.tasks.ServiceDef;
 import org.codehaus.xharness.tasks.ServiceInstance;
@@ -281,11 +283,13 @@ public class TestLogger extends TaskLogger {
      * @return The TaskLogger or <code>null</code>.
      */
     protected TaskLogger getTask(String name) {
+        boolean unNamed = false;
         if (name == null || "".equals(name)) {
             if (taskInDeferredShutdown != null && taskInDeferredShutdown instanceof TaskLogger) {
                 return (TaskLogger)taskInDeferredShutdown;
             }
             name = "-1";
+            unNamed = true;
         }
 
         TaskLogger ret = null;
@@ -294,9 +298,15 @@ public class TestLogger extends TaskLogger {
             if (numId < 0) {
                 numId = childLoggers.size() + numId;
             }
-            numId--;
-            if (numId >= 0 && numId < childLoggers.size() - 1) {
+            if (!unNamed) {
+                numId--;
+            }
+            if (numId >= 0 && numId <= childLoggers.size()) {
                 ret = (TaskLogger)childLoggers.get(numId);
+                ProjectComponent pc = TaskRegistry.unwrapComponent(ret.getTask());
+                if (unNamed && pc instanceof AssertTask) {
+                    ret = numId > 0 ? (TaskLogger)childLoggers.get(numId - 1) : null;
+                }
             }
         } catch (NumberFormatException nfe) {
             ret = getLogger(name);

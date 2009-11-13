@@ -3,8 +3,12 @@ package org.codehaus.xharness.log;
 import java.io.File;
 
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.ProjectComponent;
 import org.apache.tools.ant.RuntimeConfigurable;
+import org.apache.tools.ant.TaskAdapter;
+import org.apache.tools.ant.UnknownElement;
 
+import org.codehaus.xharness.tasks.IncludeTask;
 import org.codehaus.xharness.tasks.TestCaseTask;
 import org.codehaus.xharness.tasks.XharnessTask;
 import org.codehaus.xharness.testutil.TempDir;
@@ -306,5 +310,46 @@ public class TaskRegistryTest extends TestCase {
         tkCtrl.verify();
 
         TempDir.removeTempFile(tempDir);
+    }
+    
+    public void testUnwrapComponent() {
+        MockControl pcCtrl1 = MockClassControl.createControl(ProjectComponent.class);
+        ProjectComponent pc1 = (ProjectComponent)pcCtrl1.getMock();
+
+        MockControl pcCtrl2 = MockClassControl.createControl(TaskAdapter.class);
+        TaskAdapter pc2 = (TaskAdapter)pcCtrl2.getMock();
+        pc2.getProxy();
+        pcCtrl2.setReturnValue(pc1);
+        pc2.getProxy();
+        pcCtrl2.setReturnValue(null);
+
+        MockControl pcCtrl3 = MockClassControl.createControl(IncludeTask.class);
+        IncludeTask pc3 = (IncludeTask)pcCtrl3.getMock();
+        pc3.getNestedTask();
+        pcCtrl3.setReturnValue(pc2, 2);
+
+        MockControl pcCtrl4 = MockClassControl.createControl(UnknownElement.class);
+        UnknownElement pc4 = (UnknownElement)pcCtrl4.getMock();
+        pc4.getRealThing();
+        pcCtrl4.setReturnValue(pc3);
+        pc4.getRealThing();
+        pcCtrl4.setReturnValue(new Object());
+        
+        pcCtrl1.replay();
+        pcCtrl2.replay();
+        pcCtrl3.replay();
+        pcCtrl4.replay();
+        
+        // 4->3->2->1
+        assertEquals(pc1, TaskRegistry.unwrapComponent(pc4));
+        // 4 (pc4.getRealThing() returns Object not ProjectComponent)
+        assertEquals(pc4, TaskRegistry.unwrapComponent(pc4));
+        // 3->2 (pc2.getProxy() returns null)
+        assertEquals(pc2, TaskRegistry.unwrapComponent(pc3));
+        
+        pcCtrl1.verify();
+        pcCtrl2.verify();
+        pcCtrl3.verify();
+        pcCtrl4.verify();
     }
 }

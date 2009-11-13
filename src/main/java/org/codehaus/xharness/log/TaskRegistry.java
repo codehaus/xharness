@@ -29,8 +29,12 @@ import java.util.Properties;
 import java.util.regex.Pattern;
 
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.ProjectComponent;
 import org.apache.tools.ant.Task;
+import org.apache.tools.ant.TaskAdapter;
+import org.apache.tools.ant.UnknownElement;
 
+import org.codehaus.xharness.tasks.IncludeTask;
 import org.codehaus.xharness.tasks.TestCaseTask;
 import org.codehaus.xharness.tasks.XharnessTask;
 
@@ -104,6 +108,19 @@ public class TaskRegistry {
             return singleton.currentTestLogger.getTask(id);
         }
         return null;
+    }
+    
+    public static ProjectComponent unwrapComponent(ProjectComponent comp) {
+        Object unwrapped = null;
+        if (comp instanceof UnknownElement) {
+            unwrapped = ((UnknownElement)comp).getRealThing();
+        } else if (comp instanceof IncludeTask) {
+            unwrapped = ((IncludeTask)comp).getNestedTask();
+        } else if (comp instanceof TaskAdapter) {
+            unwrapped = ((TaskAdapter)comp).getProxy();
+        }
+        return unwrapped instanceof ProjectComponent 
+               ? unwrapComponent((ProjectComponent)unwrapped) : comp;
     }
     
     /**

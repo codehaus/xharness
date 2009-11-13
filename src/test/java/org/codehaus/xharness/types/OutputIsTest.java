@@ -89,7 +89,7 @@ public class OutputIsTest extends TestCase {
             condition.eval();
             fail("Expected BuildException");
         } catch (BuildException be) {
-            assertEquals("Wrong message", "Task \"null\" not found!", be.getMessage());
+            assertEquals("Wrong message", "Task not found!", be.getMessage());
         }
     }
     
@@ -346,10 +346,6 @@ public class OutputIsTest extends TestCase {
     }
     
     private static class MockTaskRegistry extends TaskRegistry {
-        public MockTaskRegistry() {
-            super();
-        }
-        
         protected static void reset() {
             TaskRegistry.reset();
         }

@@ -63,6 +63,15 @@
                         <formatter type="xml"/>
                     </junit>
                 </testcase>
+                <testcase name="NestedExec">
+                    <delete file="countdown.properties" failonerror="false" />
+                    <assert message="CountDown not reached" timeout="5">
+                      <xh-java classname="test.standalone.CountDown" classpath="classes">
+                        <arg line="5"/>
+                      </xh-java>
+                      <outputcontains>CountDown reached</outputcontains>
+                    </assert>
+                </testcase>
             </testgroup>
       
             <testgroup name="BlockingServiceTests">

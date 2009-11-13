@@ -31,7 +31,6 @@ import org.codehaus.xharness.log.TaskRegistry;
 
 public abstract class AbstractOutput extends ProjectComponent implements Condition {
     private Stream stream = null;
-    private TaskLogger taskLogger = null;
     private String taskName;
     private boolean ignoreANSI = false;
 
@@ -84,11 +83,10 @@ public abstract class AbstractOutput extends ProjectComponent implements Conditi
     }
     
     private TaskLogger getTaskLogger() {
+        TaskLogger taskLogger = TaskRegistry.getLogger(taskName); 
         if (taskLogger == null) {
-            taskLogger = TaskRegistry.getLogger(taskName); 
-            if (taskLogger == null) {
-                throw new BuildException("Task \"" + taskName + "\" not found!");
-            }
+            String descr = taskName == null ? "" : "\"" + taskName + "\" ";
+            throw new BuildException("Task " + descr + "not found!");
         }
         return taskLogger;
     }

@@ -61,7 +61,7 @@ public class IncludeTask extends Task implements TaskContainer {
         nestedTask = task;
     }
     
-    protected Task getNestedTask() {
+    public Task getNestedTask() {
         return nestedTask;
     }
 

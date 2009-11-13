@@ -12,6 +12,7 @@ import org.apache.tools.ant.taskdefs.MacroInstance;
 import org.apache.tools.ant.taskdefs.Parallel;
 import org.apache.tools.ant.taskdefs.Sequential;
 
+import org.codehaus.xharness.tasks.AssertTask;
 import org.codehaus.xharness.tasks.IncludeTask;
 import org.codehaus.xharness.tasks.ServiceDef;
 import org.codehaus.xharness.tasks.ServiceInstance;
@@ -1026,11 +1027,99 @@ public class TestLoggerTest extends TestCase {
         assertEquals("Wrong Task", child2, logger.getTask("2"));
         assertEquals("Wrong Task", child1, logger.getTask("-2"));
         assertEquals("Wrong Task", child2, logger.getTask("-1"));
+        assertEquals("Wrong Task", child3, logger.getTask(""));
+        assertEquals("Wrong Task", child3, logger.getTask(null));
+        assertEquals("Wrong Task", null, logger.getTask("0"));
+        assertEquals("Wrong Task", null, logger.getTask("-3"));
+        assertEquals("Wrong Task", child3, logger.getTask("3"));
+
+        prCtrl.verify();
+        tkCtrl1.verify();
+        tkCtrl2.verify();
+        tkCtrl3.verify();
+        evCtrl.verify();
+    }
+
+    public void testGetTaskFromAssert() throws Exception {
+        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
+        Project project = (Project)prCtrl.getMock();
+
+        TaskRegistry registry = TaskRegistry.init(project);
+
+        MockControl tkCtrl1 = MockClassControl.createControl(Task.class);
+        Task task1 = (Task)tkCtrl1.getMock();
+        task1.getTaskName();
+        tkCtrl1.setReturnValue("blah", 2);
+
+        MockControl tkCtrl2 = MockClassControl.createControl(Task.class);
+        Task task2 = (Task)tkCtrl2.getMock();
+        task2.getTaskName();
+        tkCtrl2.setReturnValue("blah", 2);
+
+        MockControl tkCtrl3 = MockClassControl.createControl(TaskAdapter.class);
+        TaskAdapter task3 = (TaskAdapter)tkCtrl3.getMock();
+        task3.getTaskName();
+        tkCtrl3.setReturnValue("blah", 2);
+        AssertTask assertTask = new AssertTask();
+        task3.getProxy();
+        tkCtrl3.setReturnValue(assertTask, 4);
+
+        MockControl evCtrl = MockClassControl.createControl(BuildEvent.class);
+        BuildEvent event = (BuildEvent)evCtrl.getMock();
+        event.getTask();
+        evCtrl.setReturnValue(task1, 2);
+        evCtrl.setReturnValue(task2, 2);
+        evCtrl.setReturnValue(task3, 2);
+
+        prCtrl.replay();
+        tkCtrl1.replay();
+        tkCtrl2.replay();
+        tkCtrl3.replay();
+        evCtrl.replay();
+
+        TestLogger logger = new TestLogger(registry, task1, "foo", null, null, null);
+        logger.taskStarted(event);
+        TaskLogger child1 = logger.getTask("blah");
+        assertNotNull("Wrong child logger", child1);
+        assertEquals("Wrong child logger",
+                     TaskLogger.class.getName(),
+                     child1.getClass().getName());
+        assertEquals("Wrong current logger", logger, registry.getCurrentTest());
+        assertNull("Wrong UnknownElement", child1.getUnknownElement());
+        assertEquals("Wrong Task", task1, child1.getTask());
+
+        logger.taskStarted(event);
+        TaskLogger child2 = logger.getTask("blah_1");
+        assertNotNull("Wrong child logger", child2);
+        assertTrue("Should be different TaskLoggers", child1 != child2);
+        assertEquals("Wrong child logger",
+                     TaskLogger.class.getName(),
+                     child2.getClass().getName());
+        assertEquals("Wrong current logger", logger, registry.getCurrentTest());
+        assertNull("Wrong UnknownElement", child2.getUnknownElement());
+        assertEquals("Wrong Task", task2, child2.getTask());
+
+        logger.taskStarted(event);
+        TaskLogger child3 = logger.getTask("blah_2");
+        assertNotNull("Wrong child logger", child3);
+        assertTrue("Should be different TaskLoggers", child1 != child3);
+        assertTrue("Should be different TaskLoggers", child2 != child3);
+        assertEquals("Wrong child logger",
+                     TaskLogger.class.getName(),
+                     child3.getClass().getName());
+        assertEquals("Wrong current logger", logger, registry.getCurrentTest());
+        assertNull("Wrong UnknownElement", child3.getUnknownElement());
+        assertEquals("Wrong Task", task3, child3.getTask());
+
+        assertEquals("Wrong Task", child1, logger.getTask("1"));
+        assertEquals("Wrong Task", child2, logger.getTask("2"));
+        assertEquals("Wrong Task", child1, logger.getTask("-2"));
+        assertEquals("Wrong Task", child2, logger.getTask("-1"));
         assertEquals("Wrong Task", child2, logger.getTask(""));
         assertEquals("Wrong Task", child2, logger.getTask(null));
         assertEquals("Wrong Task", null, logger.getTask("0"));
         assertEquals("Wrong Task", null, logger.getTask("-3"));
-        assertEquals("Wrong Task", null, logger.getTask("3"));
+        assertEquals("Wrong Task", child3, logger.getTask("3"));
 
         prCtrl.verify();
         tkCtrl1.verify();
@@ -1088,7 +1177,7 @@ public class TestLoggerTest extends TestCase {
         assertNull("Wrong UnknownElement", child2.getUnknownElement());
         assertEquals("Wrong Task", task2, child2.getTask());
 
-        IDeferredLogger deferred = new TestDeferredTaskLogger(logger, child1);
+        IDeferredLogger deferred = new TestDeferredTaskLogger(logger, child1, child2);
         logger.addDeferredLogger(deferred);
         logger.stopDeferredElements();
 
@@ -1100,19 +1189,21 @@ public class TestLoggerTest extends TestCase {
 
     class TestDeferredTaskLogger extends TaskLogger implements IDeferredLogger {
         private TestLogger parentLogger;
-        private TaskLogger childLogger;
-        public TestDeferredTaskLogger(TestLogger tel, TaskLogger tal) {
-            parentLogger = tel;
-            childLogger = tal;
+        private TaskLogger childLogger1;
+        private TaskLogger childLogger2;
+        public TestDeferredTaskLogger(TestLogger tl, TaskLogger cl1, TaskLogger cl2) {
+            parentLogger = tl;
+            childLogger1 = cl1;
+            childLogger2 = cl2;
         }
         public void deferredShutdown() {
             assertEquals("Wrong Task", this, parentLogger.getTask(""));
             assertEquals("Wrong Task", this, parentLogger.getTask(null));
-            assertEquals("Wrong Task", childLogger, parentLogger.getTask("1"));
-            assertEquals("Wrong Task", childLogger, parentLogger.getTask("-1"));
+            assertEquals("Wrong Task", childLogger1, parentLogger.getTask("1"));
+            assertEquals("Wrong Task", childLogger1, parentLogger.getTask("-1"));
             assertEquals("Wrong Task", null, parentLogger.getTask("0"));
             assertEquals("Wrong Task", null, parentLogger.getTask("-2"));
-            assertEquals("Wrong Task", null, parentLogger.getTask("2"));
+            assertEquals("Wrong Task", childLogger2, parentLogger.getTask("2"));
         }
     }
 }

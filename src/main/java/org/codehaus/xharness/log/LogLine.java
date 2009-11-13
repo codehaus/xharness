@@ -28,6 +28,8 @@ import java.util.regex.Pattern;
  * @author Gregor Heine
  */
 public class LogLine {
+    private static final Pattern NOANSI_PATTERN = Pattern.compile("\\u001B\\[\\d+m");
+    
     private String textLine;
     private int priority;
     
@@ -60,16 +62,12 @@ public class LogLine {
      * @return The text String with or without ANSI codes.
      */
     public String getText(boolean ignoreANSI) {
+        String txt = getText();
         if (ignoreANSI) {
-            String txt = getText();
-
-            Pattern pattern = Pattern.compile("\\u001B\\[\\d+m");
-            Matcher matcher = pattern.matcher(txt);
-            txt = matcher.replaceAll("");
-
-            return txt; //Stripped line.
+            Matcher matcher = NOANSI_PATTERN.matcher(txt);
+            txt = matcher.replaceAll(""); //Stripped line.
         }
-        return getText();
+        return txt; 
     }
     
     /**

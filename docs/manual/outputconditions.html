@@ -11,7 +11,12 @@
 <h3>Description</h3>
 <p>XHarness adds a number of additional Condition types to the 
 <a href="http://ant.apache.org/manual/CoreTasks/conditions.html">Ant Condition framework</a>
-that operate on the output produced by other Tasks within an XHarness testsuite.</p>
+that operate on the output produced by other Tasks within an XHarness testsuite. These added conditions are
+<a href="#OutputContains">OutputContains</a>
+<a href="#OutputIs">OutputIs</a>
+<a href="#OutputRegex">OutputRegex</a> and
+<a href="#OutputSize">OutputSize</a>.
+</p>
 <p>
 <h3>General Parameters</h3>
 <table border="1" cellpadding="2" cellspacing="0">
@@ -91,7 +96,7 @@ subsequent tasks are appended with a numeric value: &quot;<code>_&lt;num&gt;</co
            &lt;outputis stream=&quot;warning&quot; task=&quot;echo&quot;&gt;Hello World&lt;/outputis&gt;
        &lt;/assert&gt;
        &lt;assert&gt;
-           &lt;outputis stream=&quot;warning&quot; task=&quot;echo_1&quot;&gt;Foo Bar&lt;/outputis&gt;
+           &lt;outputis stream=&quot;warning&quot; task=&quot;echo_1&quot; string=&quot;Foo Bar&quot;/&gt;
        &lt;/assert&gt;
 </pre></p>
 <p>If the task is indicated by a positive integer value, it denotes the n-th task element in the enclosing 
@@ -102,16 +107,16 @@ it denotes the n-th task element in the enclosing group of Tasks, counting up fr
        &lt;echo message=&quot;Foo Bar&quot;/&gt;
        
        &lt;assert&gt;
-           &lt;outputis stream=&quot;warning&quot; task=&quot;-1&quot;&gt;Foo Bar&lt;/outputis&gt;
+           &lt;outputis stream=&quot;warning&quot; task=&quot;-1&quot; string=&quot;Foo Bar&quot;/&gt;
        &lt;/assert&gt;
        &lt;assert&gt;
-           &lt;outputis stream=&quot;warning&quot; task=&quot;1&quot;&gt;Hello World&lt;/outputis&gt;
+           &lt;outputis stream=&quot;warning&quot; task=&quot;1&quot; string=&quot;Hello World&quot;/&gt;
        &lt;/assert&gt;
        &lt;assert&gt;
-           &lt;outputis stream=&quot;warning&quot; task=&quot;-4&quot;&gt;Hello World&lt;/outputis&gt;
+           &lt;outputis stream=&quot;warning&quot; task=&quot;-4&quot;&gt string=&quot;Hello World&quot;/&gt;
        &lt;/assert&gt;
        &lt;assert&gt;
-           &lt;outputis stream=&quot;warning&quot; task=&quot;2&quot;&gt;Foo Bar&lt;/outputis&gt;
+           &lt;outputis stream=&quot;warning&quot; task=&quot;2&quot; string=&quot;Foo Bar&quot;/&gt;
        &lt;/assert&gt;
 </pre></p>
 <p>As stated in the above table, the default value for the task attribute is "-1" which denotes the immediate previous 
@@ -127,13 +132,14 @@ not specified, the condition operates on the output of the background process it
            &lt;assert&gt;
                &lt;and&gt;
                    &lt;outputis stream=&quot;stdout&quot;&gt;Hello World&lt;/outputis&gt;
-                   &lt;outputis stream=&quot;warning&quot; task=&quot;-1&quot;&gt;Foo Bar&lt;/outputis&gt;
+                   &lt;outputis stream=&quot;warning&quot; task=&quot;-1&quot; string=&quot;Foo Bar&quot;/&gt;
                &lt;/and&gt;
            &lt;/assert&gt;
            &lt;echo message=&quot;done&quot;&gt;
        &lt;/afterwards&gt;
     &lt;/xh-execbg&gt;
 </pre>
+<a name="OutputContains">
 <h3>OutputContains</h3>
 <p>Tests that the given stream of the denoted Task contains a given Text String.</p>
 <h4>Additional Parameters</h4>
@@ -162,6 +168,7 @@ or as a text element in the CDATA section of the condition.</p>
        &lt;/assert&gt;
 
 </pre>
+<a name="OutputIs">
 <h3>OutputIs</h3>
 <p>Tests that the given stream of the denoted Task contains exactly the given Text.</p>
 <h4>Additional Parameters</h4>
@@ -191,6 +198,7 @@ or as a text element in the CDATA section of the condition.</p>
        &lt;/assert&gt;
        
 </pre>
+<a name="OutputRegex">
 <h3>OutputRegex</h3>
 <p>Tests that the given stream of the denoted Task matches the given regular expression.</p>
 <h4>Additional Parameters</h4>
@@ -202,7 +210,7 @@ or as a text element in the CDATA section of the condition.</p>
   </tr>
   <tr>
     <td valign="top">string</td>
-    <td valign="top">The string to search for in the output.</td>
+    <td valign="top">The regular expression to search for in the output.</td>
     <td align="center" valign="top">No</td>
   </tr>
 </table>
@@ -212,12 +220,13 @@ or as a text element in the CDATA section of the condition.</p>
 <pre>       &lt;echo message=&quot;Hello World&quot;/&gt;
        
        &lt;assert&gt;
-           &lt;outputregex stream=&quot;warning&quot;&gt;%H[a-z]* W[a-z]*$&lt;/outputregex&gt;
+           &lt;outputregex stream=&quot;warning&quot; string=&quot;%H[a-z]* W[a-z]*$&quot;&gt;
        &lt;/assert&gt;
        
 </pre>
 <p>Note: Some characters of regular expressions may need to be substituted with their respective XML entities to form a valid XML document, e.g. the &quot;<code>&lt;</code>&quot; character must replaced with the entity &quot;<code>&amp;lt;</code>&quot;.
 </p>
+<a name="OutputSize">
 <h3>OutputSize</h3>
 <p>Tests that the given stream of the denoted Task contains the given amount of output.</p>
 <h4>Additional Parameters</h4>

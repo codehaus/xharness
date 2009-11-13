@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.ProjectComponent;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.TaskContainer;
 import org.apache.tools.ant.UnknownElement;
@@ -255,14 +256,10 @@ public class TestGroupTask extends Task implements TaskContainer {
     }
     
     private Task unwrapTask(Task task) {
-        if (task instanceof UnknownElement) {
-            Task subTask = ((UnknownElement)task).getTask();
-            return subTask == null ? task : unwrapTask(subTask);
-        } else if (task instanceof IncludeTask) {
-            Task subTask = ((IncludeTask)task).getNestedTask();
-            return subTask == null ? task : unwrapTask(subTask);
+        ProjectComponent comp = TaskRegistry.unwrapComponent(task);
+        if (comp != task && comp instanceof Task) {
+            return (Task)comp;
         }
         return task;
-        
     }
 }

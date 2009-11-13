@@ -1,7 +1,9 @@
 package org.codehaus.xharness.tasks;
 
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Location;
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.Task;
 import org.apache.tools.ant.taskdefs.condition.Condition;
 
 import org.codehaus.xharness.exceptions.AssertionWarningException;
@@ -212,6 +214,7 @@ public class AssertTaskTest extends TestCase {
 
         prCtrl.replay();
         conCtrl.replay();
+        
         task.add(condition);
         task.setErroronfail(true);
         try {
@@ -222,7 +225,56 @@ public class AssertTaskTest extends TestCase {
         } catch (BuildException be) {
             assertEquals("Wrong message", "Assertion failed", be.getMessage());
         }
+        
         prCtrl.verify();
+        conCtrl.verify();
+    }
+    
+    public void testNestedTask() throws Exception {
+        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
+        Project project = (Project)prCtrl.getMock();
+        
+        MockControl taskCtrl = MockClassControl.createNiceControl(Task.class);
+        Task nestedTask = (Task)taskCtrl.getMock();
+        nestedTask.getProject();
+        taskCtrl.setReturnValue(project, 4);
+        nestedTask.getLocation();
+        taskCtrl.setReturnValue(new Location("123"));
+        nestedTask.execute();
+        nestedTask.execute();
+        taskCtrl.setThrowable(new BuildException("foo"));
+
+        AssertTask task = new AssertTask();
+        task.setProject(project);
+        
+        MockControl conCtrl = MockClassControl.createControl(Condition.class);
+        Condition condition = (Condition)conCtrl.getMock();
+        condition.eval();
+        conCtrl.setReturnValue(true);
+
+        prCtrl.replay();
+        taskCtrl.replay();
+        conCtrl.replay();
+        
+        task.add(condition);
+        task.add(nestedTask);
+        try {
+            task.add(nestedTask);
+            fail("Expected BuildException");
+        } catch (BuildException be) {
+            assertEquals("Only one nested task is suppoted.", be.getMessage());
+        }
+        task.add((Task)null);
+        task.execute();
+        try {
+            task.execute();
+            fail("Expected BuildException");
+        } catch (BuildException be) {
+            assertEquals("123: foo", be.toString());
+        }
+        
+        prCtrl.verify();
+        taskCtrl.verify();
         conCtrl.verify();
     }
 }

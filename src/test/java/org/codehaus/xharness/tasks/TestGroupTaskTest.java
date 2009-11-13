@@ -515,13 +515,13 @@ public class TestGroupTaskTest extends TestCase {
         mockUke.maybeConfigure();
         mockUke.getLocation();
         ukeCtrl.setReturnValue(new Location(""));
-        mockUke.getTask();
-        ukeCtrl.setReturnValue(null);
         mockUke.getTaskName();
         ukeCtrl.setReturnValue("foo");
+        mockUke.getRealThing();
         if (!TestHelper.isAnt16()) {
-            mockUke.getRealThing();
-            ukeCtrl.setReturnValue(null);
+            ukeCtrl.setReturnValue(null, 2);
+        } else {
+            ukeCtrl.setReturnValue(null, 1);
         }
         mockUke.execute();
         ukeCtrl.setThrowable(new BuildException());
@@ -599,10 +599,10 @@ public class TestGroupTaskTest extends TestCase {
         mockUke.maybeConfigure();
         mockUke.getLocation();
         ctrl.setReturnValue(new Location(""));
-        mockUke.getTask();
-        ctrl.setReturnValue(nested, 1);
+        mockUke.getRealThing();
         if (!TestHelper.isAnt16()) {
-            mockUke.getRealThing();
+            ctrl.setReturnValue(nested, 2);
+        } else {
             ctrl.setReturnValue(nested, 1);
         }
         mockUke.execute();

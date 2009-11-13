@@ -1,3 +1,12 @@
+01/12/2009: XHarness 1.0-beta-5
+    New features:
+      * Added optional nested task to assert (XHARNESS-22)
+    Bug fixes:
+      * Fixed handling of incorrect task configurations (XHARNESS-17, XHARNESS-18, XHARNESS-19)
+      * Fixed KillTask logging (XHARNESS-20)
+      * Enhanced demo to download xharness.jar when unavailable in target dir (XHARNESS-21)
+      * Fixed xh-java task ignoring failonerror=false (XHARNESS-23)
+
 01/07/2009: XHarness 1.0-beta-4
     New features:
       * Added support for Ant 1.7.x (XHARNESS-6)
@@ -11,7 +20,6 @@
       * Improve Script Launcher Server Socket to have default 10 backlog instead of Zero (XHARNESS-3)
       * XhExecTaskTest failing on Mac OSX (XHARNESS-5)
       * NullPointerException in TestGroupTask.execute (XHARNESS-9)
-
 
 08/08/2008: XHarness 1.0-beta2
     New features:

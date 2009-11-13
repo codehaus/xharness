@@ -20,6 +20,7 @@ package org.codehaus.xharness.tasks;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.Task;
 import org.apache.tools.ant.taskdefs.condition.Condition;
 import org.apache.tools.ant.taskdefs.condition.ConditionBase;
 
@@ -33,6 +34,22 @@ public class AssertTask extends ConditionBase {
     private boolean erroronfail = false;
     private int timeout = 0;
     private String message = "Assertion failed";
+    private Task nestedTask;
+    
+    /**
+     * Add a nested task to this TaskContainer.
+     *
+     * @param task  Nested task to execute sequentially
+     * @throws FatalException If there is more than 1 nested task.
+     */
+    public void add(Task task) throws FatalException {
+        if (task != null) {
+            if (nestedTask != null) {
+                throw new FatalException("Only one nested task is suppoted.");
+            }
+            nestedTask = task;
+        }
+    }
 
     /**
      * Define a timeout how long to wait for the expected condition to be true.
@@ -56,9 +73,11 @@ public class AssertTask extends ConditionBase {
     /**
      * Execute this Assert Task.
      *
-     * @throws BuildException If the number of nested conditions is not exaclty 1.
-     * throws  AssertionWarningException If the expected condition was not true, 
-     *         after a specified timeout
+     * @throws FatalException If the number of nested conditions is not exactly 1.
+     * @throws  AssertionWarningException If the expected condition was not true, 
+     *         after a specified timeout (and erroronfail=false)
+     * @throws BuildException if the nested task fails or if the expected condition was not true
+               and erroronfail=true
      */
     public void execute() throws BuildException {
         if (countConditions() > 1) {
@@ -71,6 +90,10 @@ public class AssertTask extends ConditionBase {
         int to = timeout;
 
         do {
+            if (nestedTask != null) {
+                log("Executing nested task " + nestedTask.getTaskName(), Project.MSG_VERBOSE);
+                nestedTask.perform();
+            }
             boolean eval = ((Condition)getConditions().nextElement()).eval();
             if (eval) {
                 log("Condition true; Assertion passed.", Project.MSG_VERBOSE);

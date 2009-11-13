@@ -281,6 +281,15 @@ public class TaskLogger implements BuildListener {
         }
     }
     
+    /**
+     * {@link java.lang.Object} override.
+     * 
+     * @return logger description
+     */
+    public String toString() {
+        return getClass().getSimpleName() + " logging " + getName();
+    }
+    
     // --- Logging internal impl
     
     /**
