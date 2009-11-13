@@ -50,7 +50,7 @@ public class XhJavaTask extends Java implements LoggableProcess {
     private File dir;
     private long procTimeout = 60 * 60 * 1000; // 1 hour
     private int retVal = 0;
-    private boolean spawn = false;
+    private boolean overrideFailOnError = true;
 
     public XhJavaTask() {
         this.redirector = new LoggingRedirector(this);
@@ -73,8 +73,13 @@ public class XhJavaTask extends Java implements LoggableProcess {
     }
     
     public void setSpawn(boolean b) {
-        spawn = b;
+        overrideFailOnError = false;
         super.setSpawn(b);
+    }
+    
+    public void setFailonerror(boolean f) {
+        overrideFailOnError = false;
+        super.setFailonerror(f);
     }
 
     public void execute() throws BuildException {
@@ -99,8 +104,8 @@ public class XhJavaTask extends Java implements LoggableProcess {
             }
         }
         
-        if (!spawn) {
-            setFailonerror(true);
+        if (overrideFailOnError) {
+            super.setFailonerror(true);
         }
         super.execute();
     }

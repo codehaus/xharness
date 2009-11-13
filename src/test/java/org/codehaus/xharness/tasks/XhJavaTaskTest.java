@@ -1,12 +1,14 @@
 package org.codehaus.xharness.tasks;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.taskdefs.ExecuteWatchdog;
+import org.apache.tools.ant.taskdefs.Java;
 import org.apache.tools.ant.types.Path;
 
 import org.codehaus.xharness.log.LineBuffer;
@@ -51,24 +53,6 @@ public class XhJavaTaskTest extends TestCase {
     public static Test suite() {
         return new TestSuite(XhJavaTaskTest.class);
     }
-
-    protected String getClassPath() {
-        ClassLoader loader = getClass().getClassLoader();
-        StringBuffer classPath = new StringBuffer();
-        if (loader instanceof URLClassLoader) {
-            URLClassLoader urlLoader = (URLClassLoader)loader;
-            URL[] urls = urlLoader.getURLs();
-            for (int x = 0; x < urls.length; x++) {
-                String file = urls[x].getFile().replaceAll("%20", " ");
-                if (file.indexOf("junit") == -1) {
-                    classPath.append(file);
-                    classPath.append(System.getProperty("path.separator"));
-                }
-            }
-        }
-        return classPath.toString();
-    }
-    
     public void testExecuteNoClassname() throws Exception {
         Project project = new Project();
         
@@ -299,6 +283,113 @@ public class XhJavaTaskTest extends TestCase {
                      KillableExecuteWatchdog.class.getName(), 
                      dog.getClass().getName());
         assertEquals("Wrong watchdog", dog, task.getWatchdog());
+    }
+
+    public void testOverrideFailonerror() throws Exception {
+        Project project = new Project();
+        
+        ProcessTester server = new ProcessTester();
+        
+        XhJavaTask task = new XhJavaTask();
+        task.setProject(project);
+        task.setClassname(ProcessTester.class.getName());
+        task.setClasspath(new Path(project, getClassPath()));
+        task.createArg().setLine("-p " + server.getPort());
+        task.createArg().setLine("-s user.dir");
+        Field f1 = XhJavaTask.class.getDeclaredField("overrideFailOnError");
+        Field f2 = Java.class.getDeclaredField("spawn");
+        Field f3 = Java.class.getDeclaredField("failOnError");
+        Field f4 = Java.class.getDeclaredField("incompatibleWithSpawn");
+        // override Java language access checks to be able to read&write private members
+        Field.setAccessible(new Field[] {f1, f2, f3, f4}, true);
+        
+        assertEquals(Boolean.TRUE, f1.get(task));
+        assertEquals(Boolean.FALSE, f2.get(task));
+        assertEquals(Boolean.FALSE, f3.get(task));
+        assertEquals(Boolean.FALSE, f4.get(task));
+        
+        task.execute();
+        
+        assertEquals(Boolean.TRUE, f1.get(task));
+        assertEquals(Boolean.FALSE, f2.get(task));
+        assertEquals(Boolean.TRUE, f3.get(task));  // failOnError -> true
+        assertEquals(Boolean.TRUE, f4.get(task));  // incompatibleWithSpawn -> true
+        f3.set(task, Boolean.FALSE); // reset
+        f4.set(task, Boolean.FALSE); // reset
+        
+        task.setFailonerror(false);
+        task.execute();
+        
+        assertEquals(Boolean.FALSE, f1.get(task)); // overrideFailOnError -> false
+        assertEquals(Boolean.FALSE, f2.get(task));
+        assertEquals(Boolean.FALSE, f3.get(task)); 
+        assertEquals(Boolean.FALSE, f4.get(task));
+        f1.set(task, Boolean.TRUE); // reset
+        
+        task.setFailonerror(true);
+        task.execute();
+        
+        assertEquals(Boolean.FALSE, f1.get(task)); // overrideFailOnError -> false
+        assertEquals(Boolean.FALSE, f2.get(task));
+        assertEquals(Boolean.TRUE, f3.get(task));  // failOnError -> true
+        assertEquals(Boolean.TRUE, f4.get(task));  // incompatibleWithSpawn -> true
+        f1.set(task, Boolean.TRUE); // reset
+        f3.set(task, Boolean.FALSE); // reset
+        f4.set(task, Boolean.FALSE); // reset
+        
+        task.setSpawn(false);
+        task.execute();
+        
+        assertEquals(Boolean.FALSE, f1.get(task)); // overrideFailOnError -> false
+        assertEquals(Boolean.FALSE, f2.get(task));
+        assertEquals(Boolean.FALSE, f3.get(task)); 
+        assertEquals(Boolean.FALSE, f4.get(task));
+        f1.set(task, Boolean.TRUE); // reset
+        
+        task.setSpawn(true);
+        task.execute();
+        
+        assertEquals(Boolean.FALSE, f1.get(task)); // overrideFailOnError -> false
+        assertEquals(Boolean.TRUE, f2.get(task)); // spawn -> true
+        assertEquals(Boolean.FALSE, f3.get(task));
+        assertEquals(Boolean.FALSE, f4.get(task));
+        f1.set(task, Boolean.TRUE); // reset
+        f2.set(task, Boolean.FALSE); // reset
+        
+        task.setSpawn(true);
+        task.setFailonerror(true);
+        try {
+            task.execute();
+            fail("Expected BuildException");
+        } catch (BuildException be) {
+            assertEquals("You have used an attribute or nested element which is not compatible with spawn", be.toString());
+        }
+        
+        assertEquals(Boolean.FALSE, f1.get(task)); // overrideFailOnError -> false
+        assertEquals(Boolean.TRUE, f2.get(task));  // spawn -> true
+        assertEquals(Boolean.TRUE, f3.get(task));  // failOnError -> true
+        assertEquals(Boolean.TRUE, f4.get(task)); // incompatibleWithSpawn -> true
+        f1.set(task, Boolean.TRUE); // reset
+        f2.set(task, Boolean.FALSE); // reset
+        f3.set(task, Boolean.FALSE); // reset
+        f4.set(task, Boolean.FALSE); // reset
+    }
+
+    protected String getClassPath() {
+        ClassLoader loader = getClass().getClassLoader();
+        StringBuffer classPath = new StringBuffer();
+        if (loader instanceof URLClassLoader) {
+            URLClassLoader urlLoader = (URLClassLoader)loader;
+            URL[] urls = urlLoader.getURLs();
+            for (int x = 0; x < urls.length; x++) {
+                String file = urls[x].getFile().replaceAll("%20", " ");
+                if (file.indexOf("junit") == -1) {
+                    classPath.append(file);
+                    classPath.append(System.getProperty("path.separator"));
+                }
+            }
+        }
+        return classPath.toString();
     }
     
     private static void assertContains(String msg, String s1, String s2) {
