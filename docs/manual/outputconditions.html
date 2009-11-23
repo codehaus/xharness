@@ -11,7 +11,7 @@
 <h3>Description</h3>
 <p>XHarness adds a number of additional Condition types to the 
 <a href="http://ant.apache.org/manual/CoreTasks/conditions.html">Ant Condition framework</a>
-that operate on the output produced by other Tasks within an XHarness testsuite. These added conditions are
+that operate on the output produced by other Tasks within an XHarness test suite. These added conditions are
 <a href="#OutputSize">OutputSize</a>
 <a href="#OutputIs">OutputIs</a>
 <a href="#OutputContains">OutputContains</a>
@@ -92,7 +92,7 @@ XHarness process tasks (<a href="xhexec.html">Xh-Exec</a>, <a href="xhexecbg.htm
 <h4>Task attribute</h4>
 <p>The &quot;task&quot; attribute is either a Task name or a positive or negative integer value.</p>
 <p>If it is a task name, the condition operates on the task with the given name in the enclosing 
-group of Tasks. If there are mutliple tasks with the same name in the group, the names of 
+group of Tasks. If there are multiple tasks with the same name in the group, the names of 
 subsequent tasks are appended with a numeric value: &quot;<code>_&lt;num&gt;</code>&quot;:
 <pre>  
        &lt;echo message=&quot;Hello World&quot;/&gt;
@@ -147,7 +147,7 @@ not specified, the condition operates on the output of the background process it
 </pre>
 <a name="OutputSize">
 <h3>OutputSize</h3>
-<p>Tests that the given stream of the denoted Task contains the given amount of output.</p>
+<p>Tests if the given stream of the denoted Task contains the given amount of output.</p>
 <h4>Additional Parameters</h4>
 <table border="1" cellpadding="2" cellspacing="0">
   <tr>
@@ -188,7 +188,7 @@ not specified, the condition operates on the output of the background process it
 </pre>
 <a name="OutputIs">
 <h3>OutputIs</h3>
-<p>Tests that the given stream of the denoted Task contains exactly the given Text.</p>
+<p>Tests if the given stream of the denoted Task contains exactly the given Text.</p>
 <h4>Additional Parameters</h4>
 <table border="1" cellpadding="2" cellspacing="0">
   <tr>
@@ -218,7 +218,7 @@ or as a text element in the CDATA section of the condition.</p>
 </pre>
 <a name="OutputContains">
 <h3>OutputContains</h3>
-<p>Tests that the given stream of the denoted Task contains a given Text String.</p>
+<p>Tests if the given stream of the denoted Task contains a given Text String.</p>
 <h4>Additional Parameters</h4>
 <table border="1" cellpadding="2" cellspacing="0">
   <tr>
@@ -257,7 +257,7 @@ or as a text element in the CDATA section of the condition.</p>
 </pre>
 <a name="OutputRegex">
 <h3>OutputRegex</h3>
-<p>Tests that the given stream of the denoted Task matches the given regular expression.</p>
+<p>Tests if the given stream of the denoted Task matches the given regular expression.</p>
 <h4>Additional Parameters</h4>
 <table border="1" cellpadding="2" cellspacing="0">
   <tr>
@@ -313,7 +313,7 @@ World&lt;/echo&gt;
 <a name="SubSection">
 <h3>SubSection</h3>
 <i>(Since XHarness 1.0-beta-5)</i>
-<p>Defines a subsection of a task output which can then be used to apply forther outpus assertions via a nested condition.</p>
+<p>Defines a subsection of a task output which can then be used to apply further output validation via a nested condition.</p>
 <h4>Additional Parameters</h4>
 <table border="1" cellpadding="2" cellspacing="0">
   <tr>

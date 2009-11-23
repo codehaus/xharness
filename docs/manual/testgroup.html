@@ -10,9 +10,9 @@
 <h2>TestGroup</h2>
 <h3>Description</h3>
 <p>TestGroup is a container task that may contain any other Ant Task. If forms the logical unit of
-a set of related TestCases or TestGroups. It executs all it's
-contained taks, regardless if they fail or not. After all Tasks have been executed, the TestGroup
-fails itself, if at least on of the containg Taks has failed.
+a set of related TestCases or TestGroups. It executes all it's
+contained tasks, regardless if they fail or not. After all Tasks have been executed, the TestGroup
+fails itself, if at least on of the containing Tasks has failed.
 </p>
 <p>After the TestGroup has executed all it's containing Tasks it will stop all Background Processes 
 (<a href="xhexecbg.html">Xh-ExecBg</a> and <a href="xhjavabg.html">Xh-JavaBg</a>) that have were started 
@@ -20,7 +20,7 @@ within the scope of the TestGroup.
 </p>
 <p>Optionally TestGroups can be structure similar to the
 directory structure of the tests in the file system. In that case, XHarness will automatically set 
-the property <pre>current.test.directory</pre> to the current working directory in the filesystem
+the property <pre>current.test.directory</pre> to the current working directory in the file system
 and adjust the dir attribute (if not set explicitly) of XHarness processes to that directory.
 </p>
 

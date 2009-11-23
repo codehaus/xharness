@@ -9,14 +9,14 @@
 
 <h2>EnvSet</h2>
 <h3>Description</h3>
-<p><a href="http://ant.apache.org/manual/CoreTasks/exec.html#env">Enviroment
+<p><a href="http://ant.apache.org/manual/CoreTasks/exec.html#env">Environment
 Variables</a> can be grouped to sets and later be referenced by their 
 <code>id</code> attribute. They are defined via an EnvSet element, which can 
 appear nested into another EnvSet element. In addition, EnvSets can be defined 
 as a stand alone element at the same level as <code>target</code> &#151; i.e., 
 as children of <code>project</code> as well as as children of
 <code>target</code>.</p>
-<p>Enviroment Variables can be specified by nested <code>&lt;env&gt;</code> 
+<p>Environment Variables can be specified by nested <code>&lt;env&gt;</code> 
 elements.</p>
 <p>EnvSets can be used in all XHarness process Tasks: 
 <a href="xhexec.html">XhExec</a>, <a href="xhexecbg.html">XhExecBg</a>, 
@@ -95,20 +95,20 @@ elements.</p>
   <tr>
     <td valign="top">file</td>
     <td valign="top">The value for the environment variable. Will be
-        replaced by the absolute filename of the file by Ant.</td>
+        replaced by the absolute file name of the file by Ant.</td>
   </tr>
   <tr>
     <td valign="top">append</td>
-    <td valign="top">If the enclosing EnvSet loads the system's enviroment
-        <code>(loadenviromnet="true"</code>) and this variable already exists
+    <td valign="top">If the enclosing EnvSet loads the system's environment
+        <code>(loadenvironment="true"</code>) and this variable already exists
         in the loaded environment, append the value of this argument to the
         environments value instead of replacing it. The default is "false".</td>
     <td align="center" valign="top">No</td>
   </tr>
   <tr>
     <td valign="top">prepend</td>
-    <td valign="top">If the enclosing EnvSet loads the system's enviroment
-        <code>(loadenviromnet="true"</code>) and this variable already exists
+    <td valign="top">If the enclosing EnvSet loads the system's environment
+        <code>(loadenvironment="true"</code>) and this variable already exists
         in the loaded environment, prepend the value of this argument to the
         environments value instead of replacing it. The default is "false".</td>
     <td align="center" valign="top">No</td>
