@@ -35,7 +35,7 @@ public class ScriptLauncher extends Thread {
         task = t;
         prepareScripts();
         try {
-            InetAddress addr = InetAddress.getByName("127.0.0.1");
+            InetAddress addr = InetAddress.getByName(null);
             ssocket = new ServerSocket(0, 0, addr);
         } catch (Exception e) {
             if (ssocket != null) {

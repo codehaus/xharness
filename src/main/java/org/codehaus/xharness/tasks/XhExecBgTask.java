@@ -14,7 +14,6 @@
  *  limitations under the License.
  *
  */
-
 package org.codehaus.xharness.tasks;
 
 import java.io.BufferedOutputStream;
@@ -217,12 +216,10 @@ public class XhExecBgTask extends XhExecTask implements Runnable, BgProcess {
                 asyncThread.start();
             } catch (OutOfMemoryError oome) {
                 Runtime rt = Runtime.getRuntime();
-                ThreadGroup tg = Thread.currentThread().getThreadGroup();
-
                 log("Fatal error: unable to create new Thread: " + oome + "\n"
                         + "Trying recovery....\n" + "Before: total="
                         + rt.totalMemory() + ",free=" + rt.freeMemory()
-                        + ",threads=" + tg.activeCount(), Project.MSG_ERR);
+                        + ",threads=" + Thread.activeCount(), Project.MSG_ERR);
 
                 isRunning = false;
                 throw oome;

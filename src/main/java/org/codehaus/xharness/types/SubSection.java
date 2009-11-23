@@ -27,6 +27,12 @@ import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.log.LineBuffer;
 import org.codehaus.xharness.log.LogLine;
 
+/**
+ * The SubSection condition defines a subsection of a task output which can then be used to apply 
+ * further output validation via a nested condition.
+ *
+ * @author  Gregor Heine
+ */
 public class SubSection extends AbstractOutput {
     private Condition condition;
     private String beginRegex;
@@ -133,7 +139,8 @@ public class SubSection extends AbstractOutput {
             throw new FatalException("<subsection> endRegex must be set when greedy=true");
         }
         if (greedy && (repeat + beginAfter) > 1) {
-            throw new FatalException("<subsection> can't use repeat and beginAfter with greedy=true");
+            throw new FatalException(
+                    "<subsection> can't use repeat and beginAfter with greedy=true");
         }
         Searcher searcher = new Searcher(getOutputIterator());
         Pattern beginPattern = beginRegex == null ? null : Pattern.compile(beginRegex);

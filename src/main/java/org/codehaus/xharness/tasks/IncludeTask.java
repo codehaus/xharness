@@ -36,7 +36,7 @@ import org.codehaus.xharness.util.IncludeProjectHelper;
  * @author  Gregor Heine
  */
 public class IncludeTask extends Task implements TaskContainer {
-    private static final FileUtils FILE_UTILS = FileUtils.newFileUtils();
+    private static final FileUtils FILE_UTILS = FileUtils.getFileUtils();
     private Task nestedTask;
     private String file;
 
