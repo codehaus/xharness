@@ -6,7 +6,6 @@ import org.apache.tools.ant.Project;
 import org.codehaus.xharness.log.LineBuffer;
 import org.codehaus.xharness.log.TaskLogger;
 import org.codehaus.xharness.log.TaskRegistry;
-import org.codehaus.xharness.log.TestLogger;
 import org.codehaus.xharness.tasks.XharnessTask;
 
 import org.easymock.MockControl;
@@ -123,8 +122,7 @@ public class OutputSizeTest extends TestCase {
         LineBuffer buffer = new LineBuffer();
         buffer.logLine("All good things must come to an end");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -134,18 +132,17 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setEquals(1);
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
@@ -156,7 +153,9 @@ public class OutputSizeTest extends TestCase {
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 1 line.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testLinesEqualsFails() throws Exception {
@@ -164,8 +163,7 @@ public class OutputSizeTest extends TestCase {
         buffer.logLine("All good things must come to an end");
         buffer.logLine("Beam me up, Scottie");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -175,37 +173,37 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setEquals(1);
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
             registry.setCurrentTest(new MockTestLogger(registry, logger));
-            assertTrue("Condition evaled incorrectly", !condition.eval());
+            assertFalse("Condition evaled incorrectly", condition.eval());
         } finally {
             MockTaskRegistry.reset();
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 2 lines.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testCharsEqualsPass() throws Exception {
         LineBuffer buffer = new LineBuffer();
         buffer.logLine("All good things must come to an end");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -215,19 +213,18 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setEquals(35);
         condition.setMode("char");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
@@ -238,15 +235,16 @@ public class OutputSizeTest extends TestCase {
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testCharsEqualsFails() throws Exception {
         LineBuffer buffer = new LineBuffer();
         buffer.logLine("All good things must come to an end");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -256,30 +254,31 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setEquals(34);
         condition.setMode("char");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
             registry.setCurrentTest(new MockTestLogger(registry, logger));
-            assertTrue("Condition evaled incorrectly", !condition.eval());
+            assertFalse("Condition evaled incorrectly", condition.eval());
         } finally {
             MockTaskRegistry.reset();
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testLinesLargerPass() throws Exception {
@@ -287,8 +286,7 @@ public class OutputSizeTest extends TestCase {
         buffer.logLine("All good things must come to an end");
         buffer.logLine("Beam me up, Scottie");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -298,18 +296,17 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setLarger(1);
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
@@ -320,7 +317,9 @@ public class OutputSizeTest extends TestCase {
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 2 lines.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testLinesLargerFails() throws Exception {
@@ -328,8 +327,7 @@ public class OutputSizeTest extends TestCase {
         buffer.logLine("All good things must come to an end");
         buffer.logLine("Beam me up, Scottie");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -339,37 +337,37 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setLarger(3);
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
             registry.setCurrentTest(new MockTestLogger(registry, logger));
-            assertTrue("Condition evaled incorrectly", !condition.eval());
+            assertFalse("Condition evaled incorrectly", condition.eval());
         } finally {
             MockTaskRegistry.reset();
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 2 lines.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testCharsLargerPass() throws Exception {
         LineBuffer buffer = new LineBuffer();
         buffer.logLine("All good things must come to an end");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -379,19 +377,18 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setLarger(34);
         condition.setMode("char");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
@@ -402,15 +399,16 @@ public class OutputSizeTest extends TestCase {
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testCharsLargerFails() throws Exception {
         LineBuffer buffer = new LineBuffer();
         buffer.logLine("All good things must come to an end");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -420,38 +418,39 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setLarger(35);
         condition.setMode("char");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
             registry.setCurrentTest(new MockTestLogger(registry, logger));
-            assertTrue("Condition evaled incorrectly", !condition.eval());
+            assertFalse("Condition evaled incorrectly", condition.eval());
         } finally {
             MockTaskRegistry.reset();
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
+    
     public void testLinesSmallerPass() throws Exception {
         LineBuffer buffer = new LineBuffer();
         buffer.logLine("All good things must come to an end");
         buffer.logLine("Beam me up, Scottie");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -461,18 +460,17 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setSmaller(3);
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
@@ -483,7 +481,9 @@ public class OutputSizeTest extends TestCase {
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 2 lines.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testLinesSmallerFails() throws Exception {
@@ -491,8 +491,7 @@ public class OutputSizeTest extends TestCase {
         buffer.logLine("All good things must come to an end");
         buffer.logLine("Beam me up, Scottie");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -502,37 +501,37 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setSmaller(2);
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
             registry.setCurrentTest(new MockTestLogger(registry, logger));
-            assertTrue("Condition evaled incorrectly", !condition.eval());
+            assertFalse("Condition evaled incorrectly", condition.eval());
         } finally {
             MockTaskRegistry.reset();
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 2 lines.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testCharsSmallerPass() throws Exception {
         LineBuffer buffer = new LineBuffer();
         buffer.logLine("All good things must come to an end");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -542,19 +541,18 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setSmaller(36);
         condition.setMode("char");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
@@ -565,15 +563,16 @@ public class OutputSizeTest extends TestCase {
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testCharsSmallerFails() throws Exception {
         LineBuffer buffer = new LineBuffer();
         buffer.logLine("All good things must come to an end");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -583,48 +582,30 @@ public class OutputSizeTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputSize condition = new OutputSize();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         condition.setLarger(35);
         condition.setMode("char");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
             registry.setCurrentTest(new MockTestLogger(registry, logger));
-            assertTrue("Condition evaled incorrectly", !condition.eval());
+            assertFalse("Condition evaled incorrectly", condition.eval());
         } finally {
             MockTaskRegistry.reset();
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
-    }
 
-    private static class MockTestLogger extends TestLogger {
-        private TaskLogger taskLogger;
-        
-        public MockTestLogger(TaskRegistry registry, TaskLogger logger) {
-            super(registry, null, null, null, null, null);
-            taskLogger = logger;
-        }
-        
-        public TaskLogger getTask(String name) {
-            return taskLogger;
-        }
-    }
-    
-    private static class MockTaskRegistry extends TaskRegistry {
-        protected static void reset() {
-            TaskRegistry.reset();
-        }
+        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
 }

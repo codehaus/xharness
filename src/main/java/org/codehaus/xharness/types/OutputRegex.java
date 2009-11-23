@@ -17,30 +17,61 @@
 
 package org.codehaus.xharness.types;
 
-import java.util.Iterator;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 
 import org.codehaus.xharness.exceptions.FatalException;
-import org.codehaus.xharness.log.LogLine;
 
-public class OutputRegex extends OutputIs {
+public class OutputRegex extends AbstractRepeateableOutput {
+    private boolean docMode = false;
+    
+    /**
+     * Enable doc mode. In doc mode, the task/process output is treated as a multi-line 
+     * document, allowing the regular expression to contain line breaks (\n).
+     * If disabled (default) the regular expression is applied to each line of the output 
+     * separately, allowing the use of start-of-line and end-of-line patterns (^ and $).
+     * By default doc mode is disabled.
+     *
+     * @param mode true to enable doc mode, false to disable doc mode
+     */
+    public void setDocMode(boolean mode) {
+        docMode = mode;
+    }
+    
+    /**
+     * Evaluate this output condition.
+     * 
+     * @return true if the expected output is found, false otherwise
+     * @exception BuildException if an error occurs
+     */
     public boolean eval() throws BuildException {
         if (getText() == null) {
             throw new FatalException("Missing regular expression");
         } 
-        Pattern pattern = Pattern.compile(getText());
-        Iterator iter = getOutputIterator();
-        while (iter.hasNext()) {
-            LogLine line = (LogLine)iter.next();
-            if (pattern.matcher(line.getText(filterANSI())).find()) {
-                log(logPrefix() + "matches pattern \"" + getText() + "\"", Project.MSG_VERBOSE);
-                return true;
-            }
+        final Pattern pattern = Pattern.compile(getText());
+        Searcher searcher;
+        if (docMode) {
+            final Matcher matcher = pattern.matcher(
+                    getLineBuffer().toString('\n', "", getStreamPrio(), isIgnoreANSI()));
+            searcher = new Searcher() {
+                public boolean findAgain() {
+                    return matcher.matches();
+                }
+            };
+        } else {
+            searcher = new LineBufferSearcher(getOutputIterator()) {
+                public int indexIn(String text) {
+                    Matcher matcher = pattern.matcher(text);
+                    return matcher.find() ? matcher.end() : -1;
+                }
+            };
         }
-        log(logPrefix() + "does not match pattern \"" + getText() + "\"", Project.MSG_VERBOSE);
-        return false;
+        return super.eval(searcher);
+    }
+    
+    protected void logStartSearch() {
+        logEvalResult("searching for regex pattern \"" + getText() + "\"");
     }
 }

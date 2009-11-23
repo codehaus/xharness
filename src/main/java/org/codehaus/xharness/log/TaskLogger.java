@@ -56,8 +56,7 @@ public class TaskLogger implements BuildListener {
     private String taskName;
     private String parentName;
     private String taskReference;
-
-    private LineBuffer lineBuffer = new LineBuffer();
+    private LineBuffer lineBuffer;
 
     private int logId;
     private boolean actualTaskDetermined;
@@ -80,12 +79,31 @@ public class TaskLogger implements BuildListener {
      *                  another logger or <code>null</code>.
      */
     public TaskLogger(TaskRegistry reg, Task task, String name, String parent, String reference) {
+        this(reg, task, name, parent, reference, LogPriority.INFO);
+    }
+    
+    /**
+     * Constructs a TaskLogger instance.
+     * 
+     * @param reg The XHarness TaskRegistry
+     * @param task The Task that is to be logged by this Logger or a placeholder Task 
+     *             retrieved from an {@link org.apache.tools.ant.UnknownElement} if 
+     *             the actual Task is not available yet.
+     * @param name The name of the TaskLogger (usually some form of the Task name).
+     * @param parent The fully wualified name of the Logger's parent logger (or <code>null</code>).
+     * @param reference An optional reference String denoting a fully quailified name of 
+     *                  another logger or <code>null</code>.
+     * @param defaultPrio The default log priority for this Task.
+     */
+    public TaskLogger(TaskRegistry reg, Task task, String name, 
+                      String parent, String reference, int defaultPrio) {
         registry = reg;
         myTask = task;
         actualTaskDetermined = false;
         taskName = name;
         parentName = parent;
         taskReference = reference;
+        lineBuffer = new LineBuffer(defaultPrio);
         
         logId = registry.getNextId();
         registry.getProject().addBuildListener(this);

@@ -81,28 +81,71 @@ public class LineBufferTest extends TestCase {
         buffer.logLine(2, "bar"); 
         buffer.logLine(3, "spam"); 
         buffer.logLine(4, "eggs"); 
-        buffer.logLine(1, "FOO");
-        assertEquals("Wrong log", "foo\nbar\nspam\neggs\nFOO", buffer.toString());
-        assertEquals("Wrong log", "foo\nFOO", buffer.toString(1));
+        buffer.logLine(1, "hel\u001B[1;2mlo");
+        assertEquals("Wrong log", "foo\nbar\nspam\neggs\nhel\u001B[1;2mlo", buffer.toString());
+        assertEquals("Wrong log", "foo\nhel\u001B[1;2mlo", buffer.toString(1));
         assertEquals("Wrong log", "bar", buffer.toString(2));
         assertEquals("Wrong log", "spam", buffer.toString(3));
         assertEquals("Wrong log", "eggs", buffer.toString(4));
-        assertEquals("Wrong log", "foo\nFOO", buffer.toString(1, 1));
+        assertEquals("Wrong log", "foo\nhel\u001B[1;2mlo", buffer.toString(1, 1));
         assertEquals("Wrong log", "bar", buffer.toString(2, 2));
         assertEquals("Wrong log", "spam", buffer.toString(3, 3));
         assertEquals("Wrong log", "eggs", buffer.toString(4, 4));
-        assertEquals("Wrong log", "foo\nbar\nFOO", buffer.toString(-10, 2));
+        assertEquals("Wrong log", "foo\nbar\nhel\u001B[1;2mlo", buffer.toString(-10, 2));
         assertEquals("Wrong log", "bar\nspam", buffer.toString(2, 3));
         assertEquals("Wrong log", "spam\neggs", buffer.toString(3, 30));
-        assertEquals("Wrong log", "foo bar spam eggs FOO", buffer.toString(' ', ""));
+        assertEquals("Wrong log", "foo bar spam eggs hello", buffer.toString(' ', "", true));
         assertEquals("Wrong log", 
-                     "abcfooxabcbarxabcspamxabceggsxabcFOO", 
+                     "abcfooxabcbarxabcspamxabceggsxabchel\u001B[1;2mlo", 
                      buffer.toString('x', "abc"));
         assertEquals("Wrong log", 
-                     "1: foo-2: bar-3: spam-4: eggs-1: FOO", 
-                     buffer.toString('-', null));
-        assertEquals("Wrong log", "*foox*FOO", buffer.toString('x', "*", 1));
-        assertEquals("Wrong log", "*foox*barx*FOO", buffer.toString('x', "*", 1, 2));
+                     "1: foo-2: bar-3: spam-4: eggs-1: hello", 
+                     buffer.toString('-', null, true));
+        assertEquals("Wrong log", "*foox*hello", buffer.toString('x', "*", 1, true));
+        assertEquals("Wrong log", "*foox*barx*hello", buffer.toString('x', "*", 1, 2, true));
+    }
+    
+    public void testToArray() {
+        LineBuffer buffer = new LineBuffer();
+        buffer.logLine(1, "foo");
+        buffer.logLine(2, "bar"); 
+        buffer.logLine(3, "spam"); 
+        buffer.logLine(4, "eggs"); 
+        
+        LogLine[] lines = buffer.toArray();
+        assertEquals(4, lines.length);
+        assertEquals(1, lines[0].getPriority());
+        assertEquals(2, lines[1].getPriority());
+        assertEquals(3, lines[2].getPriority());
+        assertEquals(4, lines[3].getPriority());
+        assertEquals("foo", lines[0].getText());
+        assertEquals("bar", lines[1].getText());
+        assertEquals("spam", lines[2].getText());
+        assertEquals("eggs", lines[3].getText());
+    }
+    
+    public void testToStringArray() {
+        LineBuffer buffer = new LineBuffer();
+        buffer.logLine(1, "foo");
+        buffer.logLine(2, "bar"); 
+        buffer.logLine(3, "spam"); 
+        buffer.logLine(4, "eggs"); 
+        
+        String[] strings = buffer.toStringArray();
+        assertEquals(4, strings.length);
+        assertEquals("foo", strings[0]);
+        assertEquals("bar", strings[1]);
+        assertEquals("spam", strings[2]);
+        assertEquals("eggs", strings[3]);
+        
+        strings = buffer.toStringArray(2);
+        assertEquals(1, strings.length);
+        assertEquals("bar", strings[0]);
+        
+        strings = buffer.toStringArray(2, 3);
+        assertEquals(2, strings.length);
+        assertEquals("bar", strings[0]);
+        assertEquals("spam", strings[1]);
     }
     
     public void testGetPriority() throws Exception {
@@ -122,6 +165,15 @@ public class LineBufferTest extends TestCase {
         assertEquals("Wrong default prio", 100, buffer.getDefaultPriority());
         assertEquals("Wrong max prio", 150, buffer.getMaxPriority());
         assertEquals("Wrong min prio", 50, buffer.getMinPriority());
+    }
+    
+    public void testAddLine() {
+        LineBuffer buffer = new LineBuffer();
+        buffer.addLine(new LogLine(5, "foo"));
+        buffer.addLine(new LogLine(10, "bar"));
+        assertEquals(5, buffer.getMinPriority());
+        assertEquals(10, buffer.getMaxPriority());
+        assertEquals("foo\nbar", buffer.toString());
     }
     
     public void testIterator() throws Exception {
@@ -148,8 +200,6 @@ public class LineBufferTest extends TestCase {
         assertTrue("Out of elements", iter.hasNext());
         line = (LogLine)iter.next();
         assertEquals("Wrong priority", 1, line.getPriority());
-        line.setPriority(3);
-        assertEquals("Wrong priority", 3, line.getPriority());
         assertEquals("Wrong element", "bar", line.getText());
 
         assertTrue("Out of elements", iter.hasNext());
@@ -199,9 +249,38 @@ public class LineBufferTest extends TestCase {
 
         assertTrue("Out of elements", iter.hasNext());
         line = (LogLine)iter.next();
+        assertEquals("Wrong priority", 1, line.getPriority());
+        assertEquals("Wrong element", "bar", line.getText());
+
+        assertTrue("Out of elements", iter.hasNext());
+        line = (LogLine)iter.next();
         assertEquals("Wrong priority", 2, line.getPriority());
         assertEquals("Wrong element", "eggs", line.getText());
 
         assertTrue("Too many elements", !iter.hasNext());
+    }
+    
+    public void testClone() {
+        LineBuffer buffer = new LineBuffer(10);
+        buffer.logLine(2, "foo");
+        buffer.logLine(3, "spam"); 
+        buffer.logLine(4, "bar"); 
+        buffer.logLine(1, "eggs"); 
+        buffer.logLine(5, "bacon");
+        
+        LineBuffer clone = (LineBuffer)buffer.clone();
+        assertEquals(10, clone.getDefaultPriority());
+        assertEquals(1, clone.getMinPriority());
+        assertEquals(5, clone.getMaxPriority());
+        assertEquals(buffer.toString(), clone.toString());
+        
+        buffer.logLine("new");
+        buffer.logLine(0, "saussage");
+        assertEquals(0, buffer.getMinPriority());
+        assertEquals(10, buffer.getMaxPriority());
+        assertEquals(10, clone.getDefaultPriority());
+        assertEquals(1, clone.getMinPriority());
+        assertEquals(5, clone.getMaxPriority());
+        assertFalse(clone.toString().equals(buffer.toString()));
     }
 }

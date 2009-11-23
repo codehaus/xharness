@@ -20,7 +20,6 @@ package org.codehaus.xharness.types;
 import java.util.Iterator;
 
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 
 import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.log.LogLine;
@@ -31,22 +30,56 @@ public class OutputSize extends AbstractOutput {
     private int larger = -1;
     private int smaller = -1;
     
+    /**
+     * Set the size mode. Allowed values are "line" to count the number of lines in the output
+     * and "char" to count the number of characters in the output. In "char" mode, line breaks
+     * (cr/lf) are ignored.
+     *
+     * @param mod the size mode
+     */
     public void setMode(String mod) {
         mode = mod;
     }
     
+    /**
+     * Match exactly the number of lines/characters as specified in the parameter.
+     * The condition will pass if the output contains the exact number of lines/characters
+     * (depending on the size mode), otherwise it will fail.  
+     *
+     * @param value the exact number of lines to expect
+     */
     public void setEquals(int value) {
         equals = value;
     }
     
+    /**
+     * Match at least one more number of lines/characters than specified in the parameter.
+     * The condition will pass if the output contains more lines/characters
+     * (depending on the size mode) than specified, otherwise it will fail.  
+     *
+     * @param value the minimum number of lines to expect minus 1
+     */
     public void setLarger(int value) {
         larger = value;
     }
     
+    /**
+     * Match less number of lines/characters than specified in the parameter.
+     * The condition will pass if the output contains less lines/characters
+     * (depending on the size mode) than specified, otherwise it will fail.  
+     *
+     * @param value the maximum number of lines to expect plus 1
+     */
     public void setSmaller(int value) {
         smaller = value;
     }
     
+    /**
+     * Evaluate this output condition.
+     * 
+     * @return true if the expected output is found, false otherwise
+     * @exception BuildException if an error occurs
+     */
     public boolean eval() throws BuildException {
         if (equals >= 0 && (larger >= 0 || smaller >= 0) || larger >= 0 && smaller >= 0) {
             throw new FatalException("Can only set one of: equals, larger, smaller");
@@ -66,16 +99,15 @@ public class OutputSize extends AbstractOutput {
         int numLines = 0;
         int numChars = 0;
         
-        Iterator iter = getOutputIterator();
-        while (iter.hasNext()) {
+        for (Iterator iter = getOutputIterator(); iter.hasNext();) {
             LogLine line = (LogLine)iter.next();
             numLines++;
             numChars += line.getText().length();
         }
         
-        log(logPrefix() + "size is "
-            + (lineMode ? (numLines + " Lines.") : (numChars + " Characters.")), 
-            Project.MSG_VERBOSE);
+        int val = lineMode ? numLines : numChars;
+        String unit = lineMode ? "line" : "character";
+        logEvalResult("size is " + val + " " + unit + (val == 1 ? "." : "s."));
 
         if (equals >= 0) {
             return lineMode ? numLines == equals : numChars == equals;

@@ -40,12 +40,12 @@ public class AssertTask extends ConditionBase {
      * Add a nested task to this TaskContainer.
      *
      * @param task  Nested task to execute sequentially
-     * @throws FatalException If there is more than 1 nested task.
+     * @throws BuildException (FatalException) If there is more than 1 nested task.
      */
-    public void add(Task task) throws FatalException {
+    public void add(Task task) throws BuildException {
         if (task != null) {
             if (nestedTask != null) {
-                throw new FatalException("Only one nested task is suppoted.");
+                throw new FatalException("Only one nested task is supported in <assert>.");
             }
             nestedTask = task;
         }
@@ -73,11 +73,11 @@ public class AssertTask extends ConditionBase {
     /**
      * Execute this Assert Task.
      *
-     * @throws FatalException If the number of nested conditions is not exactly 1.
-     * @throws  AssertionWarningException If the expected condition was not true, 
-     *         after a specified timeout (and erroronfail=false)
      * @throws BuildException if the nested task fails or if the expected condition was not true
-               and erroronfail=true
+     *                        and erroronfail=true
+     *         FatalException If the number of nested conditions is not exactly 1.
+     *         AssertionWarningException If the expected condition was not true, after a specified 
+     *                                   timeout (and erroronfail=false)
      */
     public void execute() throws BuildException {
         if (countConditions() > 1) {

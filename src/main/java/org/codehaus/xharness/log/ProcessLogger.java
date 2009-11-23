@@ -44,7 +44,7 @@ public class ProcessLogger extends TaskLogger implements IDeferredLogger {
      * @param parentName The name of this logger's parent logger.
      */
     public ProcessLogger(TaskRegistry registry, Task task, String name, String parentName) {
-        super(registry, task, name, parentName, null);
+        super(registry, task, name, parentName, null, LogPriority.STDOUT);
         processLoggingEnabled = false;
     }
     

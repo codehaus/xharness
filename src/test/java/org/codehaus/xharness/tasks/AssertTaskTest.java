@@ -262,7 +262,7 @@ public class AssertTaskTest extends TestCase {
             task.add(nestedTask);
             fail("Expected BuildException");
         } catch (BuildException be) {
-            assertEquals("Only one nested task is suppoted.", be.getMessage());
+            assertEquals("Only one nested task is supported in <assert>.", be.getMessage());
         }
         task.add((Task)null);
         task.execute();

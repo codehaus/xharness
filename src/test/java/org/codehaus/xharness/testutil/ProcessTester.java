@@ -139,7 +139,7 @@ public class ProcessTester {
                     return;
                 }
                 try {
-                    byte[] data = new byte[1000];
+                    byte[] data = new byte[16000];
                     int bytes = sock.getInputStream().read(data);
                     if (bytes > 0) {
                         receivedData = new String(data, 0, bytes);

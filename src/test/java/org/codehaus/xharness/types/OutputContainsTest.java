@@ -3,11 +3,11 @@ package org.codehaus.xharness.types;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 
+import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.log.LineBuffer;
 import org.codehaus.xharness.log.LogPriority;
 import org.codehaus.xharness.log.TaskLogger;
 import org.codehaus.xharness.log.TaskRegistry;
-import org.codehaus.xharness.log.TestLogger;
 import org.codehaus.xharness.tasks.XharnessTask;
 import org.codehaus.xharness.types.AbstractOutput.Stream;
 
@@ -67,8 +67,7 @@ public class OutputContainsTest extends TestCase {
         LineBuffer buffer = new LineBuffer(LogPriority.STDOUT);
         buffer.logLine("All good things must come to an end");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -78,29 +77,33 @@ public class OutputContainsTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputContains condition = new OutputContains();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.addText("Scottie");
         condition.setTask("foo");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
             registry.setCurrentTest(new MockTestLogger(registry, logger));
-            assertTrue("Condition evaled incorrectly", !condition.eval());
+            assertFalse("Condition evaled incorrectly", condition.eval());
         } finally {
             MockTaskRegistry.reset();
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        String[] logLines = project.getBuffer().toStringArray(Project.MSG_VERBOSE);
+        assertEquals(2, logLines.length);
+        assertEquals("Task @@foo/bar@@ output (stdout) searching for string \"Scottie\"", 
+                     logLines[0]);
+        assertEquals("Condition failed: found 0 occurrences, required  at least 1", logLines[1]);
     }
 
     public void testEvalTrue() throws Exception {
@@ -108,8 +111,7 @@ public class OutputContainsTest extends TestCase {
         buffer.logLine("All good things must come to an end");
         buffer.logLine("Beam me up, Scottie");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -124,7 +126,7 @@ public class OutputContainsTest extends TestCase {
         tlCtrl.setReturnValue("foo/bar");
         
         OutputContains condition = new OutputContains();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.addText("Scottie");
         condition.setTask("foo");
         condition.setIgnoreANSI(true);
@@ -134,7 +136,6 @@ public class OutputContainsTest extends TestCase {
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
@@ -145,16 +146,20 @@ public class OutputContainsTest extends TestCase {
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        String[] logLines = project.getBuffer().toStringArray(Project.MSG_VERBOSE);
+        assertEquals(2, logLines.length);
+        assertEquals("Task @@foo/bar@@ output (stderr) searching for string \"Scottie\"", 
+                     logLines[0]);
+        assertEquals("Condition passed: found at least 1 occurrence", logLines[1]);
     }
 
-    public void testFilterANSIEvalTrue() throws Exception {
+    public void testFilterANSI() throws Exception {
         LineBuffer buffer = new LineBuffer(LogPriority.STDERR);
         buffer.logLine("All good things must come to an end");
-        buffer.logLine("Beam me up, \\u001B\\[1mScottie\\u001B\\[1m");
+        buffer.logLine("Beam me up, Scot\u001B[1;2m\u001B[3mtie");
 
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
 
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -169,7 +174,7 @@ public class OutputContainsTest extends TestCase {
         tlCtrl.setReturnValue("foo/bar");
 
         OutputContains condition = new OutputContains();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.addText("Scottie");
         condition.setTask("foo");
         condition.setIgnoreANSI(true);
@@ -179,7 +184,6 @@ public class OutputContainsTest extends TestCase {
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
@@ -190,25 +194,130 @@ public class OutputContainsTest extends TestCase {
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+        
+
+        String[] logLines = project.getBuffer().toStringArray(Project.MSG_VERBOSE);
+        assertEquals(2, logLines.length);
+        assertEquals("Task @@foo/bar@@ output (stderr) searching for string \"Scottie\"", 
+                     logLines[0]);
+        assertEquals("Condition passed: found at least 1 occurrence", logLines[1]);
     }    
 
-    private static class MockTestLogger extends TestLogger {
-        private TaskLogger taskLogger;
+    public void testMinAndMax() throws Exception {
+        LineBuffer buffer = new LineBuffer(0);
+        buffer.logLine("one two three four");
+        buffer.logLine("five four three four");
+        buffer.logLine("three two one zero");
         
-        public MockTestLogger(TaskRegistry registry, TaskLogger logger) {
-            super(registry, null, null, null, null, null);
-            taskLogger = logger;
-        }
+        TestProject project = new TestProject();
         
-        public TaskLogger getTask(String name) {
-            return taskLogger;
+        MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
+        XharnessTask task = (XharnessTask)xhCtrl.getMock();
+        task.getProject();
+        xhCtrl.setReturnValue(project);
+        
+        MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
+        TaskLogger logger = (TaskLogger)tlCtrl.getMock();
+        logger.getLineBuffer();
+        tlCtrl.setReturnValue(buffer, 6);
+        logger.getFullName();
+        tlCtrl.setReturnValue("foo/bar", 5);
+        
+        OutputContains condition0 = new OutputContains();
+        condition0.setProject(project);
+        condition0.addText("foo");
+        condition0.setTask("foo");
+        condition0.setStream(Stream.getStream(0));
+        try {
+            condition0.setMin(0);
+            fail("Expected FatalException");
+        } catch(FatalException fe) {
+            assertEquals("<OutputContains> min value must be > 0", fe.getMessage());
         }
-    }
-    
-    private static class MockTaskRegistry extends TaskRegistry {
-        protected static void reset() {
-            TaskRegistry.reset();
+        try {
+            condition0.setMax(0);
+            fail("Expected FatalException");
+        } catch(FatalException fe) {
+            assertEquals("<OutputContains> max value must be > 0", fe.getMessage());
         }
+        condition0.setMin(2);
+        condition0.setMax(1);
+
+        OutputContains condition1 = new OutputContains();
+        condition1.setProject(project);
+        condition1.addText("three");
+        condition1.setTask("foo");
+        condition1.setStream(Stream.getStream(0));
+        condition1.setMin(3);
+        
+        OutputContains condition2 = new OutputContains();
+        condition2.setProject(project);
+        condition2.addText("three");
+        condition2.setTask("foo");
+        condition2.setStream(Stream.getStream(0));
+        condition2.setMin(4);
+        
+        OutputContains condition3 = new OutputContains();
+        condition3.setProject(project);
+        condition3.addText("three");
+        condition3.setTask("foo");
+        condition3.setStream(Stream.getStream(0));
+        condition3.setMax(3);
+        
+        OutputContains condition4 = new OutputContains();
+        condition4.setProject(project);
+        condition4.addText("three");
+        condition4.setTask("foo");
+        condition4.setStream(Stream.getStream(0));
+        condition4.setMax(2);
+        
+        OutputContains condition5 = new OutputContains();
+        condition5.setProject(project);
+        condition5.addText("four");
+        condition5.setTask("foo");
+        condition5.setStream(Stream.getStream(0));
+        condition5.setMin(3);
+        condition5.setMax(3);
+
+        xhCtrl.replay();
+        tlCtrl.replay();
+        TaskRegistry registry = null;
+        try {
+            registry = TaskRegistry.init(task);
+            registry.setCurrentTest(new MockTestLogger(registry, logger));
+            try {
+                condition0.eval();
+                fail("Expected FatalException");
+            } catch(FatalException fe) {
+                assertEquals("<OutputContains> min value must be <= max value", fe.getMessage());
+            }
+            assertTrue("Condition evaled incorrectly", condition1.eval());
+            assertFalse("Condition evaled incorrectly", condition2.eval());
+            assertTrue("Condition evaled incorrectly", condition3.eval());
+            assertFalse("Condition evaled incorrectly", condition4.eval());
+            assertTrue("Condition evaled incorrectly", condition5.eval());
+        } finally {
+            MockTaskRegistry.reset();
+        }
+        xhCtrl.verify();
+        tlCtrl.verify();
+
+        String[] logLines = project.getBuffer().toStringArray(Project.MSG_VERBOSE);
+        assertEquals(10, logLines.length);
+        assertEquals("Task @@foo/bar@@ output (stdout) searching for string \"three\"", 
+                     logLines[0]);
+        assertEquals("Condition passed: found at least 3 occurrences", logLines[1]);
+        assertEquals("Task @@foo/bar@@ output (stdout) searching for string \"three\"", 
+                     logLines[2]);
+        assertEquals("Condition failed: found 3 occurrences, required  at least 4", logLines[3]);
+        assertEquals("Task @@foo/bar@@ output (stdout) searching for string \"three\"", 
+                     logLines[4]);
+        assertEquals("Condition passed: found 3 occurrences", logLines[5]);
+        assertEquals("Task @@foo/bar@@ output (stdout) searching for string \"three\"", 
+                     logLines[6]);
+        assertEquals("Condition failed: found more than 2 occurrences", logLines[7]);
+        assertEquals("Task @@foo/bar@@ output (stdout) searching for string \"four\"", 
+                     logLines[8]);
+        assertEquals("Condition passed: found 3 occurrences", logLines[9]);
     }
 }

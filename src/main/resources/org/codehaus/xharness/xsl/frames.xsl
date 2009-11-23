@@ -1133,21 +1133,21 @@ function refresh() {
 <xsl:template name="format.output">
     <xsl:param name="output"/>
     <xsl:param name="fullname" select="@fullname"/>
-    <xsl:variable name="temp" select="substring-after($output, '@')"/>
+    <xsl:variable name="temp" select="substring-after($output, '@@')"/>
     <xsl:choose>
-        <xsl:when test="contains($temp,'@')">
-            <xsl:value-of select="substring-before($output, '@')"/>
+        <xsl:when test="contains($temp,'@@')">
+            <xsl:value-of select="substring-before($output, '@@')"/>
             <a>
                 <xsl:attribute name="href">
                     <xsl:call-template name="path">
                         <xsl:with-param name="path"><xsl:value-of select="$fullname"/></xsl:with-param>
                     </xsl:call-template> 
-                    <xsl:value-of select="substring-before($temp, '@')"/><xsl:text>.html</xsl:text>
+                    <xsl:value-of select="substring-before($temp, '@@')"/><xsl:text>.html</xsl:text>
                 </xsl:attribute>
-                <xsl:value-of select="substring-before($temp, '@')"/>
+                <xsl:value-of select="substring-before($temp, '@@')"/>
             </a>
             <xsl:call-template name="format.output">
-                <xsl:with-param name="output" select="substring-after($temp, '@')"/>
+                <xsl:with-param name="output" select="substring-after($temp, '@@')"/>
                 <xsl:with-param name="fullname" select="$fullname"/>
             </xsl:call-template>
         </xsl:when>

@@ -80,6 +80,7 @@ public class TaskLoggerTest extends TestCase {
         logger.setUnknownElement(uke);
         assertEquals("Wrong Uke", uke, logger.getUnknownElement());
         assertTrue("Buffer shouldn't be null", logger.getLineBuffer() != null);
+        assertEquals(LogPriority.INFO, logger.getLineBuffer().getDefaultPriority());
         assertEquals("Wrong owner", "", logger.getOwner());
         assertEquals("Wrong command", "", logger.getCommand());
         assertEquals("Wrong retval", 0, logger.getRetVal());
@@ -89,12 +90,14 @@ public class TaskLoggerTest extends TestCase {
         assertEquals("Wrong Failure", failure, logger.getFailure());
         assertEquals("Wrong Failure", failure.getMessage(), logger.getFailure().getMessage());
         
-        TaskLogger logger2 = new TaskLogger(registry, uke, "foo", null, null);
+        TaskLogger logger2 = new TaskLogger(registry, uke, "foo", null, null, 123);
         
         assertEquals("Wrong name", "foo", logger2.getName());
         assertEquals("Wrong parent", null, logger2.getParentName());
         assertEquals("Wrong full name", "foo", logger2.getFullName());
         assertEquals("Wrong reference", null, logger2.getReference());
+        assertTrue("Buffer shouldn't be null", logger2.getLineBuffer() != null);
+        assertEquals(123, logger2.getLineBuffer().getDefaultPriority());
 
         prCtrl.verify();
         trCtrl.verify();

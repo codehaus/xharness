@@ -17,19 +17,24 @@
 
 package org.codehaus.xharness.types;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectComponent;
 import org.apache.tools.ant.taskdefs.condition.Condition;
 import org.apache.tools.ant.types.EnumeratedAttribute;
 
+import org.codehaus.xharness.log.LineBuffer;
+import org.codehaus.xharness.log.LogLine;
 import org.codehaus.xharness.log.LogPriority;
 import org.codehaus.xharness.log.TaskLogger;
 import org.codehaus.xharness.log.TaskRegistry;
 
 public abstract class AbstractOutput extends ProjectComponent implements Condition {
+    private static LineBuffer lineBuffer;
     private Stream stream = null;
     private String taskName;
     private boolean ignoreANSI = false;
@@ -43,10 +48,6 @@ public abstract class AbstractOutput extends ProjectComponent implements Conditi
         ignoreANSI = ignoreansi;
     }
 
-    public boolean filterANSI() {
-        return ignoreANSI;
-    }
-    
     /**
      * Set the task to check.
      * 
@@ -65,19 +66,57 @@ public abstract class AbstractOutput extends ProjectComponent implements Conditi
         stream = strm;
     }
     
-    protected Iterator getOutputIterator() {
-        return getTaskLogger().getLineBuffer().iterator(getStream().getPriority());
+    protected boolean isIgnoreANSI() {
+        return ignoreANSI;
     }
     
-    protected final String logPrefix()  {
-        return "Task @" + getTaskLogger().getFullName() 
-             + "@ output (" + getStream().getValue() + ") ";
+    protected LineBuffer getLineBuffer() {
+        return lineBuffer == null ? getTaskLogger().getLineBuffer() : lineBuffer;
+    }
+    
+    protected int getStreamPrio() {
+        return lineBuffer == null ? getStream().getPriority() : lineBuffer.getDefaultPriority();
+    }
+
+    protected Iterator getOutputIterator() {
+        return getLineBuffer().iterator(getStreamPrio());
+    }
+    
+    protected final void logEvalResult(String msg)  {
+        LineBuffer subsection = lineBuffer;
+        StringBuffer buf = new StringBuffer();
+        buf.append("Task @@")
+            .append(getTaskLogger().getFullName())
+            .append("@@ output (")
+            .append(getStream().getValue())
+            .append(") ")
+            .append(msg);
+        if (subsection != null) {
+            buf.append(" in subsection");
+        }
+        log(buf.toString(), Project.MSG_VERBOSE);
+        if (subsection != null) {
+            logSubsection(subsection);
+        }
+    }
+
+    protected final void logSubsection(LineBuffer subsection) {
+        log("+++ subsection contents in debug output +++", Project.MSG_VERBOSE);
+        for (Iterator iter = subsection.iterator(); iter.hasNext();) {
+            LogLine line = (LogLine)iter.next();
+            log(line.getText(), Project.MSG_DEBUG);
+        }
+        log("+++ end of subsection contents +++", Project.MSG_VERBOSE);
+    }
+    
+    static void setLineBuffer(LineBuffer buf) {
+        lineBuffer = buf;
     }
     
     private Stream getStream() {
         if (stream == null) {
-            stream = new Stream();
-            stream.setValue(stream.getValues()[0]);
+            int prio = getLineBuffer().getDefaultPriority();
+            stream = Stream.getStream(prio);
         }
         return stream;
     }
@@ -104,16 +143,25 @@ public abstract class AbstractOutput extends ProjectComponent implements Conditi
             STDOUT, STDERR, ERROR, WARNING, INFO, VERBOSE, DEBUG
         };
 
-        private static Hashtable streamTable = new Hashtable();
+        private static Map streamTable = new HashMap();
         
         static {
-            streamTable.put(STDOUT,  new Integer(LogPriority.STDOUT));
-            streamTable.put(STDERR,  new Integer(LogPriority.STDERR));
-            streamTable.put(ERROR,   new Integer(LogPriority.ERROR));
-            streamTable.put(WARNING, new Integer(LogPriority.WARNING));
-            streamTable.put(INFO,    new Integer(LogPriority.INFO));
-            streamTable.put(VERBOSE, new Integer(LogPriority.VERBOSE));
-            streamTable.put(DEBUG,   new Integer(LogPriority.DEBUG));
+            streamTable.put(STDOUT,  Integer.valueOf(LogPriority.STDOUT));
+            streamTable.put(STDERR,  Integer.valueOf(LogPriority.STDERR));
+            streamTable.put(ERROR,   Integer.valueOf(LogPriority.ERROR));
+            streamTable.put(WARNING, Integer.valueOf(LogPriority.WARNING));
+            streamTable.put(INFO,    Integer.valueOf(LogPriority.INFO));
+            streamTable.put(VERBOSE, Integer.valueOf(LogPriority.VERBOSE));
+            streamTable.put(DEBUG,   Integer.valueOf(LogPriority.DEBUG));
+        }
+        
+        public Stream() {
+            super();
+        }
+        
+        private Stream(String sreamName) {
+            super();
+            setValue(sreamName);
         }
 
         public int getPriority() {
@@ -124,6 +172,17 @@ public abstract class AbstractOutput extends ProjectComponent implements Conditi
 
         public String[] getValues() {
             return UNITS;
+        }
+
+        public static Stream getStream(int priority) {
+            Integer prioObj = Integer.valueOf(priority);
+            for (Iterator iter = streamTable.entrySet().iterator(); iter.hasNext();) {
+                Map.Entry entry = (Map.Entry)iter.next();
+                if (prioObj.equals(entry.getValue())) {
+                    return new Stream((String)entry.getKey());
+                }
+            }
+            return null;
         }
     }
 }

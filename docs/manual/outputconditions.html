@@ -12,10 +12,11 @@
 <p>XHarness adds a number of additional Condition types to the 
 <a href="http://ant.apache.org/manual/CoreTasks/conditions.html">Ant Condition framework</a>
 that operate on the output produced by other Tasks within an XHarness testsuite. These added conditions are
-<a href="#OutputContains">OutputContains</a>
+<a href="#OutputSize">OutputSize</a>
 <a href="#OutputIs">OutputIs</a>
+<a href="#OutputContains">OutputContains</a>
 <a href="#OutputRegex">OutputRegex</a> and
-<a href="#OutputSize">OutputSize</a>.
+<a href="#SubSection">SubSection</a>.
 </p>
 <p>
 <h3>General Parameters</h3>
@@ -27,12 +28,17 @@ that operate on the output produced by other Tasks within an XHarness testsuite.
   </tr>
   <tr>
     <td valign="top">stream</td>
-    <td valign="top">Name of the output stream to operate on. Default is "stdout".</td>
+    <td valign="top">Name of the output stream to operate on. Default is "stdout" for all XHarness process tasks (see below), "info" for all other tasks.</td>
     <td align="center" valign="top">No</td>
   </tr>
   <tr>
     <td valign="top">task</td>
     <td valign="top">Name of or pointer to the task on which to operate. Default is "-1", i.e. the immediate previous Task.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">ignoreansi</td>
+    <td valign="top">Strip ANSI control characters from the output before applying the condition. Default is "false". <i>(Since XHarness 1.0-beta2)</i></td>
     <td align="center" valign="top">No</td>
   </tr>
 </table>
@@ -139,93 +145,6 @@ not specified, the condition operates on the output of the background process it
        &lt;/afterwards&gt;
     &lt;/xh-execbg&gt;
 </pre>
-<a name="OutputContains">
-<h3>OutputContains</h3>
-<p>Tests that the given stream of the denoted Task contains a given Text String.</p>
-<h4>Additional Parameters</h4>
-<table border="1" cellpadding="2" cellspacing="0">
-  <tr>
-    <td valign="top"><b>Attribute</b></td>
-    <td valign="top"><b>Description</b></td>
-    <td align="center" valign="top"><b>Required</b></td>
-  </tr>
-  <tr>
-    <td valign="top">string</td>
-    <td valign="top">The string to search for in the output.</td>
-    <td align="center" valign="top">No</td>
-  </tr>
-</table>
-<p>The string that the output is searched for can be specified either in the <code>string</code> attribute 
-or as a text element in the CDATA section of the condition.</p>
-<h4>Example</h4>
-<pre>       &lt;echo message=&quot;Hello World&quot;/&gt;
-       
-       &lt;assert&gt;
-           &lt;and&gt;
-               &lt;outputcontains stream=&quot;warning&quot; string=&quot;Hello&quot;/&gt;
-               &lt;outputcontains stream=&quot;warning&quot;&gt;World&lt;/outputcontains&gt;
-           &lt;/and&gt;
-       &lt;/assert&gt;
-
-</pre>
-<a name="OutputIs">
-<h3>OutputIs</h3>
-<p>Tests that the given stream of the denoted Task contains exactly the given Text.</p>
-<h4>Additional Parameters</h4>
-<table border="1" cellpadding="2" cellspacing="0">
-  <tr>
-    <td valign="top"><b>Attribute</b></td>
-    <td valign="top"><b>Description</b></td>
-    <td align="center" valign="top"><b>Required</b></td>
-  </tr>
-  <tr>
-    <td valign="top">string</td>
-    <td valign="top">The string to search for in the output.</td>
-    <td align="center" valign="top">No</td>
-  </tr>
-</table>
-<p>The string that the output must match can be specified either in the <code>string</code> attribute 
-or as a text element in the CDATA section of the condition.</p>
-<h4>Example</h4>
-<pre>       &lt;echo message=&quot;Hello World&quot;/&gt;
-       
-       &lt;assert&gt;
-           &lt;outputis stream=&quot;warning&quot string=&quot;Hello World&quot;/&gt;
-       &lt;/assert&gt;
-       
-       &lt;assert&gt;
-           &lt;outputis task=&quot;-2&quot; stream=&quot;warning&quot;&gt;Hello World&lt;/outputis&gt;
-       &lt;/assert&gt;
-       
-</pre>
-<a name="OutputRegex">
-<h3>OutputRegex</h3>
-<p>Tests that the given stream of the denoted Task matches the given regular expression.</p>
-<h4>Additional Parameters</h4>
-<table border="1" cellpadding="2" cellspacing="0">
-  <tr>
-    <td valign="top"><b>Attribute</b></td>
-    <td valign="top"><b>Description</b></td>
-    <td align="center" valign="top"><b>Required</b></td>
-  </tr>
-  <tr>
-    <td valign="top">string</td>
-    <td valign="top">The regular expression to search for in the output.</td>
-    <td align="center" valign="top">No</td>
-  </tr>
-</table>
-<p>The regular expression string can be specified either in the <code>string</code> attribute 
-or as a text element in the CDATA section of the condition.</p>
-<h4>Example</h4>
-<pre>       &lt;echo message=&quot;Hello World&quot;/&gt;
-       
-       &lt;assert&gt;
-           &lt;outputregex stream=&quot;warning&quot; string=&quot;%H[a-z]* W[a-z]*$&quot;&gt;
-       &lt;/assert&gt;
-       
-</pre>
-<p>Note: Some characters of regular expressions may need to be substituted with their respective XML entities to form a valid XML document, e.g. the &quot;<code>&lt;</code>&quot; character must replaced with the entity &quot;<code>&amp;lt;</code>&quot;.
-</p>
 <a name="OutputSize">
 <h3>OutputSize</h3>
 <p>Tests that the given stream of the denoted Task contains the given amount of output.</p>
@@ -264,6 +183,199 @@ or as a text element in the CDATA section of the condition.</p>
                &lt;outputsize stream=&quot;warning&quot; mode=&quot;chars&quot; larger="10"/&gt;
                &lt;outputsize stream=&quot;warning&quot; mode=&quot;chars&quot; smaller="12"/&gt;
            &lt;/and&gt;
+       &lt;/assert&gt;
+       
+</pre>
+<a name="OutputIs">
+<h3>OutputIs</h3>
+<p>Tests that the given stream of the denoted Task contains exactly the given Text.</p>
+<h4>Additional Parameters</h4>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">string</td>
+    <td valign="top">The string to search for in the output.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<p>The string that the output must match can be specified either in the <code>string</code> attribute 
+or as a text element in the CDATA section of the condition.</p>
+<h4>Example</h4>
+<pre>       &lt;echo message=&quot;Hello World&quot;/&gt;
+       
+       &lt;assert&gt;
+           &lt;outputis stream=&quot;warning&quot string=&quot;Hello World&quot;/&gt;
+       &lt;/assert&gt;
+       
+       &lt;assert&gt;
+           &lt;outputis task=&quot;-2&quot; stream=&quot;warning&quot;&gt;Hello World&lt;/outputis&gt;
+       &lt;/assert&gt;
+       
+</pre>
+<a name="OutputContains">
+<h3>OutputContains</h3>
+<p>Tests that the given stream of the denoted Task contains a given Text String.</p>
+<h4>Additional Parameters</h4>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">string</td>
+    <td valign="top">The string to search for in the output.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">min</td>
+    <td valign="top">The minimum number of expected occurrences of this string in the task output. Default is 1. <i>(Since XHarness 1.0-beta-5)</i></td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">max</td>
+    <td valign="top">The maximum number of expected occurrences of this string in the task output. Default is unlimited. <i>(Since XHarness 1.0-beta-5)</i></td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<p>The string that the output is searched for can be specified either in the <code>string</code> attribute 
+or as a text element in the CDATA section of the condition.</p>
+<h4>Example</h4>
+<pre>       &lt;echo message=&quot;Hello World&quot;/&gt;
+       
+       &lt;assert&gt;
+           &lt;and&gt;
+               &lt;outputcontains stream=&quot;warning&quot; string=&quot;Hello&quot;/&gt;
+               &lt;outputcontains stream=&quot;warning&quot;&gt;World&lt;/outputcontains&gt;
+           &lt;/and&gt;
+       &lt;/assert&gt;
+
+</pre>
+<a name="OutputRegex">
+<h3>OutputRegex</h3>
+<p>Tests that the given stream of the denoted Task matches the given regular expression.</p>
+<h4>Additional Parameters</h4>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">string</td>
+    <td valign="top">The regular expression to search for in the output.</td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">min</td>
+    <td valign="top">The minimum number of expected occurrences of this expression in the task output. Default is 1. <i>(Since XHarness 1.0-beta-5)</i></td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">max</td>
+    <td valign="top">The maximum number of expected occurrences of this expression in the task output. Default is unlimited. <i>(Since XHarness 1.0-beta-5)</i></td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">docmode</td>
+    <td valign="top">Enable/disable doc mode. Default is false. <i>(Since XHarness 1.0-beta-5)</i></td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<p>The regular expression string can be specified either in the <code>string</code> attribute 
+or as a text element in the CDATA section of the condition.</p>
+<h4>Example</h4>
+<pre>       &lt;echo message=&quot;Hello World&quot;/&gt;
+       
+       &lt;assert&gt;
+           &lt;outputregex stream=&quot;warning&quot; string=&quot;^H[a-z]* W[a-z]*$&quot;/&gt;
+       &lt;/assert&gt;
+       
+</pre>
+<p>When doc mode is enabled (attribute docmode="true"), the task/process output is treated as a multi-line document, allowing the regular expression to contain line breaks (\n).
+If doc mode is disabled (default) the regular expression is applied to each line of the output separately, allowing the use of start-of-line and end-of-line patterns (^ and $).
+</p>
+<h4>Example</h4>
+<pre>       &lt;echo&gt;Hello
+World&lt;/echo&gt;
+       
+       &lt;assert&gt;
+           &lt;outputregex stream=&quot;warning&quot; string=&quot;.*o\nW.*&quot; docmode=&quot;true&quot;/&gt;
+       &lt;/assert&gt;
+       
+</pre>
+<p><b>Note:</b> Some characters of regular expressions may need to be substituted with their respective XML entities to form a valid XML document, e.g. the &quot;<code>&lt;</code>&quot; character must replaced with the entity &quot;<code>&amp;lt;</code>&quot;.
+</p>
+<a name="SubSection">
+<h3>SubSection</h3>
+<i>(Since XHarness 1.0-beta-5)</i>
+<p>Defines a subsection of a task output which can then be used to apply forther outpus assertions via a nested condition.</p>
+<h4>Additional Parameters</h4>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">beginregex</td>
+    <td valign="top">The regular expression that marks the beginning of this subsection.</td>
+    <td align="center" valign="top" rowspan="2">At least one of beginregex and endregex</td>
+  </tr>
+  <tr>
+    <td valign="top">endregex</td>
+    <td valign="top">The regular expression that marks the end of this subsection.</i></td>
+  </tr>
+  <tr>
+    <td valign="top">repeat</td>
+    <td valign="top">The number of times the subsection is repeated in the output. Default is 1. See note 1 below.</i></td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">beginafter</td>
+    <td valign="top">The number of subsections that are skipped before the nested condition is evaluated. Default is 0. See note 2 below.</i></td>
+    <td align="center" valign="top">No</td>
+  </tr>
+  <tr>
+    <td valign="top">greedy</td>
+    <td valign="top">Set searching for the endRegex expression to greedy mode. The default value is false. See note 3 below.</i></td>
+    <td align="center" valign="top">No</td>
+  </tr>
+</table>
+<h3>Additional parameters specified as nested elements</h3>
+<p>The SubSection condition requires exactly one nested condition. This can be any condition from the <a href="http://ant.apache.org/manual/CoreTasks/conditions.html">Ant Condition framework</a>
+as well as any of the XHarness <a href="outputconditions.html">Output Conditions</a>. Any nested Output Conditions are applied to the output defined by the SubSection instead of the entire task output. 
+Any task and stream attribute specified in nested Output Conditions are ignored.</p>
+<p><b>Note 1:</b> If the repeat value is > 1, the nested condition is evaluated multiple times for each subsection. If the nested condition evaluates false for any of the subsections, 
+the subsection itself will evaluate false, i.e. the nested condition must evaluate true for all subsections for the subsection to evaluate true. A repeat value > 1 requires both beginregex and endregex to be set.</p>
+<p><b>Note 2:</b> The beginafter attribute can be used to strip out "header" data from the output that matches the same pattern as the main output contents, but should be ignored (i.e. not evaluated by the nested condition).
+If beginafter is set, both beginregex and endregex must be set.</p>
+<p><b>Note 3:</b> If greedy mode is disabled (default), the endRegex will match upon the first occurrence of the expression in the output. If greedy mode is enabled, the endRegex will instead match upon 
+the last occurrence of the expression in the output. Greedy mode requires endregex to bet set and can not be used together with repeat and beginafter.</p>
+<h4>Examples</h4>
+<pre>       &lt;java classname="my.app.Main" /&gt;
+       
+       &lt;assert&gt;
+           &lt;subsection beginregex=&quot;^START [0-9]+$&quot; endregex=&quot;^END [0-9]+$&quot; repeat=&quot;5&quot; beginafter=&quot;1&quot;&gt;
+               &lt;outputcontains string=&quot;passed&quot;/&gt;
+           &lt;/subsection&gt;
+       &lt;/assert&gt;
+       
+       
+       
+       &lt;echo message=&quot;Hello World&quot;/&gt;
+       
+       &lt;assert&gt;
+           &lt;subsection stream=&quot;warning&quot; beginregex=&quot;l&quot; endregex=&quot;l&quot; greedy=&quot;true&quot;&gt;
+               &lt;and&gt;
+                   &lt;outputregex string=&quot;.+\sW.+&quot;/&gt;
+                   &lt;outputsize larger=&quot;5&quot; mode=&quot;chars&quot;/&gt;
+               &lt;/and&gt;
+           &lt;/subsection&gt;
        &lt;/assert&gt;
        
 </pre>

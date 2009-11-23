@@ -31,9 +31,9 @@ import java.util.StringTokenizer;
  *
  * @author Gregor Heine
  */
-public class LineBuffer {
+public class LineBuffer implements Cloneable {
     
-    private List log;
+    private List log = new LinkedList();;
     private int defaultPriority;
     private int minPriority = Integer.MAX_VALUE;
     private int maxPriority = Integer.MIN_VALUE;
@@ -53,9 +53,18 @@ public class LineBuffer {
      */
     public LineBuffer(int defaultPrio) {
         this.defaultPriority = defaultPrio;
-        this.log = new LinkedList();
     }
     
+    private LineBuffer(LineBuffer lineBuffer) {
+        defaultPriority = lineBuffer.getDefaultPriority();
+        minPriority = lineBuffer.getMinPriority();
+        maxPriority = lineBuffer.getMaxPriority();
+        for (Iterator iter = lineBuffer.iterator(); iter.hasNext();) {
+            LogLine line = (LogLine)iter.next();
+            log.add(line);
+        }
+    }
+
     /**
      * Clears the internal text buffer.
      */
@@ -96,16 +105,8 @@ public class LineBuffer {
     public void logLine(int priority, String text) {
         if (text != null) {
             StringTokenizer tok = tokenize(text);
-            synchronized (log) {
-                while (tok.hasMoreTokens()) {
-                    log.add(new LogLine(priority, tok.nextToken()));
-                }
-                if (priority < minPriority) {
-                    minPriority = priority;
-                }
-                if (priority > maxPriority) {
-                    maxPriority = priority;
-                }
+            while (tok.hasMoreTokens()) {
+                addLine(new LogLine(priority, tok.nextToken()));
             }
         }
     }
@@ -137,15 +138,27 @@ public class LineBuffer {
                         }
                     }
                     if (!found) {
-                        log.add(new LogLine(prio2, newLine));
+                        addLine(new LogLine(prio2, newLine));
                     }
                 }
-                if (prio2 < minPriority) {
-                    minPriority = prio2;
-                }
-                if (prio2 > maxPriority) {
-                    maxPriority = prio2;
-                }
+            }
+        }
+    }
+    
+    /**
+     * Appends a log line to the Buffer. 
+     *
+     * @param logLine The log line.
+     */
+    public void addLine(LogLine logLine) {
+        synchronized (log) {
+            log.add(logLine);
+            int priority = logLine.getPriority();
+            if (priority < minPriority) {
+                minPriority = priority;
+            }
+            if (priority > maxPriority) {
+                maxPriority = priority;
             }
         }
     }
@@ -199,6 +212,22 @@ public class LineBuffer {
     }
     
     /**
+     * Represent all lines of this buffer as a String.
+     * The lines are separated by the given sepeatator character and  
+     * may be prefixed with an arbitrary String.
+     *
+     * @param lineSeparator The line separator char.
+     * @param linePrefix The String every line is prefixed with. If <code>null</code>, every 
+     *        line is prefixed with the line's priority followed by a colon, e.g. "3: " 
+     * @param ignoreAnsi Strip ANSI characters from output
+     * @return The contents of this buffer as a String.
+     */
+    public String toString(char lineSeparator, String linePrefix, boolean ignoreAnsi) {
+        return toString(lineSeparator, linePrefix, 
+                        Integer.MIN_VALUE, Integer.MAX_VALUE, ignoreAnsi);
+    }
+    
+    /**
      * Represent the lines with the given priority as a String.
      * The lines are separated by the given sepeatator character and  
      * may be prefixed with an arbitrary String.
@@ -211,6 +240,22 @@ public class LineBuffer {
      */
     public String toString(char lineSeparator, String linePrefix, int prio) {
         return toString(lineSeparator, linePrefix, prio, prio);
+    }
+    
+    /**
+     * Represent the lines with the given priority as a String.
+     * The lines are separated by the given sepeatator character and  
+     * may be prefixed with an arbitrary String.
+     *
+     * @param lineSeparator The line separator char.
+     * @param linePrefix The String every line is prefixed with. If <code>null</code>, every 
+     *        line is prefixed with the line's priority followed by a colon, e.g. "3: " 
+     * @param prio The priority of the returned lines.
+     * @param ignoreAnsi Strip ANSI characters from output
+     * @return The contents of this buffer as a String.
+     */
+    public String toString(char lineSeparator, String linePrefix, int prio, boolean ignoreAnsi) {
+        return toString(lineSeparator, linePrefix, prio, prio, ignoreAnsi);
     }
     
     /**
@@ -228,6 +273,26 @@ public class LineBuffer {
      * @return The contents of this buffer as a String.
      */
     public String toString(char lineSeparator, String linePrefix, int minPrio, int maxPrio) {
+        return toString(lineSeparator, linePrefix, minPrio, maxPrio, false);
+    }
+        
+    /**
+     * Represent the lines in the range between the given minimum and maximum 
+     * priority as a String.
+     * The lines are separated by '\n' line breaks.
+     * The lines are separated by the given sepeatator character and  
+     * may be prefixed with an arbitrary String.
+     *
+     * @param lineSeparator The line separator char.
+     * @param linePrefix The String every line is prefixed with. If <code>null</code>, every 
+     *        line is prefixed with the line's priority followed by a colon, e.g. "3: " 
+     * @param minPrio The minimum priority of the returned lines.
+     * @param maxPrio The maximum priority of the returned lines.
+     * @param ignoreAnsi Strip ANSI characters from output
+     * @return The contents of this buffer as a String.
+     */
+    public String toString(char lineSeparator, String linePrefix, 
+                               int minPrio, int maxPrio, boolean ignoreAnsi) {
         StringBuffer ret = new StringBuffer();
         boolean first = true;
 
@@ -246,11 +311,66 @@ public class LineBuffer {
                     } else {
                         ret.append(linePrefix);
                     }
-                    ret.append(line.getText());
+                    ret.append(line.getText(ignoreAnsi));
                 }
             }
         }
         return ret.toString();
+    }
+        
+    /**
+     * Represent the lines of this LineBuffer as an array of LogLine.
+     *
+     * @return The contents of this buffer as a LogLine array.
+     */
+    public LogLine[] toArray() {
+        synchronized (log) {
+            LogLine[] lines = new LogLine[log.size()];
+            log.toArray(lines);
+            return lines;
+        }
+    }
+
+    
+    /**
+     * Represent the lines of this LineBuffer as an array of Strings.
+     *
+     * @return The contents of this buffer as a String array.
+     */
+    public String[] toStringArray() {
+        return toStringArray(Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+    
+    /**
+     * Represent the lines of this LineBuffer as an array of Strings.
+     *
+     * @param priority The priority of the returned lines.
+     * @return The contents of this buffer as a String array.
+     */
+    public String[] toStringArray(int priority) {
+        return toStringArray(priority, priority);
+    }
+    
+    /**
+     * Represent the lines of this LineBuffer as an array of Strings.
+     *
+     * @param minPrio The minimum priority of the returned lines.
+     * @param maxPrio The maximum priority of the returned lines.
+     * @return The contents of this buffer as a String array.
+     */
+    public String[] toStringArray(int minPrio, int maxPrio) {
+        LogLine[] lines = toArray();
+        String[] strings = new String[lines.length];
+        int count = 0;
+        for (int i = 0; i < lines.length; i++) {
+            LogLine line = (LogLine)lines[i];
+            if (line.getPriority() >= minPrio && line.getPriority() <= maxPrio) {
+                strings[count++] = line.getText();
+            }
+        }
+        String[] ret = new String[count];
+        System.arraycopy(strings, 0, ret, 0, count);
+        return ret;
     }
 
     /**
@@ -313,6 +433,10 @@ public class LineBuffer {
         return new LineIterator(minPrio, maxPrio);
     }
     
+    public Object clone() {
+        return new LineBuffer(this);
+    }
+    
     private StringTokenizer tokenize(String text) {
         while (text.startsWith("\n") || text.startsWith("\r") || text.startsWith("\f")) {
             text = text.substring(1);
@@ -335,26 +459,34 @@ public class LineBuffer {
             synchronized (log) {
                 iter = Arrays.asList(log.toArray()).iterator();
             }
+            nextLine = getNext();
         }
         
         public boolean hasNext() {
-            while (iter.hasNext()) {
-                nextLine = (LogLine)iter.next();
-                if (nextLine.getPriority() >= minPriority
-                    && nextLine.getPriority() <= maxPriority) {
-                    return true;
-                }
-            }
-            nextLine = null;
-            return false;
+            return nextLine != null;
         }
         
         public Object next() {
-            return nextLine;
+            LogLine ret = nextLine;
+            if (nextLine != null) {
+                nextLine = getNext();
+            }
+            return ret;
         }
         
         public void remove() {
             throw new UnsupportedOperationException();
+        }
+        
+        private LogLine getNext() {
+            while (iter.hasNext()) {
+                LogLine line = (LogLine)iter.next();
+                if (line.getPriority() >= minPriority
+                    && line.getPriority() <= maxPriority) {
+                    return line;
+                }
+            }
+            return null;
         }
     }
 }

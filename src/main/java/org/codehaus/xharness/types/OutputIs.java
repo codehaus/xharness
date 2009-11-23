@@ -20,7 +20,6 @@ package org.codehaus.xharness.types;
 import java.util.Iterator;
 
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 
 import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.log.LogLine;
@@ -54,28 +53,34 @@ public class OutputIs extends AbstractOutput {
         }
     }
 
+    /**
+     * Evaluate this output condition.
+     * 
+     * @return true if the expected output is found, false otherwise
+     * @exception BuildException if an error occurs
+     */
     public boolean eval() throws BuildException {
         Iterator iter = getOutputIterator();
         if (getText() == null || "".equals(getText())) {
             boolean ret = !iter.hasNext();
             if (ret) {
-                log(logPrefix() + "empty.", Project.MSG_VERBOSE);
+                logEvalResult("empty");
             } else {
-                log(logPrefix() + "not empty.", Project.MSG_VERBOSE);
+                logEvalResult("not empty");
             }
             return ret;
         } else if (iter.hasNext()) {
             LogLine line = (LogLine)iter.next();
-            if (!iter.hasNext() && getText().equals(line.getText(filterANSI()))) {
-                log(logPrefix() + "is \"" + getText() + "\"", Project.MSG_VERBOSE);
+            if (!iter.hasNext() && getText().equals(line.getText(isIgnoreANSI()))) {
+                logEvalResult("is \"" + getText() + "\"");
                 return true;
             }
         }
-        log(logPrefix() + "not \"" + getText() + "\"", Project.MSG_VERBOSE);
+        logEvalResult("not \"" + getText() + "\"");
         return false;
     }
     
-    protected String getText() {
+    protected final String getText() {
         return text;
     }
 }

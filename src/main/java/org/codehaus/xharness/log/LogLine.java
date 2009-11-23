@@ -28,10 +28,10 @@ import java.util.regex.Pattern;
  * @author Gregor Heine
  */
 public class LogLine {
-    private static final Pattern NOANSI_PATTERN = Pattern.compile("\\u001B\\[\\d+m");
+    private static final Pattern NOANSI_PATTERN = Pattern.compile("\\e\\[\\d+;?\\d*m");
     
-    private String textLine;
-    private int priority;
+    private final String textLine;
+    private final int priority;
     
     /**
      * Constructs a LogLine with the given priority and text.
@@ -79,12 +79,7 @@ public class LogLine {
         return this.priority;
     }
     
-    /**
-     * Sets the priority to a new value.
-     * 
-     * @param prio The new priority value.
-     */
-    protected void setPriority(int prio) {
-        this.priority = prio;
+    public String toString() {
+        return getPriority() + ": " + getText();
     }
 }

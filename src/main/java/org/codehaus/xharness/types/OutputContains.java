@@ -17,28 +17,32 @@
 
 package org.codehaus.xharness.types;
 
-import java.util.Iterator;
 
 import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Project;
 
-import org.codehaus.xharness.log.LogLine;
+public class OutputContains extends AbstractRepeateableOutput {
 
-public class OutputContains extends OutputIs {
-
+    /**
+     * Evaluate this output condition.
+     * 
+     * @return true if the expected output is found, false otherwise
+     * @exception BuildException if an error occurs
+     */
     public boolean eval() throws BuildException {
         if (getText() == null || "".equals(getText())) {
             return true;
         } 
-        Iterator iter = getOutputIterator();
-        while (iter.hasNext()) {
-            LogLine line = (LogLine)iter.next();
-            if (line.getText(filterANSI()).indexOf(getText()) >= 0) {
-                log(logPrefix() + "contains \"" + getText() + "\"", Project.MSG_VERBOSE);
-                return true;
+        Searcher searcher = new LineBufferSearcher(getOutputIterator()) {
+            private int textLen = getText().length();
+            public int indexIn(String text) {
+                int index = text.indexOf(getText());
+                return index >= 0 ? index + textLen : -1;
             }
-        }
-        log(logPrefix() + "does not contain \"" + getText() + "\"", Project.MSG_VERBOSE);
-        return false;
+        };
+        return super.eval(searcher);
+    }
+    
+    protected void logStartSearch() {
+        logEvalResult("searching for string \"" + getText() + "\"");
     }
 }

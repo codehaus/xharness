@@ -7,7 +7,6 @@ import org.codehaus.xharness.log.LineBuffer;
 import org.codehaus.xharness.log.LogPriority;
 import org.codehaus.xharness.log.TaskLogger;
 import org.codehaus.xharness.log.TaskRegistry;
-import org.codehaus.xharness.log.TestLogger;
 import org.codehaus.xharness.tasks.XharnessTask;
 import org.codehaus.xharness.types.AbstractOutput.Stream;
 
@@ -97,8 +96,7 @@ public class OutputIsTest extends TestCase {
         LineBuffer buffer = new LineBuffer(LogPriority.STDOUT);
         buffer.logLine("All good things must come to an end");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -108,37 +106,37 @@ public class OutputIsTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputIs condition = new OutputIs();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.addText("Scottie");
         condition.setTask("foo");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
             registry.setCurrentTest(new MockTestLogger(registry, logger));
-            assertTrue("Condition evaled incorrectly", !condition.eval());
+            assertFalse("Condition evaled incorrectly", condition.eval());
         } finally {
             MockTaskRegistry.reset();
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) not \"Scottie\"", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testEvalTrueCdata() throws Exception {
         LineBuffer buffer = new LineBuffer(LogPriority.STDOUT);
         buffer.logLine("Beam me up, Scottie");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -148,18 +146,17 @@ public class OutputIsTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputIs condition = new OutputIs();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.addText("Beam me up, Scottie");
         condition.setTask("foo");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
@@ -170,16 +167,16 @@ public class OutputIsTest extends TestCase {
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) is \"Beam me up, Scottie\"", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
-    
     
     public void testEvalTrueString() throws Exception {
         LineBuffer buffer = new LineBuffer(LogPriority.STDOUT);
         buffer.logLine("Beam me up, Scottie");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -189,18 +186,17 @@ public class OutputIsTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputIs condition = new OutputIs();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setString("Beam me up, Scottie");
         condition.setTask("foo");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
@@ -211,13 +207,15 @@ public class OutputIsTest extends TestCase {
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) is \"Beam me up, Scottie\"", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
+    
     public void testEvalFailing() throws Exception {
         LineBuffer buffer = new LineBuffer(LogPriority.STDOUT);
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -227,36 +225,36 @@ public class OutputIsTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputIs condition = new OutputIs();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.addText("Beam me up, Scottie");
         condition.setTask("foo");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
             registry.setCurrentTest(new MockTestLogger(registry, logger));
-            assertTrue("Condition evaled incorrectly", !condition.eval());
+            assertFalse("Condition evaled incorrectly", condition.eval());
         } finally {
             MockTaskRegistry.reset();
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) not \"Beam me up, Scottie\"", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testEvalEmpty() throws Exception {
         LineBuffer buffer = new LineBuffer(LogPriority.STDERR);
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -271,7 +269,7 @@ public class OutputIsTest extends TestCase {
         tlCtrl.setReturnValue("foo/bar");
         
         OutputIs condition = new OutputIs();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
         Stream stream = new Stream();
         stream.setValue("stderr");
@@ -279,7 +277,6 @@ public class OutputIsTest extends TestCase {
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
@@ -290,15 +287,16 @@ public class OutputIsTest extends TestCase {
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stderr) empty", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
     public void testEvalEmptyFailing() throws Exception {
         LineBuffer buffer = new LineBuffer(LogPriority.STDOUT);
         buffer.logLine("Beam me up, Scottie");
         
-        MockControl prCtrl = MockClassControl.createNiceControl(Project.class);
-        Project project = (Project)prCtrl.getMock();
+        TestProject project = new TestProject();
         
         MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
         XharnessTask task = (XharnessTask)xhCtrl.getMock();
@@ -308,46 +306,83 @@ public class OutputIsTest extends TestCase {
         MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
         TaskLogger logger = (TaskLogger)tlCtrl.getMock();
         logger.getLineBuffer();
-        tlCtrl.setReturnValue(buffer);
+        tlCtrl.setReturnValue(buffer, 2);
         logger.getFullName();
         tlCtrl.setReturnValue("foo/bar");
         
         OutputIs condition = new OutputIs();
-        condition.setProject(new Project());
+        condition.setProject(project);
         condition.setTask("foo");
 
         xhCtrl.replay();
         tlCtrl.replay();
-        prCtrl.replay();
         TaskRegistry registry = null;
         try {
             registry = TaskRegistry.init(task);
             registry.setCurrentTest(new MockTestLogger(registry, logger));
-            assertTrue("Condition evaled incorrectly", !condition.eval());
+            assertFalse("Condition evaled incorrectly", condition.eval());
         } finally {
             MockTaskRegistry.reset();
         }
         xhCtrl.verify();
         tlCtrl.verify();
-        prCtrl.verify();
+
+        assertEquals("Task @@foo/bar@@ output (stdout) not empty", 
+                     project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
-    private static class MockTestLogger extends TestLogger {
-        private TaskLogger taskLogger;
+    public void testDefaultStream() throws Exception {
+        LineBuffer buffer = new LineBuffer(2);
+        buffer.logLine(1, "one");
+        buffer.logLine(2, "two");
         
-        public MockTestLogger(TaskRegistry registry, TaskLogger logger) {
-            super(registry, null, null, null, null, null);
-            taskLogger = logger;
-        }
+        TestProject project = new TestProject();
         
-        public TaskLogger getTask(String name) {
-            return taskLogger;
+        MockControl xhCtrl = MockClassControl.createNiceControl(XharnessTask.class);
+        XharnessTask task = (XharnessTask)xhCtrl.getMock();
+        task.getProject();
+        xhCtrl.setReturnValue(project);
+        
+        MockControl tlCtrl = MockClassControl.createControl(TaskLogger.class);
+        TaskLogger logger = (TaskLogger)tlCtrl.getMock();
+        logger.getLineBuffer();
+        tlCtrl.setReturnValue(buffer, 6);
+        logger.getFullName();
+        tlCtrl.setReturnValue("foo/bar", 4);
+        
+        OutputIs condition1 = new OutputIs();
+        condition1.setProject(project);
+        condition1.setString("one");
+        condition1.setTask("foo");
+        
+        OutputIs condition2 = new OutputIs();
+        condition2.setProject(project);
+        condition2.setString("two");
+        condition2.setTask("foo");
+
+        xhCtrl.replay();
+        tlCtrl.replay();
+        TaskRegistry registry = null;
+        try {
+            registry = TaskRegistry.init(task);
+            registry.setCurrentTest(new MockTestLogger(registry, logger));
+            assertFalse("Condition evaled incorrectly", condition1.eval());
+            assertTrue("Condition evaled incorrectly", condition2.eval());
+            condition1.setStream(Stream.getStream(1));
+            condition2.setStream(Stream.getStream(3));
+            assertTrue("Condition evaled incorrectly", condition1.eval());
+            assertFalse("Condition evaled incorrectly", condition2.eval());
+        } finally {
+            MockTaskRegistry.reset();
         }
-    }
-    
-    private static class MockTaskRegistry extends TaskRegistry {
-        protected static void reset() {
-            TaskRegistry.reset();
-        }
+        xhCtrl.verify();
+        tlCtrl.verify();
+
+        String[] logLines = project.getBuffer().toStringArray(Project.MSG_VERBOSE);
+        assertEquals(4, logLines.length);
+        assertEquals("Task @@foo/bar@@ output (error) not \"one\"", logLines[0]);
+        assertEquals("Task @@foo/bar@@ output (error) is \"two\"", logLines[1]);
+        assertEquals("Task @@foo/bar@@ output (stderr) is \"one\"", logLines[2]);
+        assertEquals("Task @@foo/bar@@ output (warning) not \"two\"", logLines[3]);
     }
 }

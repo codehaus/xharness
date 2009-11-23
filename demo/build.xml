@@ -72,6 +72,17 @@
                       <outputcontains>CountDown reached</outputcontains>
                     </assert>
                 </testcase>
+                <testcase name="AssertSubsection">
+                    <echo>Hello World!
+                          How are you today
+                          On this sunny day?
+                    </echo>
+                    <assert>
+                        <subsection beginregex="or" endregex="day" stream="warning">
+                            <outputcontains string="you" />
+                        </subsection>
+                    </assert>
+                </testcase>
             </testgroup>
       
             <testgroup name="BlockingServiceTests">

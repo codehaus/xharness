@@ -1,11 +1,17 @@
 01/12/2009: XHarness 1.0-beta-5
     New features:
-      * Added optional nested task to assert (XHARNESS-22)
+      * Added optional nested task to assert taskoptputcontains and outputregex 
+      * Output condition enhancements:
+        - Added subsection condition (XHARNESS-25)
+        - Added min and max occurrence attribute to outputcontains and outputregex (XHARNESS-26)
+        - Changed default stream for non-process tasks to info (XHARNESS-28)
+        - Added "docMode" to outputregex to allow regex to span across lines (XHARNESS-30)
     Bug fixes:
       * Fixed handling of incorrect task configurations (XHARNESS-17, XHARNESS-18, XHARNESS-19)
       * Fixed KillTask logging (XHARNESS-20)
       * Enhanced demo to download xharness.jar when unavailable in target dir (XHARNESS-21)
       * Fixed xh-java task ignoring failonerror=false (XHARNESS-23)
+      * Fixed No-ANSI filter pattern (XHARNESS-29)
 
 01/07/2009: XHarness 1.0-beta-4
     New features:
@@ -30,3 +36,6 @@
       * Fixed unix launcher to ignore exit codes corresponding to signals 2(130), 15(143) and a 
         strange exit code 208
       * Fixed ConcurrentModificationException in LineBuffer (XHARNESS-7)
+
+24/10/2006: XHarness 1.0-beta1
+    Initial release
