@@ -226,8 +226,8 @@ public class XhJavaBgTask extends XhJavaTask implements Runnable, BgProcess {
                 }
             }
 
-            if (processException == null && exc != null
-                    && !getWatchdog().killedDeliberately()) {
+            if (exc != null && processException == null
+                && (getWatchdog() == null || !getWatchdog().killedDeliberately())) {
                 processException = exc;
             }
         }

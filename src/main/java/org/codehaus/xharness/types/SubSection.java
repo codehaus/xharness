@@ -22,7 +22,10 @@ import java.util.regex.Pattern;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
+import org.apache.tools.ant.taskdefs.condition.And;
 import org.apache.tools.ant.taskdefs.condition.Condition;
+import org.apache.tools.ant.taskdefs.condition.Not;
+import org.apache.tools.ant.taskdefs.condition.Or;
 import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.log.LineBuffer;
 import org.codehaus.xharness.log.LogLine;
@@ -112,6 +115,51 @@ public class SubSection extends AbstractOutput {
                 throw new FatalException("Only one nested condition is supported.");
             }
             condition = c;
+        }
+    }
+
+    /**
+     * Add an &lt;not&gt; condition "container".
+     *
+     * @param n a Not condition
+     * @since 1.1
+     */
+    public void addNot(Not n) {
+        if (n != null) {
+            if (condition != null) {
+                throw new FatalException("Only one nested condition is supported.");
+            }
+            condition = n;
+        }
+    }
+
+    /**
+     * Add an &lt;and&gt; condition "container".
+     *
+     * @param a an And condition
+     * @since 1.1
+     */
+    public void addAnd(And a) {
+        if (a != null) {
+            if (condition != null) {
+                throw new FatalException("Only one nested condition is supported.");
+            }
+            condition = a;
+        }
+    }
+
+    /**
+     * Add an &lt;or&gt; condition "container".
+     *
+     * @param o an Or condition
+     * @since 1.1
+     */
+    public void addOr(Or o) {
+        if (o != null) {
+            if (condition != null) {
+                throw new FatalException("Only one nested condition is supported.");
+            }
+            condition = o;
         }
     }
 

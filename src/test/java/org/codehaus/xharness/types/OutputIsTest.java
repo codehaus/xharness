@@ -8,6 +8,7 @@ import org.codehaus.xharness.log.LogPriority;
 import org.codehaus.xharness.log.TaskLogger;
 import org.codehaus.xharness.log.TaskRegistry;
 import org.codehaus.xharness.tasks.XharnessTask;
+import org.codehaus.xharness.testutil.TestProject;
 import org.codehaus.xharness.types.AbstractOutput.Stream;
 
 import org.easymock.MockControl;

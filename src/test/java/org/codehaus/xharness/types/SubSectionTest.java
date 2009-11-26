@@ -2,12 +2,16 @@ package org.codehaus.xharness.types;
 
 import junit.framework.TestCase;
 
+import org.apache.tools.ant.ComponentHelper;
+import org.apache.tools.ant.IntrospectionHelper;
+import org.apache.tools.ant.UnknownElement;
 import org.codehaus.xharness.exceptions.FatalException;
 import org.codehaus.xharness.log.LineBuffer;
 import org.codehaus.xharness.log.LogPriority;
 import org.codehaus.xharness.log.TaskLogger;
 import org.codehaus.xharness.log.TaskRegistry;
 import org.codehaus.xharness.tasks.XharnessTask;
+import org.codehaus.xharness.testutil.TestProject;
 import org.easymock.MockControl;
 import org.easymock.classextension.MockClassControl;
 
@@ -476,5 +480,46 @@ public class SubSectionTest extends TestCase {
         assertEquals("Found 3rd <subsection>", logLines[33]);
         assertEquals("Task @@foo/bar@@ output (stdout) Can't find 4th begin of " 
                      + "<subsection> \"star\"", logLines[39]);
+    }
+    
+    public void testNestedConditionTypes() {
+        TestProject project = new TestProject();
+        SubSection subSection = new SubSection();
+        
+        ComponentHelper ch = ComponentHelper.getComponentHelper(project);
+        IntrospectionHelper ih = IntrospectionHelper.getHelper(SubSection.class);
+        
+        try {
+            ih.getElementCreator(project, "", subSection, "outputis", 
+                                 new UnknownElement("outputis"));
+        } catch (Exception ex) {
+            assertEqualsIgnoreCase("class org.codehaus.xharness.types.SubSection doesn't support "
+                         + "the nested \"outputis\" element.", ex.getMessage());
+        }
+        
+        ch.addDataTypeDefinition("outputis", OutputIs.class);
+        assertNotNull(ih.getElementCreator(project, "", subSection, "outputis", 
+                                           new UnknownElement("outputis")));
+        
+        assertNotNull(ih.getElementCreator(project, "", subSection, "and", 
+                                           new UnknownElement("and")));
+        
+        assertNotNull(ih.getElementCreator(project, "", subSection, "or", 
+                                           new UnknownElement("or")));
+        
+        assertNotNull(ih.getElementCreator(project, "", subSection, "not", 
+                                           new UnknownElement("not")));
+        
+        try {
+            ih.getElementCreator(project, "", subSection, "available", 
+                                 new UnknownElement("available"));
+        } catch (Exception ex) {
+            assertEqualsIgnoreCase("class org.codehaus.xharness.types.SubSection doesn't support "
+                         + "the nested \"available\" element.", ex.getMessage());
+        }
+    }
+    
+    private static void assertEqualsIgnoreCase(String s1, String s2) {
+        assertEquals(s1.toLowerCase(), s2.toLowerCase());
     }
 }

@@ -7,6 +7,7 @@ import org.codehaus.xharness.log.LineBuffer;
 import org.codehaus.xharness.log.TaskLogger;
 import org.codehaus.xharness.log.TaskRegistry;
 import org.codehaus.xharness.tasks.XharnessTask;
+import org.codehaus.xharness.testutil.TestProject;
 
 import org.easymock.MockControl;
 import org.easymock.classextension.MockClassControl;

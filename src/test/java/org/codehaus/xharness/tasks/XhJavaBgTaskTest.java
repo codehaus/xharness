@@ -2,6 +2,7 @@ package org.codehaus.xharness.tasks;
 
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Arrays;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
@@ -11,6 +12,7 @@ import org.apache.tools.ant.types.Path;
 import org.codehaus.xharness.procutil.KillableExecuteWatchdog;
 import org.codehaus.xharness.procutil.ProcessRegistry;
 import org.codehaus.xharness.testutil.ProcessTester;
+import org.codehaus.xharness.testutil.TestProject;
 
 import org.easymock.MockControl;
 import org.easymock.classextension.MockClassControl;
@@ -73,7 +75,7 @@ public class XhJavaBgTaskTest extends TestCase {
     }
     
     public void testExecute() throws Exception {
-        Project project = new Project();
+        TestProject project = new TestProject();
         
         ProcessTester server = new ProcessTester();
         
@@ -115,10 +117,71 @@ public class XhJavaBgTaskTest extends TestCase {
                          "Process " + PROC_NAME + " not registered.", 
                          be.getMessage());
         }
+        String[] output = project.getBuffer().toStringArray(Project.MSG_WARN);
+        assertEquals(Arrays.toString(output), 1, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_INFO);
+        assertEquals(Arrays.toString(output), 5, output.length);
+    }
+    
+    public void testExecuteNoFork() throws Exception {
+        TestProject project = new TestProject();
+        
+        ProcessTester server = new ProcessTester();
+        
+        XhJavaBgTask task = new XhJavaBgTask();
+        task.setProject(project);
+        task.setClassname(ProcessTester.class.getName());
+        task.setClasspath(new Path(project, getClassPath()));
+        task.createArg().setLine("-p " + server.getPort());
+        task.createArg().setLine("-s user.dir");
+        task.createArg().setLine("-t 60");
+        task.setProcessName(PROC_NAME);
+        task.setFork(false);
+        
+        try {
+            ProcessRegistry.getProcess(PROC_NAME);
+            fail("Expected BuildException");
+        } catch (BuildException be) {
+            assertEquals("Wrong message", 
+                         "Process " + PROC_NAME + " not registered.", 
+                         be.getMessage());
+        }
+        try {
+            project.enableConsoleCapturing(100, 101);
+            task.execute();
+            assertEquals("Process not registered", task, ProcessRegistry.getProcess(PROC_NAME));
+            assertTrue("Process is not running", task.isRunning());
+            assertTrue("Process is not running", server.passed());
+            assertEqualsIgnoreCase("Wrong user dir", 
+                                   System.getProperty("user.dir"), 
+                                   server.getReceivedData());
+            server.getSocket().close();
+            // wait for process to terminate
+            for (int i = 100; i > 0 && task.isRunning(); i--) {
+                Thread.sleep(100);
+            }
+            assertTrue("Process is still running", !task.isRunning());
+        } finally {
+            project.disableConsoleCapturing();
+        }
+        
+        try {
+            ProcessRegistry.getProcess(PROC_NAME);
+            fail("Expected BuildException");
+        } catch (BuildException be) {
+            assertEquals("Wrong message", 
+                         "Process " + PROC_NAME + " not registered.", 
+                         be.getMessage());
+        }
+        
+        String[] output = project.getBuffer().toStringArray(101);
+        assertEquals(Arrays.toString(output), 1, output.length);
+        output = project.getBuffer().toStringArray(100);
+        assertEquals(Arrays.toString(output), 5, output.length);
     }
     
     public void testKill() throws Exception {
-        Project project = new Project();
+        TestProject project = new TestProject();
         
         ProcessTester server = new ProcessTester();
         
@@ -156,10 +219,16 @@ public class XhJavaBgTaskTest extends TestCase {
                          "Process " + PROC_NAME + " not registered.", 
                          be.getMessage());
         }
+        String[] output = project.getBuffer().toStringArray(Project.MSG_WARN);
+        assertEquals(Arrays.toString(output), 1, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_INFO);
+        assertEquals(Arrays.toString(output), 3, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_VERBOSE);
+        assertEquals("Waiting for Process to die after kill...", output[output.length - 1]);
     }
 
     public void testKillNotRunning() throws Exception {
-        Project project = new Project();
+        TestProject project = new TestProject();
         
         ProcessTester server = new ProcessTester();
         
@@ -184,10 +253,15 @@ public class XhJavaBgTaskTest extends TestCase {
         }
         task.kill();
         assertTrue("Process is still running", !task.isRunning());
+
+        String[] output = project.getBuffer().toStringArray(Project.MSG_WARN);
+        assertEquals(Arrays.toString(output), 1, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_INFO);
+        assertEquals(Arrays.toString(output), 5, output.length);
     }
 
     public void testPrekillTimeout() throws Exception {
-        Project project = new Project();
+        TestProject project = new TestProject();
         
         ProcessTester server = new ProcessTester();
         
@@ -213,10 +287,18 @@ public class XhJavaBgTaskTest extends TestCase {
             assertEquals("Wrong message", "Timeout: killed the sub-process", be.getMessage());
         }
         assertTrue("Process is still running", !task.isRunning());
+
+        String[] output = project.getBuffer().toStringArray(Project.MSG_WARN);
+        assertEquals(Arrays.toString(output), 1, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_INFO);
+        assertEquals(Arrays.toString(output), 3, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_ERR);
+        assertEquals(Arrays.toString(output), 1, output.length);
+        assertEquals("Timeout: killed the sub-process", output[0]);
     }
 
     public void testNegativePrekillTimeout() throws Exception {
-        Project project = new Project();
+        TestProject project = new TestProject();
         
         ProcessTester server = new ProcessTester();
         
@@ -237,10 +319,17 @@ public class XhJavaBgTaskTest extends TestCase {
                                server.getReceivedData());
         task.kill();
         assertTrue("Process is still running", !task.isRunning());
+
+        String[] output = project.getBuffer().toStringArray(Project.MSG_WARN);
+        assertEquals(Arrays.toString(output), 1, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_INFO);
+        assertEquals(Arrays.toString(output), 3, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_VERBOSE);
+        assertEquals("Waiting for Process to die after kill...", output[output.length - 1]);
     }
     
     public void testKillTimeout() throws Exception {
-        Project project = new Project();
+        TestProject project = new TestProject();
         
         ProcessTester server = new ProcessTester();
         
@@ -278,10 +367,18 @@ public class XhJavaBgTaskTest extends TestCase {
         }
         assertTrue("Process is still running", !task.isRunning());
         wdCtrl.verify();
+
+        String[] output = project.getBuffer().toStringArray(Project.MSG_WARN);
+        assertEquals(Arrays.toString(output), 2, output.length);
+        assertEquals("Process is still running!", output[1]);
+        output = project.getBuffer().toStringArray(Project.MSG_INFO);
+        assertEquals(Arrays.toString(output), 5, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_VERBOSE);
+        assertEquals("Waiting for Process to die after kill...", output[output.length - 1]);
     }
     
     public void testAfterwards() throws Exception {
-        Project project = new Project();
+        TestProject project = new TestProject();
         
         ProcessTester server = new ProcessTester();
         
@@ -308,10 +405,17 @@ public class XhJavaBgTaskTest extends TestCase {
         task.kill();
         assertTrue("Process is still running", !task.isRunning());
         ctrl.verify();
+
+        String[] output = project.getBuffer().toStringArray(Project.MSG_WARN);
+        assertEquals(Arrays.toString(output), 1, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_INFO);
+        assertEquals(Arrays.toString(output), 3, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_VERBOSE);
+        assertEquals("Waiting for Process to die after kill...", output[output.length - 1]);
     }
     
     public void testAfterwardsFails() throws Exception {
-        Project project = new Project();
+        TestProject project = new TestProject();
         
         ProcessTester server = new ProcessTester();
         
@@ -344,10 +448,18 @@ public class XhJavaBgTaskTest extends TestCase {
         }
         assertTrue("Process is still running", !task.isRunning());
         ctrl.verify();
+
+        String[] output = project.getBuffer().toStringArray(Project.MSG_WARN);
+        assertEquals(Arrays.toString(output), 2, output.length);
+        assertEquals("Nested task failed: null", output[1]);
+        output = project.getBuffer().toStringArray(Project.MSG_INFO);
+        assertEquals(Arrays.toString(output), 3, output.length);
+        output = project.getBuffer().toStringArray(Project.MSG_VERBOSE);
+        assertEquals("Waiting for Process to die after kill...", output[output.length - 1]);
     }
     
     public void testExecuteFails() throws Exception {
-        Project project = new Project();
+        TestProject project = new TestProject();
         
         XhJavaBgTask task = new XhJavaBgTask();
         task.setProject(project);
@@ -363,18 +475,50 @@ public class XhJavaBgTaskTest extends TestCase {
             task.kill();
             fail("Expected BuildException");
         } catch (BuildException be) {
-            assertContains("Wrong message", 
-                           "Java returned: 1", 
-                           be.getMessage());
+            assertEquals("Wrong message", "Java returned: 1", be.getMessage());
         }
+
+        String[] output = project.getBuffer().toStringArray(Project.MSG_WARN);
+        assertEquals(Arrays.toString(output), 2, output.length);
+        assertEquals("java.lang.NoClassDefFoundError: org/bogus/NonExist", output[0]);
+        assertEquals("Exception in thread \"main\" ", output[1]);
+        output = project.getBuffer().toStringArray(Project.MSG_INFO);
+        assertEquals(Arrays.toString(output), 0, output.length);
+    }
+    
+    public void testExecuteFailsNoFork() throws Exception {
+        TestProject project = new TestProject();
+        
+        XhJavaBgTask task = new XhJavaBgTask();
+        task.setProject(project);
+        task.setClassname("org.bogus.NonExist");
+        task.setFork(false);
+        
+        try {
+            project.enableConsoleCapturing(100, 101);
+            task.execute();
+            for (int i = 6000; i > 0 && task.isRunning(); i--) {
+                Thread.sleep(100);
+            }
+            task.kill();
+            fail("Expected BuildException");
+        } catch (BuildException be) {
+            assertEquals("Wrong message", 
+                    "Could not find org.bogus.NonExist. Make sure you have it in your classpath", 
+                    be.getMessage());
+        } finally {
+            project.disableConsoleCapturing();
+        }
+        
+        //System.out.println(project.getBuffer().toString('\n', null));
+        String[] output = project.getBuffer().toStringArray(101);
+        assertEquals(Arrays.toString(output), 0, output.length);
+        output = project.getBuffer().toStringArray(100);
+        assertEquals(Arrays.toString(output), 0, output.length);
     }
     
     private static void assertEqualsIgnoreCase(String msg, String s1, String s2) {
         assertEquals(msg, s1.toLowerCase(), s2.toLowerCase());
-    }
-    
-    private static void assertContains(String msg, String s1, String s2) {
-        assertTrue(msg + " <" + s1 + "> not found in <" + s2 + ">", s2.indexOf(s1) >= 0);
     }
     
     private static class TestXhJavaBgTask extends XhJavaBgTask {

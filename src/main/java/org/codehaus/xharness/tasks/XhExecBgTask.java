@@ -260,12 +260,12 @@ public class XhExecBgTask extends XhExecTask implements Runnable, BgProcess {
      * Runnable implementation. Executes the process in a separate Thread.
      */
     public void run() {
+        BuildException exc = null;
+
         try {
             super.execute();
-        } catch (BuildException ex) {
-            if (getWatchdog() == null || !getWatchdog().killedDeliberately()) {
-                processException = ex;
-            }
+        } catch (BuildException e) {
+            exc = e;
         }
 
         synchronized (mutex) {
@@ -282,6 +282,11 @@ public class XhExecBgTask extends XhExecTask implements Runnable, BgProcess {
                 } catch (BuildException be) {
                     // ignore
                 }
+            }
+            
+            if (exc != null && processException == null
+                && (getWatchdog() == null || !getWatchdog().killedDeliberately())) {
+                processException = exc;
             }
         }
     }

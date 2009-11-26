@@ -6,6 +6,8 @@ import java.io.ByteArrayOutputStream;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.taskdefs.ExecuteStreamHandler;
 import org.apache.tools.ant.taskdefs.PumpStreamHandler;
+import org.codehaus.xharness.TestHelper;
+import org.codehaus.xharness.testutil.TestProject;
 import org.easymock.MockControl;
 import org.easymock.classextension.MockClassControl;
 
@@ -102,13 +104,32 @@ public class LoggingRedirectorTest extends TestCase {
         assertEquals("Wrong log", "", buffer.toString(2));
         assertEquals("Wrong log", "", os.toString());
 
-        handler.start();
-        handler.stop();
+        TestProject project = new TestProject();
+        try {
+            project.enableConsoleCapturing(100, 101);
+            handler.start();
+            handler.stop();
+        } finally {
+            project.disableConsoleCapturing();
+        }
         
         assertEquals("Wrong log", "foo\nbar", buffer.toString(1));
         assertEquals("Wrong log", "spam\neggs", buffer.toString(2));
         assertEquals("Wrong log", "", os.toString());
         
         tkCtrl.verify();
+
+        String[] lines = project.getBuffer().toStringArray();
+        if (TestHelper.isAnt16()) {
+            assertEquals(0, lines.length);
+        } else {
+            assertEquals(4, lines.length);
+            lines = project.getBuffer().toStringArray(101);
+            assertEquals(4, lines.length);
+            assertEquals("foo", lines[0]);
+            assertEquals("spam", lines[1]);
+            assertEquals("bar", lines[2]);
+            assertEquals("eggs", lines[3]);
+        }
     }
 }
