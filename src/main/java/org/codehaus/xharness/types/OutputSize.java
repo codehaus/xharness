@@ -105,17 +105,37 @@ public class OutputSize extends AbstractOutput {
             numChars += line.getText().length();
         }
         
-        int val = lineMode ? numLines : numChars;
-        String unit = lineMode ? "line" : "character";
-        logEvalResult("size is " + val + " " + unit + (val == 1 ? "." : "s."));
+        final int expectVal;
+        final int isVal = lineMode ? numLines : numChars;
+        final String unit = lineMode ? "line" : "character";
+        final boolean result;
 
+        StringBuffer buf = new StringBuffer();
+        buf.append("expected ");
         if (equals >= 0) {
-            return lineMode ? numLines == equals : numChars == equals;
+            buf.append("exactly ");
+            expectVal = equals;
+            result = (isVal == expectVal);
         } else if (larger >= 0) {
-            return lineMode ? numLines > larger : numChars > larger;
+            buf.append("more than ");
+            expectVal = larger;
+            result = (isVal > expectVal);
         } else {
-            return lineMode ? numLines < smaller : numChars < smaller;
+            buf.append("less than ");
+            expectVal = smaller;
+            result = (isVal < expectVal);
         }
+        buf.append(expectVal);
+        buf.append(" ");
+        buf.append(unit);
+        buf.append(expectVal == 1 ? ", found " : "s, found ");
+        buf.append(isVal);
+        buf.append(" ");
+        buf.append(unit);
+        buf.append(isVal == 1 ? "." : "s.");
+        logEvalResult(buf.toString());
+        
+        return result;
     }
 
 }

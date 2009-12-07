@@ -155,7 +155,7 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 1 line.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected exactly 1 line, found 1 line.",
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
@@ -196,7 +196,7 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 2 lines.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected exactly 1 line, found 2 lines.",
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
@@ -237,7 +237,8 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected exactly 35 characters, "
+                     + "found 35 characters.", 
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
@@ -278,7 +279,8 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected exactly 34 characters, "
+                     + "found 35 characters.", 
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
@@ -319,7 +321,7 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 2 lines.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected more than 1 line, found 2 lines.",
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
@@ -360,7 +362,7 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 2 lines.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected more than 3 lines, found 2 lines.",
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
@@ -401,7 +403,8 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected more than 34 characters, "
+                     + "found 35 characters.", 
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
@@ -442,7 +445,8 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected more than 35 characters, "
+                     + "found 35 characters.", 
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
@@ -483,7 +487,7 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 2 lines.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected less than 3 lines, found 2 lines.",
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
@@ -524,7 +528,7 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 2 lines.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected less than 2 lines, found 2 lines.", 
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
@@ -565,7 +569,8 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected less than 36 characters, " 
+                     + "found 35 characters.", 
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
     
@@ -606,7 +611,8 @@ public class OutputSizeTest extends TestCase {
         xhCtrl.verify();
         tlCtrl.verify();
 
-        assertEquals("Task @@foo/bar@@ output (stdout) size is 35 characters.", 
+        assertEquals("Task @@foo/bar@@ output (stdout) expected more than 35 characters, "
+                     + "found 35 characters.",
                      project.getBuffer().toString(Project.MSG_VERBOSE));
     }
 }
