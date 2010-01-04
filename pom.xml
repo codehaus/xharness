@@ -4,7 +4,7 @@
     <groupId>org.codehaus.xharness</groupId>
     <artifactId>xharness</artifactId>
     <packaging>jar</packaging>
-    <version>1.0-beta-5</version>
+    <version>1.0-beta-6-SNAPSHOT</version>
     <name>XHarness</name>
     <url>http://xharness.codehaus.org</url>
     <description>XHarness runs your system tests.</description>
@@ -393,9 +393,9 @@
     </ciManagement-->
 
     <scm>
-        <connection>scm:svn:https://svn.codehaus.org/xharness/tags/xharness-1.0-beta-5</connection>
-        <developerConnection>scm:svn:https://svn.codehaus.org/xharness/tags/xharness-1.0-beta-5</developerConnection>
-        <url>scm:svn:https://svn.codehaus.org/xharness/tags/xharness-1.0-beta-5</url>
+        <connection>scm:svn:https://svn.codehaus.org/xharness/trunk</connection>
+        <developerConnection>scm:svn:https://${maven.username}@svn.codehaus.org/xharness/trunk</developerConnection>
+        <url>https://svn.codehaus.org/xharness/trunk</url>
     </scm>
 
     <issueManagement>
