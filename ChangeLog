@@ -1,4 +1,4 @@
-01/12/2009: XHarness 1.0-beta-5
+04/01/2010: XHarness 1.0-beta-5
     New features:
       * Added optional nested task to assert taskoptputcontains and outputregex (XHARNESS-22)
       * Output condition enhancements:

@@ -115,15 +115,15 @@ public class OutputSize extends AbstractOutput {
         if (equals >= 0) {
             buf.append("exactly ");
             expectVal = equals;
-            result = (isVal == expectVal);
+            result = isVal == expectVal;
         } else if (larger >= 0) {
             buf.append("more than ");
             expectVal = larger;
-            result = (isVal > expectVal);
+            result = isVal > expectVal;
         } else {
             buf.append("less than ");
             expectVal = smaller;
-            result = (isVal < expectVal);
+            result = isVal < expectVal;
         }
         buf.append(expectVal);
         buf.append(" ");

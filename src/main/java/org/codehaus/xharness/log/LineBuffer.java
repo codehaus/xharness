@@ -33,7 +33,7 @@ import java.util.StringTokenizer;
  */
 public class LineBuffer implements Cloneable {
     
-    private List log = new LinkedList();;
+    private List log = new LinkedList();
     private int defaultPriority;
     private int minPriority = Integer.MAX_VALUE;
     private int maxPriority = Integer.MIN_VALUE;

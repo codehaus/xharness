@@ -16,7 +16,6 @@ import java.net.Socket;
  * Window - Preferences - Java - Code Style - Code Templates
  */
 public class ProcessTester {
-    private static final int MAX_PASSED_WAIT_SECS = 6;
     private boolean passed;
     private int port;
     private String receivedData;
@@ -98,10 +97,9 @@ public class ProcessTester {
     public boolean passed() {
 
         synchronized (mutex) {
-            int count = 0;
-            while (!passed && count++ < MAX_PASSED_WAIT_SECS) {
+            if (!passed) {
                 try {
-                    mutex.wait(count * 1000);
+                    mutex.wait(10000);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

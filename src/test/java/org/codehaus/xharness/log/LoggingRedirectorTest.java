@@ -126,10 +126,34 @@ public class LoggingRedirectorTest extends TestCase {
             assertEquals(4, lines.length);
             lines = project.getBuffer().toStringArray(101);
             assertEquals(4, lines.length);
-            assertEquals("foo", lines[0]);
-            assertEquals("spam", lines[1]);
-            assertEquals("bar", lines[2]);
-            assertEquals("eggs", lines[3]);
+            if ("foo".equals(lines[0])) {
+                if ("bar".equals(lines[1])) {
+                    assertEquals("spam", lines[2]);
+                    assertEquals("eggs", lines[3]);
+                } else {
+                    assertEquals("spam", lines[1]);
+                    if ("bar".equals(lines[2])) {
+                        assertEquals("eggs", lines[3]);
+                    } else {
+                        assertEquals("eggs", lines[2]);
+                        assertEquals("bar", lines[3]);
+                    }
+                }
+            } else {
+                assertEquals("spam", lines[0]);
+                if ("eggs".equals(lines[1])) {
+                    assertEquals("foo", lines[2]);
+                    assertEquals("bar", lines[3]);
+                } else {
+                    assertEquals("foo", lines[1]);
+                    if ("bar".equals(lines[2])) {
+                        assertEquals("eggs", lines[3]);
+                    } else {
+                        assertEquals("eggs", lines[2]);
+                        assertEquals("bar", lines[3]);
+                    }
+                }
+            }
         }
     }
 }
